@@ -15,7 +15,7 @@ Concepts
 - [Reject](#reject)
 - [Custom](#custom)
 - [Default](#default)
-- [Joi Differences](#joi-differences)
+- [Differences with Joi](#differences-with-joi)
 - [Utils](#utils)
 
 ## Installation
@@ -261,9 +261,9 @@ console.log(await schema.validate()); // "hi!"
 console.log(await schema.validate('hello!')); // "hello!"
 ```
 
-## Joi Differences
+## Differences with Joi
 
-Yada is intentionally kept exteremely simple. Complex validations are expressed
+Yada is intentionally kept extremely simple. Complex validations are expressed
 in code rather than requiring deep API understanding. For example (from the Joi
 docs):
 
@@ -340,7 +340,7 @@ const schema = yd.object({
 ```
 
 Since all custom validators are simply functions that throw errors, the above
-can also use a simple `try/catch` to throw custom error messsages:
+can also use a simple `try/catch` to throw custom error messages:
 
 ```js
 // equivalent yada schema
