@@ -1,6 +1,10 @@
 # Yada
 
-Yada is a validation library inspired by [Joi](https://joi.dev/). The name derives from a [Japanese slang phrase](https://jisho.org/word/%E3%82%84%E3%81%A0) that expresses rejection. Its goal is to provide an API for validation that is simple and composable.
+Yada is a validation library inspired by [Joi](https://joi.dev/). The name
+derives from a
+[Japanese slang phrase](https://jisho.org/word/%E3%82%84%E3%81%A0) that
+expresses rejection. Its goal is to provide an API for validation that is simple
+and composable.
 
 Concepts
 
@@ -11,6 +15,7 @@ Concepts
 - [Reject](#reject)
 - [Custom](#custom)
 - [Default](#default)
+- [Joi Differences](#joi-differences)
 - [Utils](#utils)
 
 ## Installation
@@ -44,7 +49,8 @@ await schema.validate({
 })
 ```
 
-Note that the `validate` method is asynchronous so must be awaited with `await` or `then/catch`. A schema that fails validation will throw an error:
+Note that the `validate` method is asynchronous so must be awaited with `await`
+or `then/catch`. A schema that fails validation will throw an error:
 
 ```js
 try {
@@ -63,7 +69,10 @@ try {
 }
 ```
 
-The thrown error object exposes a `details` property that describes validation failures. [Type validations](#types) and `required()` will be run first and halt execution. All other validations will be run sequentially. This means that all validation issues will be identified up front:
+The thrown error object exposes a `details` property that describes validation
+failures. [Type validations](#types) and `required()` will be run first and halt
+execution. All other validations will be run sequentially. This means that all
+validation issues will be identified up front:
 
 ```js
 const schema = yd.object({
@@ -104,7 +113,8 @@ try {
 }
 ```
 
-A validation that passes will return either the initial input or any transformations that may apply to the schema:
+A validation that passes will return either the initial input or any
+transformations that may apply to the schema:
 
 ```js
 const schema = yd.date();
@@ -112,7 +122,8 @@ const date = await schema.validate('2020-01-01');
 console.log(date instanceof Date); // true
 ```
 
-Custom validations can transform data simply by returning a value that is not `undefined` in the validation function:
+Custom validations can transform data simply by returning a value that is not
+`undefined` in the validation function:
 
 ```js
 const schema = yd.string().custom((val) => {
@@ -134,11 +145,13 @@ Basic validation types are:
 - array
 - date
 
-These perform an initial type check on validation and will halt execution of any further validations (except `required` which is run up front).
+These perform an initial type check on validation and will halt execution of any
+further validations (except `required` which is run up front).
 
 ## Allow
 
-Alternates are validated with the `allow` schema. This may be used to validate literals as enums:
+Alternates are validated with the `allow` schema. This may be used to validate
+literals as enums:
 
 ```js
 const schema = yd.string().allow('foo', 'bar');
@@ -160,7 +173,8 @@ const schema = yd.object({
 
 ## Reject
 
-The `reject` schema is simply an inverse of `allow`. Anything that does not match will be allowed through:
+The `reject` schema is simply an inverse of `allow`. Anything that does not
+match will be allowed through:
 
 ```js
 const schema = yd.string().reject('foo', 'bar');
@@ -176,7 +190,9 @@ await schema.validate('true'); // error!
 
 ## Custom
 
-The `custom` schema allows for custom validations expressed in code. A custom schema may either throw an error or transform the input by returning a value that is not `undefined`.
+The `custom` schema allows for custom validations expressed in code. A custom
+schema may either throw an error or transform the input by returning a value
+that is not `undefined`.
 
 ```js
 const schema = yd.custom((val) => {
@@ -193,9 +209,11 @@ console.info(await schema.validate('foo')); // error thrown: "foo" is not allowe
 
 ### Arguments
 
-Custom validators are passed two arguments: the initial `value` and an `options` object that contains meta information that can be helpful:
+Custom validators are passed two arguments: the initial `value` and an `options`
+object that contains meta information that can be helpful:
 
-- `root`: The root value passed into the validation. This is helpful to create complex validations that depend on other fields, etc.
+- `root`: The root value passed into the validation. This is helpful to create
+  complex validations that depend on other fields, etc.
 - TODO: more?
 
 ### Examples
@@ -205,7 +223,7 @@ Validating input that depends on another field in an object schema:
 ```js
 const schema = yd.object({
   age: yd.number(),
-  parentConsent: yd.string().custom((val, { root }) => {
+  parentConsent: yd.boolean().custom((val, { root }) => {
     if (!val && root.age < 13) {
       throw new Error('Parent consent must be given if you are under 13.');
     }
@@ -242,6 +260,111 @@ const schema = yd.string().default('hi!');
 console.log(await schema.validate()); // "hi!"
 console.log(await schema.validate('hello!')); // "hello!"
 ```
+
+## Joi Differences
+
+Yada is intentionally kept exteremely simple. Complex validations are expressed
+in code rather than requiring deep API understanding. For example (from the Joi
+docs):
+
+```js
+// Joi schema
+const schema = Joi.object({
+  a: Joi.any()
+    .valid('x')
+    .when('b', {
+      is: Joi.exist(),
+      then: Joi.valid('y'),
+      otherwise: Joi.valid('z'),
+    })
+    .when('c', { is: Joi.number().min(10), then: Joi.forbidden() }),
+  b: Joi.any(),
+  c: Joi.number(),
+});
+```
+
+```js
+// equivalent yada schema
+const schema = yd.object({
+  a: yd
+    .custom((val, { root }) => {
+      if (root.b && val !== 'y') {
+        throw new Error('x must be y when b is passed');
+      } else if (val !== 'z') {
+        throw new Error('x must be z when b is not passed');
+      }
+    })
+    .custom((val, { root }) => {
+      if (typeof root.c > 10 && val) {
+        throw new Error('x may not be passed when c is more than 10');
+      }
+    }),
+  b: yd.string(),
+  c: yd.number(),
+});
+```
+
+Note: yada has no "any" equivalent. schemas must either define their types or
+use "allow" for alternate types.
+
+For a few more lines of code the same schema can be defined simply as readable
+Javascript, complete with custom error messages.
+
+Additionally, schemas may be validated inside other custom schemas, as they are
+simply functions that throw an error or (optionally) return a transformed value.
+This makes even custom schema composition simple:
+
+```js
+// Joi schema
+const states = Joi.valid(UsStates);
+const provinces = Joi.valid(JapanProvinces);
+const schema = Joi.object({
+  region: Joi.string().when('country', {
+    is: 'japan',
+    then: provinces,
+    otherwise: states,
+  }),
+});
+```
+
+```js
+// equivalent yada schema
+const states = yd.allow(UsStates);
+const provinces = yd.allow(JapanProvinces);
+const schema = yd.object({
+  region: yd.string().custom(async (val, { root }) => {
+    const schema = root.country === 'japan' ? provinces : states;
+    await schema.validate(val);
+  }),
+});
+```
+
+Since all custom validators are simply functions that throw errors, the above
+can also use a simple `try/catch` to throw custom error messsages:
+
+```js
+// equivalent yada schema
+const states = yd.allow(UsStates);
+const provinces = yd.allow(JapanProvinces);
+const schema = yd.object({
+  region: yd.string().custom(async (val, { root }) => {
+    const schema = root.country === 'japan' ? provinces : states;
+    try {
+      await schema.validate(val);
+    } catch {
+      throw new Error('"region" is invalid.');
+    }
+  }),
+});
+```
+
+This can be useful either to add context or to strip it away, for example to
+hide allowed values if they are private.
+
+Other differences:
+
+- Joi optionally can strip out unknown fields on object schemas. In Yada all
+  fields **must** be defined, otherwise they are stripped out.
 
 ## Utils
 
