@@ -1,0 +1,30 @@
+{
+  "name": "yada",
+  "version": "0.0.1",
+  "description": "Validation library inspired by Joi.",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "lint": "eslint"
+  },
+  "type": "module",
+  "main": "src/index.js",
+  "repository": "https://github.com/bedrockio/yada",
+  "author": "Andrew Plummer <plummer.andrew@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash-es": "^4.17.21",
+    "validator": "^13.7.0"
+  },
+  "devDependencies": {
+    "@bedrockio/prettier-config": "^1.0.2",
+    "eslint": "^8.7.0",
+    "eslint-plugin-bedrock": "^1.0.14",
+    "jest": "^27.4.7",
+    "prettier": "^2.5.1"
+  },
+  "prettier": "@bedrockio/prettier-config",
+  "volta": {
+    "node": "16.13.2",
+    "yarn": "1.22.17"
+  }
+}
