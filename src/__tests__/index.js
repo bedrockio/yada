@@ -1,5 +1,4 @@
 import yd from '../index';
-console.info('okkkkkk', yd);
 
 async function assertFail(schema, obj, errors) {
   try {
