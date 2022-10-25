@@ -1,6 +1,6 @@
 import { ValidationError, FieldError, AssertionError } from './errors';
 
-const INITIAL_ASSERTIONS = ['required', 'type', 'transform'];
+const INITIAL = ['required', 'type', 'transform'];
 
 export default class Schema {
   constructor(assertions = [], meta = {}) {
@@ -56,7 +56,6 @@ export default class Schema {
 
   async validate(value, options = {}) {
     const details = [];
-    const { initial, other } = this.getAssertions();
 
     options = {
       root: value,
@@ -65,23 +64,17 @@ export default class Schema {
       transformed: value,
     };
 
-    for (let assertion of initial) {
+    for (let assertion of this.assertions) {
       try {
         await this.runAssertion(assertion, value, options);
       } catch (error) {
         details.push(error);
-        break;
-      }
-    }
-    if (!details.length) {
-      for (let assertion of other) {
-        try {
-          await this.runAssertion(assertion, value, options);
-        } catch (error) {
-          details.push(error);
+        if (assertion.halt) {
+          break;
         }
       }
     }
+
     if (details.length) {
       const { message } = this.meta;
       if (options.field || options.index) {
@@ -135,21 +128,19 @@ export default class Schema {
 
   assert(type, fn) {
     this.assertions.push({
+      halt: INITIAL.includes(type),
       type,
       fn,
+    });
+    this.assertions.sort((a, b) => {
+      return this.getSortIndex(a.type) - this.getSortIndex(b.type);
     });
     return this;
   }
 
-  getAssertions() {
-    return {
-      initial: this.assertions.filter(({ type }) => {
-        return INITIAL_ASSERTIONS.includes(type);
-      }),
-      other: this.assertions.filter(({ type }) => {
-        return !INITIAL_ASSERTIONS.includes(type);
-      }),
-    };
+  getSortIndex(type) {
+    const index = INITIAL.indexOf(type);
+    return index === -1 ? INITIAL.length : index;
   }
 
   async runAssertion(assertion, value, options = {}) {
