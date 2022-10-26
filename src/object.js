@@ -2,7 +2,7 @@ import TypeSchema from './TypeSchema';
 import { wrapSchema } from './utils';
 
 class ObjectSchema extends TypeSchema {
-  constructor(fields) {
+  constructor(fields = {}) {
     super(Object);
     this.transform((obj) => {
       if (obj) {
@@ -15,9 +15,6 @@ class ObjectSchema extends TypeSchema {
         return result;
       }
     });
-    if (!fields) {
-      throw new Error('Object schema must be defined.');
-    }
     for (let [key, schema] of Object.entries(fields)) {
       this.assert('field', async (obj, options) => {
         if (obj) {

@@ -271,6 +271,12 @@ describe('string', () => {
     await assertPass(schema, 'AXISINBB250');
     await assertFail(schema, 'foo', ['Value must be a valid SWIFT code.']);
   });
+
+  it('should validate a MongoDB ObjectId', async () => {
+    const schema = yd.string().mongo();
+    await assertPass(schema, '61b8b032cac265007c34ce09');
+    await assertFail(schema, 'foo', ['Value must be a valid ObjectId.']);
+  });
 });
 
 describe('number', () => {
@@ -534,11 +540,9 @@ describe('object', () => {
     expect(result.c).toBeUndefined();
   });
 
-  it('should error if schema not defined', async () => {
-    expect.assertions(1);
-    expect(() => {
-      yd.object();
-    }).toThrow('Object schema must be defined.');
+  it('should allow empty object', async () => {
+    const schema = yd.object();
+    expect(await schema.validate({ foo: 'bar' })).toEqual({});
   });
 });
 

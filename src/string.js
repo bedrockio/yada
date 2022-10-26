@@ -237,6 +237,14 @@ class StringSchema extends TypeSchema {
       }
     });
   }
+
+  mongo() {
+    return this.clone().assert('format', (str) => {
+      if (!validator.isMongoId(str)) {
+        throw new Error('{label} must be a valid ObjectId.');
+      }
+    });
+  }
 }
 
 export default wrapSchema(StringSchema);
