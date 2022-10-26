@@ -3,9 +3,9 @@ import { ValidationError, FieldError, AssertionError } from './errors';
 const INITIAL = ['required', 'type', 'transform'];
 
 export default class Schema {
-  constructor(assertions = [], meta = {}) {
-    this.assertions = assertions;
-    this.meta = meta;
+  constructor() {
+    this.assertions = [];
+    this.meta = {};
   }
 
   // Public
@@ -59,14 +59,17 @@ export default class Schema {
 
     options = {
       root: value,
+      original: value,
       ...this.meta,
       ...options,
-      transformed: value,
     };
 
     for (let assertion of this.assertions) {
       try {
-        await this.runAssertion(assertion, value, options);
+        const result = await this.runAssertion(assertion, value, options);
+        if (result !== undefined) {
+          value = result;
+        }
       } catch (error) {
         details.push(error);
         if (assertion.halt) {
@@ -86,13 +89,16 @@ export default class Schema {
         throw new ValidationError(message, details);
       }
     }
-    return options.transformed;
+    return value;
   }
 
   // Private
 
   clone(meta) {
-    return new Schema(this.assertions, { ...meta, ...this.meta });
+    const clone = Object.create(this.constructor.prototype);
+    clone.assertions = [...this.assertions];
+    clone.meta = { ...this.meta, ...meta };
+    return clone;
   }
 
   assertEnum(set, reject = false) {
@@ -138,6 +144,11 @@ export default class Schema {
     return this;
   }
 
+  transform(fn) {
+    this.assert('transform', fn);
+    return this;
+  }
+
   getSortIndex(type) {
     const index = INITIAL.indexOf(type);
     return index === -1 ? INITIAL.length : index;
@@ -146,10 +157,7 @@ export default class Schema {
   async runAssertion(assertion, value, options = {}) {
     const { type, fn } = assertion;
     try {
-      const result = await fn(value, options);
-      if (result !== undefined) {
-        options.transformed = result;
-      }
+      return await fn(value, options);
     } catch (error) {
       if (error instanceof FieldError) {
         throw error;

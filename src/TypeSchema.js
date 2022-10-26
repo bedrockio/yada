@@ -10,7 +10,7 @@ export default class TypeSchema extends Schema {
   assertType(Class, type) {
     const n = this.type.match(/^[aeiou]/) ? 'n' : '';
     const msg = `{label} must be a${n} ${type}.`;
-    return this.clone().assert('type', (val, options) => {
+    return this.assert('type', (val, options) => {
       if (val !== undefined) {
         if (typeof val !== type) {
           if (options.cast) {

@@ -51,6 +51,12 @@ describe('string', () => {
     await assertFail(schema, 'abcde', ['Value must be 4 characters or less.']);
   });
 
+  it('should validate an email', async () => {
+    const schema = yd.string().email();
+    await assertPass(schema, 'foo@bar.com');
+    await assertFail(schema, 'foo@bar', ['Value has incorrect email format.']);
+  });
+
   it('should validate a regex pattern', async () => {
     expect(() => {
       yd.string().matches();
@@ -63,6 +69,14 @@ describe('string', () => {
     const schema = yd.string().matches(reg);
     await assertPass(schema, 'A');
     await assertFail(schema, 'a', [`Value must match pattern ${reg}.`]);
+  });
+
+  it('should be able to trim a string', async () => {
+    const schema = yd.string().email().trim();
+    expect(await schema.validate('   foo@bar.com   ')).toBe('foo@bar.com');
+    expect(await schema.validate('   foo@bar.com')).toBe('foo@bar.com');
+    expect(await schema.validate('foo@bar.com   ')).toBe('foo@bar.com');
+    expect(await schema.validate('foo@bar.com')).toBe('foo@bar.com');
   });
 });
 
@@ -473,10 +487,10 @@ describe('date', () => {
     await assertFail(schema, new Date(), ['Value must be a string.']);
     await assertFail(schema, 1642232606911, ['Value must be a string.']);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, null, ['Value must be a valid date.']);
-    await assertFail(schema, false, ['Value must be a valid date.']);
-    await assertFail(schema, NaN, ['Value must be a valid date.']);
-    await assertFail(schema, 'invalid', ['Value must be a valid date.']);
+    await assertFail(schema, null, ['Value must be a string.']);
+    await assertFail(schema, false, ['Value must be a string.']);
+    await assertFail(schema, NaN, ['Value must be a string.']);
+    await assertFail(schema, 'invalid', ['Value must be in ISO 8601 format.']);
     await assertFail(schema, '01 Jan 1970 00:00:00 GMT', [
       'Value must be in ISO 8601 format.',
     ]);

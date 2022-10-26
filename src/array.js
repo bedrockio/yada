@@ -17,8 +17,8 @@ class ArraySchema extends Schema {
     if (args.length) {
       const arg = args.length === 1 ? args[0] : args;
       const schema = Array.isArray(arg) ? new Schema().allow(arg) : arg;
-      this.assert('element', async (val, options) => {
-        const { transformed: arr, field, meta } = options;
+      this.assert('element', async (arr, options) => {
+        const { field, meta } = options;
         if (arr !== undefined) {
           let error;
           const result = [];

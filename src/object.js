@@ -4,7 +4,7 @@ import { wrapSchema } from './utils';
 class ObjectSchema extends TypeSchema {
   constructor(fields) {
     super(Object);
-    this.assert('transform', (obj) => {
+    this.transform((obj) => {
       if (obj) {
         const result = {};
         for (let key of Object.keys(obj)) {
@@ -27,7 +27,7 @@ class ObjectSchema extends TypeSchema {
             label: `"${key}"`,
           });
           return {
-            ...options.transformed,
+            ...obj,
             ...(val !== undefined && {
               [key]: val,
             }),
