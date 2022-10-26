@@ -32,10 +32,8 @@ class ArraySchema extends Schema {
                 })
               );
             } catch (err) {
-              const message =
-                meta?.message || 'Array contains invalid elements.';
               const details = error?.details || [];
-              error = new FieldError(message, [...details, ...err.details], {
+              error = new FieldError('', [...details, ...err.details], {
                 field,
                 ...options,
               });

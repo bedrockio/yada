@@ -36,6 +36,10 @@ class ObjectSchema extends TypeSchema {
       });
     }
   }
+
+  toString() {
+    return 'object';
+  }
 }
 
 export default wrapSchema(ObjectSchema);

@@ -82,6 +82,10 @@ class DateSchema extends Schema {
     });
     return schema;
   }
+
+  toString() {
+    return 'date';
+  }
 }
 
 export default wrapSchema(DateSchema);
