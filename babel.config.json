@@ -1,0 +1,17 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "16.13.0"
+        },
+        "loose": true,
+        "modules": "cjs"
+      }
+    ]
+  ],
+  "ignore": [
+    "**/__tests__/*.js"
+  ]
+}

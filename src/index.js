@@ -1,25 +1,41 @@
-import { wrapSchema, wrapArgs } from './utils';
-import { isSchema } from './Schema';
+import array from './array';
+import boolean from './boolean';
+import date from './date';
+import number from './number';
+import object from './object';
+import string from './string';
 
-import StringSchema from './StringSchema';
-import NumberSchema from './NumberSchema';
-import BooleanSchema from './BooleanSchema';
-import DateSchema from './DateSchema';
-import ArraySchema from './ArraySchema';
-import ObjectSchema from './ObjectSchema';
+import { wrapArgs, wrapAny, isSchema } from './utils';
+
+const allow = wrapArgs('allow');
+const reject = wrapArgs('reject');
+const custom = wrapArgs('custom');
+const any = wrapAny();
 
 export default {
-  string: wrapSchema(StringSchema),
-  number: wrapSchema(NumberSchema),
-  date: wrapSchema(DateSchema),
-  array: wrapSchema(ArraySchema),
-  object: wrapSchema(ObjectSchema),
-  boolean: wrapSchema(BooleanSchema),
-  allow: wrapArgs('allow'),
-  reject: wrapArgs('reject'),
-  custom: wrapArgs('custom'),
-  default: wrapArgs('default'),
+  array,
+  boolean,
+  date,
+  number,
+  object,
+  string,
+  any,
+  allow,
+  reject,
+  custom,
   isSchema,
 };
 
-export { isSchema };
+export {
+  array,
+  boolean,
+  date,
+  number,
+  object,
+  string,
+  any,
+  allow,
+  reject,
+  custom,
+  isSchema,
+};

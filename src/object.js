@@ -1,13 +1,18 @@
-import { pick } from 'lodash-es';
-
 import TypeSchema from './TypeSchema';
+import { wrapSchema } from './utils';
 
-export default class ObjectSchema extends TypeSchema {
+class ObjectSchema extends TypeSchema {
   constructor(fields) {
     super(Object);
     this.assert('transform', (obj) => {
       if (obj) {
-        return pick(obj, Object.keys(fields));
+        const result = {};
+        for (let key of Object.keys(obj)) {
+          if (key in fields) {
+            result[key] = obj[key];
+          }
+        }
+        return result;
       }
     });
     if (!fields) {
@@ -32,3 +37,5 @@ export default class ObjectSchema extends TypeSchema {
     }
   }
 }
+
+export default wrapSchema(ObjectSchema);

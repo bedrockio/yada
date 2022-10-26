@@ -1,8 +1,9 @@
 import validator from 'validator';
+import { wrapSchema } from './utils';
 
 import Schema from './Schema';
 
-export default class DateSchema extends Schema {
+class DateSchema extends Schema {
   constructor() {
     super();
     this.assert('type', (val) => {
@@ -86,3 +87,5 @@ export default class DateSchema extends Schema {
     return schema;
   }
 }
+
+export default wrapSchema(DateSchema);

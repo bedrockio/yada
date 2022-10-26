@@ -1,7 +1,8 @@
 import Schema from './Schema';
 import { FieldError } from './errors';
+import { wrapSchema } from './utils';
 
-export default class ArraySchema extends Schema {
+class ArraySchema extends Schema {
   constructor(...args) {
     super();
     this.assert('type', (val, options) => {
@@ -54,3 +55,5 @@ export default class ArraySchema extends Schema {
     return 'array';
   }
 }
+
+export default wrapSchema(ArraySchema);

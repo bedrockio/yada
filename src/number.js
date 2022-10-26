@@ -1,6 +1,7 @@
 import TypeSchema from './TypeSchema';
+import { wrapSchema } from './utils';
 
-export default class NumberSchema extends TypeSchema {
+class NumberSchema extends TypeSchema {
   constructor() {
     super(Number);
   }
@@ -47,3 +48,5 @@ export default class NumberSchema extends TypeSchema {
     });
   }
 }
+
+export default wrapSchema(NumberSchema);

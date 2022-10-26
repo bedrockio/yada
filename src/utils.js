@@ -1,4 +1,10 @@
-import Schema from './Schema';
+import Schema, { isSchema } from './Schema';
+
+export function wrapSchema(Class) {
+  return (...args) => {
+    return new Class(...args);
+  };
+}
 
 export function wrapArgs(name) {
   return (...args) => {
@@ -6,8 +12,10 @@ export function wrapArgs(name) {
   };
 }
 
-export function wrapSchema(Class) {
-  return (...args) => {
-    return new Class(...args);
+export function wrapAny() {
+  return () => {
+    return new Schema();
   };
 }
+
+export { isSchema };

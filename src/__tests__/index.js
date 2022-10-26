@@ -553,7 +553,7 @@ describe('isSchema', () => {
 
 describe('default', () => {
   it('should be able to set a default value', async () => {
-    const schema = yd.default('a');
+    const schema = yd.any().default('a');
     expect(await schema.validate()).toBe('a');
     expect(await schema.validate(undefined)).toBe('a');
     expect(await schema.validate(null)).toBe(null);
@@ -562,7 +562,7 @@ describe('default', () => {
 
   it('should be able to set a default value in an object', async () => {
     const schema = yd.object({
-      a: yd.default('a'),
+      a: yd.any().default('a'),
       b: yd.string(),
     });
     expect(await schema.validate()).toBe(undefined);

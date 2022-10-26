@@ -1,6 +1,7 @@
 import TypeSchema from './TypeSchema';
+import { wrapSchema } from './utils';
 
-export default class StringSchema extends TypeSchema {
+class StringSchema extends TypeSchema {
   constructor() {
     super(String);
   }
@@ -32,3 +33,5 @@ export default class StringSchema extends TypeSchema {
     });
   }
 }
+
+export default wrapSchema(StringSchema);
