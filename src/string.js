@@ -70,7 +70,7 @@ class StringSchema extends TypeSchema {
   }
 
   email() {
-    return this.clone().assert('format', (str) => {
+    return this.format('email', (str) => {
       if (!validator.isEmail(str)) {
         throw new Error('{label} has incorrect email format.');
       }
@@ -78,7 +78,7 @@ class StringSchema extends TypeSchema {
   }
 
   hex() {
-    return this.clone().assert('format', (str) => {
+    return this.format('hex', (str) => {
       if (!validator.isHexadecimal(str)) {
         throw new Error('{label} must be hexadecimal.');
       }
@@ -86,7 +86,7 @@ class StringSchema extends TypeSchema {
   }
 
   hash(algorithm = 'md5') {
-    return this.clone().assert('format', (str) => {
+    return this.format('md5', (str) => {
       if (!validator.isHash(str, algorithm)) {
         throw new Error(`{label} must be a hash in ${algorithm} format.`);
       }
@@ -94,7 +94,7 @@ class StringSchema extends TypeSchema {
   }
 
   ascii() {
-    return this.clone().assert('format', (str) => {
+    return this.format('ascii', (str) => {
       if (!validator.isAscii(str)) {
         throw new Error('{label} must be ASCII.');
       }
@@ -102,7 +102,7 @@ class StringSchema extends TypeSchema {
   }
 
   base64(options) {
-    return this.clone().assert('format', (str) => {
+    return this.format('base64', (str) => {
       if (!validator.isBase64(str, options)) {
         throw new Error('{label} must be base64.');
       }
@@ -110,7 +110,7 @@ class StringSchema extends TypeSchema {
   }
 
   creditCard() {
-    return this.clone().assert('format', (str) => {
+    return this.format('credit-card', (str) => {
       if (!validator.isCreditCard(str)) {
         throw new Error('{label} must be a valid credit card number.');
       }
@@ -118,7 +118,7 @@ class StringSchema extends TypeSchema {
   }
 
   ip() {
-    return this.clone().assert('format', (str) => {
+    return this.format('ip', (str) => {
       if (!validator.isIP(str)) {
         throw new Error('{label} must be a valid IP address.');
       }
@@ -126,7 +126,7 @@ class StringSchema extends TypeSchema {
   }
 
   country() {
-    return this.clone().assert('format', (str) => {
+    return this.format('country', (str) => {
       if (!validator.isISO31661Alpha2(str)) {
         throw new Error('{label} must be a valid country code.');
       }
@@ -134,7 +134,7 @@ class StringSchema extends TypeSchema {
   }
 
   locale() {
-    return this.clone().assert('format', (str) => {
+    return this.format('locale', (str) => {
       if (!validator.isLocale(str)) {
         throw new Error('{label} must be a valid locale code.');
       }
@@ -142,7 +142,7 @@ class StringSchema extends TypeSchema {
   }
 
   jwt() {
-    return this.clone().assert('format', (str) => {
+    return this.format('jwt', (str) => {
       if (!validator.isJWT(str)) {
         throw new Error('{label} must be a valid JWT token.');
       }
@@ -150,7 +150,7 @@ class StringSchema extends TypeSchema {
   }
 
   slug() {
-    return this.clone().assert('format', (str) => {
+    return this.format('slug', (str) => {
       // Validator shows some issues here so use a custom regex.
       if (!SLUG_REG.test(str)) {
         throw new Error('{label} must be a valid slug.');
@@ -159,7 +159,7 @@ class StringSchema extends TypeSchema {
   }
 
   latlng() {
-    return this.clone().assert('format', (str) => {
+    return this.format('latlng', (str) => {
       if (!validator.isLatLong(str)) {
         throw new Error('{label} must be a valid lat,lng coordinate.');
       }
@@ -167,7 +167,7 @@ class StringSchema extends TypeSchema {
   }
 
   postalCode(locale = 'any') {
-    return this.clone().assert('format', (str) => {
+    return this.format('postal-code', (str) => {
       if (!validator.isPostalCode(str, locale)) {
         throw new Error('{label} must be a valid postal code.');
       }
@@ -175,7 +175,7 @@ class StringSchema extends TypeSchema {
   }
 
   password(options = PASSWORD_DEFAULTS) {
-    return this.clone().assert('format', (str) => {
+    return this.format('password', (str) => {
       if (!validator.isStrongPassword(str, options)) {
         const fields = Object.entries(options)
           .map(([key, val]) => {
@@ -191,7 +191,7 @@ class StringSchema extends TypeSchema {
   }
 
   url(options) {
-    return this.clone().assert('format', (str) => {
+    return this.format('url', (str) => {
       if (!validator.isURL(str, options)) {
         throw new Error('{label} must be a valid URL.');
       }
@@ -199,7 +199,7 @@ class StringSchema extends TypeSchema {
   }
 
   domain(options) {
-    return this.clone().assert('format', (str) => {
+    return this.format('domain', (str) => {
       if (!validator.isFQDN(str, options)) {
         throw new Error('{label} must be a valid domain.');
       }
@@ -207,7 +207,7 @@ class StringSchema extends TypeSchema {
   }
 
   uuid(version) {
-    return this.clone().assert('format', (str) => {
+    return this.format('uuid', (str) => {
       if (!validator.isUUID(str, version)) {
         throw new Error('{label} must be a valid unique id.');
       }
@@ -215,7 +215,7 @@ class StringSchema extends TypeSchema {
   }
 
   btc() {
-    return this.clone().assert('format', (str) => {
+    return this.format('bitcoin-address', (str) => {
       if (!validator.isBtcAddress(str)) {
         throw new Error('{label} must be a valid Bitcoin address.');
       }
@@ -223,7 +223,7 @@ class StringSchema extends TypeSchema {
   }
 
   eth() {
-    return this.clone().assert('format', (str) => {
+    return this.format('etherium-address', (str) => {
       if (!validator.isEthereumAddress(str)) {
         throw new Error('{label} must be a valid Ethereum address.');
       }
@@ -231,7 +231,7 @@ class StringSchema extends TypeSchema {
   }
 
   swift() {
-    return this.clone().assert('format', (str) => {
+    return this.format('swift-code', (str) => {
       if (!validator.isBIC(str)) {
         throw new Error('{label} must be a valid SWIFT code.');
       }
@@ -239,7 +239,7 @@ class StringSchema extends TypeSchema {
   }
 
   mongo() {
-    return this.clone().assert('format', (str) => {
+    return this.format('mongo-object-id', (str) => {
       if (!validator.isMongoId(str)) {
         throw new Error('{label} must be a valid ObjectId.');
       }

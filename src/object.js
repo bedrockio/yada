@@ -1,9 +1,11 @@
 import TypeSchema from './TypeSchema';
 import { wrapSchema } from './utils';
+import { isSchema } from './Schema';
 
 class ObjectSchema extends TypeSchema {
   constructor(fields = {}) {
     super(Object);
+    this.fields = fields;
     this.transform((obj) => {
       if (obj) {
         const result = {};
@@ -34,8 +36,26 @@ class ObjectSchema extends TypeSchema {
     }
   }
 
+  append(arg) {
+    const fields = isSchema(arg) ? arg.fields : arg;
+    return new ObjectSchema({ ...this.fields, ...fields });
+  }
+
   toString() {
     return 'object';
+  }
+
+  toOpenApi() {
+    const properties = {};
+    for (let [key, schema] of Object.entries(this.fields)) {
+      properties[key] = schema.toOpenApi();
+    }
+    return {
+      ...super.toOpenApi(),
+      ...(Object.keys(properties).length > 0 && {
+        properties,
+      }),
+    };
   }
 }
 

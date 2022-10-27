@@ -3,8 +3,14 @@ import { FieldError } from './errors';
 import { wrapSchema } from './utils';
 
 class ArraySchema extends Schema {
-  constructor(...args) {
+  constructor(...schemas) {
     super();
+
+    if (schemas.length === 1 && Array.isArray(schemas[0])) {
+      schemas = schemas[0];
+    }
+    this.schemas = schemas;
+
     this.assert('type', (val, options) => {
       if (val !== undefined && !Array.isArray(val)) {
         if (options.cast) {
@@ -14,11 +20,11 @@ class ArraySchema extends Schema {
         }
       }
     });
-    if (args.length) {
-      const arg = args.length === 1 ? args[0] : args;
-      const schema = Array.isArray(arg) ? new Schema().allow(arg) : arg;
+    const schema =
+      schemas.length > 1 ? new Schema().allow(schemas) : schemas[0];
+    if (schema) {
       this.assert('element', async (arr, options) => {
-        const { field, meta } = options;
+        const { field } = options;
         if (arr !== undefined) {
           let error;
           const result = [];
@@ -51,6 +57,26 @@ class ArraySchema extends Schema {
 
   toString() {
     return 'array';
+  }
+
+  toOpenApi() {
+    let other;
+    if (this.schemas.length > 1) {
+      other = {
+        oneOf: this.schemas.map((schema) => {
+          return schema.toOpenApi();
+        }),
+      };
+    } else if (this.schemas.length === 1) {
+      other = {
+        items: this.schemas[0].toOpenApi(),
+      };
+    }
+
+    return {
+      type: 'array',
+      ...other,
+    };
   }
 }
 

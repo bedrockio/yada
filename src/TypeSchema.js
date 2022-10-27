@@ -2,13 +2,13 @@ import Schema from './Schema';
 
 export default class TypeSchema extends Schema {
   constructor(Class) {
-    super();
-    this.type = Class.name.toLowerCase();
-    this.assertType(Class, this.type);
+    const type = Class.name.toLowerCase();
+    super({ type });
+    this.assertType(Class, type);
   }
 
   assertType(Class, type) {
-    const n = this.type.match(/^[aeiou]/) ? 'n' : '';
+    const n = this.meta.type.match(/^[aeiou]/) ? 'n' : '';
     const msg = `{label} must be a${n} ${type}.`;
     return this.assert('type', (val, options) => {
       if (val !== undefined) {
@@ -23,7 +23,18 @@ export default class TypeSchema extends Schema {
     });
   }
 
+  format(name, fn) {
+    return this.clone({ format: name }).assert('format', fn);
+  }
+
   toString() {
-    return this.type;
+    return this.meta.type;
+  }
+
+  toOpenApi() {
+    return {
+      type: this.meta.type,
+      ...super.toOpenApi(),
+    };
   }
 }

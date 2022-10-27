@@ -3,17 +3,25 @@ import { ValidationError, FieldError, AssertionError } from './errors';
 const INITIAL = ['required', 'type', 'transform'];
 
 export default class Schema {
-  constructor() {
+  constructor(meta = {}) {
     this.assertions = [];
-    this.meta = {};
+    this.meta = meta;
   }
 
   // Public
 
   required() {
-    return this.clone().assert('required', (val) => {
+    return this.clone({ required: true }).assert('required', (val) => {
       if (val === undefined) {
         throw new Error('{label} is required.');
+      }
+    });
+  }
+
+  default(value) {
+    return this.clone({ default: value }).assert('transform', async (val) => {
+      if (val === undefined) {
+        return value;
       }
     });
   }
@@ -22,14 +30,6 @@ export default class Schema {
     return this.clone().assert('custom', async (val, options) => {
       if (val !== undefined) {
         return await fn(val, options);
-      }
-    });
-  }
-
-  default(value) {
-    return this.clone().assert('transform', async (val) => {
-      if (val === undefined) {
-        return value;
       }
     });
   }
@@ -113,7 +113,7 @@ export default class Schema {
     });
     const not = reject ? ' not ' : ' ';
     const msg = `{label} must${not}be one of [${types.join(', ')}].`;
-    return this.clone().assert('enum', async (val, options) => {
+    return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
         for (let el of set) {
           if (isSchema(el)) {
@@ -166,6 +166,23 @@ export default class Schema {
       message = message.replace(/{label}/g, label || 'Value');
       throw new AssertionError(message, type);
     }
+  }
+
+  toOpenApi() {
+    return {
+      ...(this.meta.required && {
+        required: true,
+      }),
+      ...(this.meta.default && {
+        default: this.meta.default,
+      }),
+      ...(this.meta.enum && {
+        enum: this.meta.enum,
+      }),
+      ...(this.meta.format && {
+        format: this.meta.format,
+      }),
+    };
   }
 }
 

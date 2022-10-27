@@ -1,5 +1,5 @@
 {
-  "name": "yada",
+  "name": "@bedrockio/yada",
   "version": "0.0.1",
   "description": "Validation library inspired by Joi.",
   "scripts": {

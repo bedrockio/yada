@@ -544,6 +544,32 @@ describe('object', () => {
     const schema = yd.object();
     expect(await schema.validate({ foo: 'bar' })).toEqual({});
   });
+
+  it('should allow appending an object schema', async () => {
+    const schema1 = yd.object({
+      foo: yd.string().required(),
+    });
+    const schema2 = yd.object({
+      bar: yd.string().required(),
+    });
+    const schema = schema1.append(schema2);
+    await assertPass(schema, { foo: 'foo', bar: 'bar' });
+    await assertFail(schema, { foo: 'foo' }, ['"bar" is required.']);
+    await assertFail(schema, { bar: 'bar' }, ['"foo" is required.']);
+  });
+
+  it('should allow appending a plain object', async () => {
+    const schema1 = yd.object({
+      foo: yd.string().required(),
+    });
+    const schema2 = {
+      bar: yd.string().required(),
+    };
+    const schema = schema1.append(schema2);
+    await assertPass(schema, { foo: 'foo', bar: 'bar' });
+    await assertFail(schema, { foo: 'foo' }, ['"bar" is required.']);
+    await assertFail(schema, { bar: 'bar' }, ['"foo" is required.']);
+  });
 });
 
 describe('custom', () => {
@@ -783,19 +809,6 @@ describe('date', () => {
   });
 });
 
-describe('isSchema', () => {
-  it('should correctly identify a schema', () => {
-    expect(yd.isSchema(yd.string())).toBe(true);
-    expect(yd.isSchema(yd.date())).toBe(true);
-    expect(yd.isSchema(yd.custom())).toBe(true);
-    expect(yd.isSchema(yd.object({}))).toBe(true);
-    expect(yd.isSchema(undefined)).toBe(false);
-    expect(yd.isSchema(null)).toBe(false);
-    expect(yd.isSchema({})).toBe(false);
-    expect(yd.isSchema('a')).toBe(false);
-  });
-});
-
 describe('default', () => {
   it('should set a default value', async () => {
     const schema = yd.any().default('a');
@@ -816,6 +829,80 @@ describe('default', () => {
     expect(await schema.validate({ a: null })).toEqual({ a: null });
     expect(await schema.validate({ a: 'b' })).toEqual({ a: 'b' });
     expect(await schema.validate({ b: 'b' })).toEqual({ a: 'a', b: 'b' });
+  });
+});
+
+describe('isSchema', () => {
+  it('should correctly identify a schema', () => {
+    expect(yd.isSchema(yd.string())).toBe(true);
+    expect(yd.isSchema(yd.date())).toBe(true);
+    expect(yd.isSchema(yd.custom())).toBe(true);
+    expect(yd.isSchema(yd.object({}))).toBe(true);
+    expect(yd.isSchema(undefined)).toBe(false);
+    expect(yd.isSchema(null)).toBe(false);
+    expect(yd.isSchema({})).toBe(false);
+    expect(yd.isSchema('a')).toBe(false);
+  });
+});
+
+describe('toOpenApi', () => {
+  it('should convert a string schema', async () => {
+    expect(yd.string().toOpenApi()).toEqual({
+      type: 'string',
+    });
+    expect(yd.string().required().toOpenApi()).toEqual({
+      type: 'string',
+      required: true,
+    });
+    expect(yd.string().default('foo').toOpenApi()).toEqual({
+      type: 'string',
+      default: 'foo',
+    });
+    expect(yd.string().allow('foo', 'bar').toOpenApi()).toEqual({
+      type: 'string',
+      enum: ['foo', 'bar'],
+    });
+    expect(yd.string().email().toOpenApi()).toEqual({
+      type: 'string',
+      format: 'email',
+    });
+  });
+
+  it('should convert an object schema', async () => {
+    expect(yd.object().toOpenApi()).toEqual({
+      type: 'object',
+    });
+    expect(yd.object({ foo: yd.string() }).toOpenApi()).toEqual({
+      type: 'object',
+      properties: {
+        foo: {
+          type: 'string',
+        },
+      },
+    });
+  });
+
+  it('should convert an array schema', async () => {
+    expect(yd.array().toOpenApi()).toEqual({
+      type: 'array',
+    });
+    expect(yd.array(yd.string()).toOpenApi()).toEqual({
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    });
+    expect(yd.array(yd.string(), yd.number()).toOpenApi()).toEqual({
+      type: 'array',
+      oneOf: [
+        {
+          type: 'string',
+        },
+        {
+          type: 'number',
+        },
+      ],
+    });
   });
 });
 
