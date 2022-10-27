@@ -119,21 +119,22 @@ describe('string', () => {
     await assertFail(schema, 'zzz', ['Value must be hexadecimal.']);
   });
 
-  it('should validate a hash', async () => {
-    await assertPass(yd.string().hash(), 'bed1e4d90fb9261a80ae92d339949559');
-    await assertFail(yd.string().hash(), 'aaaa', [
+  it('should validate an MD5 hash', async () => {
+    await assertPass(yd.string().md5(), 'bed1e4d90fb9261a80ae92d339949559');
+    await assertFail(yd.string().md5(), 'aaaa', [
       'Value must be a hash in md5 format.',
     ]);
+  });
+
+  it('should validate a SHA1 hash', async () => {
     await assertPass(
-      yd.string().hash('sha1'),
+      yd.string().sha1(),
       'c9b09f7f254eb6aaeeff30abeb0b92bea732855a'
     );
 
-    await assertFail(
-      yd.string().hash('sha1'),
-      'bed1e4d90fb9261a80ae92d339949559',
-      ['Value must be a hash in sha1 format.']
-    );
+    await assertFail(yd.string().sha1(), 'bed1e4d90fb9261a80ae92d339949559', [
+      'Value must be a hash in sha1 format.',
+    ]);
   });
 
   it('should validate an ascii string', async () => {

@@ -85,10 +85,18 @@ class StringSchema extends TypeSchema {
     });
   }
 
-  hash(algorithm = 'md5') {
+  md5() {
     return this.format('md5', (str) => {
-      if (!validator.isHash(str, algorithm)) {
-        throw new Error(`{label} must be a hash in ${algorithm} format.`);
+      if (!validator.isHash(str, 'md5')) {
+        throw new Error('{label} must be a hash in md5 format.');
+      }
+    });
+  }
+
+  sha1() {
+    return this.format('sha1', (str) => {
+      if (!validator.isHash(str, 'sha1')) {
+        throw new Error('{label} must be a hash in sha1 format.');
       }
     });
   }
