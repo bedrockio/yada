@@ -222,7 +222,7 @@ describe('string', () => {
   it('should validate a password', async () => {
     const schema = yd.string().password();
     await assertPass(schema, '123456789abcde');
-    await assertFail(schema, '1234', ['Must be at least 12 characters.']);
+    await assertFail(schema, '1234', ['Value must be at least 12 characters.']);
   });
 
   it('should validate a password with options', async () => {
@@ -235,8 +235,8 @@ describe('string', () => {
     });
     await assertPass(schema, 'aB1%');
     await assertFail(schema, '123456789abcde', [
-      'Must contain at least 1 uppercase character.',
-      'Must contain at least 1 symbol.',
+      'Value must contain at least 1 uppercase character.',
+      'Value must contain at least 1 symbol.',
     ]);
   });
 
@@ -892,23 +892,23 @@ describe('serialization', () => {
       details: [
         {
           type: 'password',
-          message: 'Must be at least 6 characters.',
+          message: 'Value must be at least 6 characters.',
         },
         {
           type: 'password',
-          message: 'Must contain at least 1 lowercase character.',
+          message: 'Value must contain at least 1 lowercase character.',
         },
         {
           type: 'password',
-          message: 'Must contain at least 1 uppercase character.',
+          message: 'Value must contain at least 1 uppercase character.',
         },
         {
           type: 'password',
-          message: 'Must contain at least 1 number.',
+          message: 'Value must contain at least 1 number.',
         },
         {
           type: 'password',
-          message: 'Must contain at least 1 symbol.',
+          message: 'Value must contain at least 1 symbol.',
         },
       ],
     });
