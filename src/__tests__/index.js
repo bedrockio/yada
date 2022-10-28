@@ -1,4 +1,5 @@
 import yd from '../index';
+import { isSchema, isSchemaError } from '../utils';
 
 async function assertFail(schema, obj, errors) {
   try {
@@ -18,6 +19,16 @@ function mapErrorMessages(error) {
   } else {
     return [error.message];
   }
+}
+
+async function assertErrorMessage(schema, obj, message) {
+  let error;
+  try {
+    await schema.validate(obj);
+  } catch (err) {
+    error = err;
+  }
+  expect(error.message).toEqual(message);
 }
 
 async function assertPass(schema, obj) {
@@ -495,6 +506,7 @@ describe('object', () => {
     } catch (error) {
       const data = JSON.parse(JSON.stringify(error));
       expect(data).toEqual({
+        message: 'Input failed validation.',
         details: [
           {
             field: 'a',
@@ -835,14 +847,27 @@ describe('default', () => {
 
 describe('isSchema', () => {
   it('should correctly identify a schema', () => {
-    expect(yd.isSchema(yd.string())).toBe(true);
-    expect(yd.isSchema(yd.date())).toBe(true);
-    expect(yd.isSchema(yd.custom())).toBe(true);
-    expect(yd.isSchema(yd.object({}))).toBe(true);
-    expect(yd.isSchema(undefined)).toBe(false);
-    expect(yd.isSchema(null)).toBe(false);
-    expect(yd.isSchema({})).toBe(false);
-    expect(yd.isSchema('a')).toBe(false);
+    expect(isSchema(yd.string())).toBe(true);
+    expect(isSchema(yd.date())).toBe(true);
+    expect(isSchema(yd.custom())).toBe(true);
+    expect(isSchema(yd.object({}))).toBe(true);
+    expect(isSchema(undefined)).toBe(false);
+    expect(isSchema(null)).toBe(false);
+    expect(isSchema({})).toBe(false);
+    expect(isSchema('a')).toBe(false);
+  });
+});
+
+describe('isSchemaError', () => {
+  it('should correctly identify a schema error', async () => {
+    let error;
+    try {
+      await yd.string().validate(1);
+    } catch (err) {
+      error = err;
+    }
+    expect(isSchemaError(error)).toBe(true);
+    expect(isSchemaError(new Error())).toBe(false);
   });
 });
 
@@ -908,6 +933,11 @@ describe('toOpenApi', () => {
 });
 
 describe('other', () => {
+  it('should provide a default error message', async () => {
+    await assertErrorMessage(yd.string(), 3, 'Input failed validation.');
+    await assertErrorMessage(yd.object(), 3, 'Input failed validation.');
+  });
+
   it('should allow a custom message', async () => {
     const schema = yd.string().message('Needs a string');
     await assertFail(schema, 1, ['Needs a string']);

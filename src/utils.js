@@ -1,4 +1,4 @@
-import Schema, { isSchema } from './Schema';
+import Schema from './Schema';
 
 export function wrapSchema(Class) {
   return (...args) => {
@@ -18,4 +18,5 @@ export function wrapAny() {
   };
 }
 
-export { isSchema };
+export { isSchema } from './Schema';
+export { isSchemaError } from './errors';

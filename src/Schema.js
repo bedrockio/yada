@@ -79,13 +79,14 @@ export default class Schema {
     }
 
     if (details.length) {
-      const { message } = this.meta;
+      let { message } = this.meta;
       if (options.field || options.index) {
         throw new FieldError(message, details, {
           field: options.field,
           index: options.index,
         });
       } else {
+        message ||= 'Input failed validation.';
         throw new ValidationError(message, details);
       }
     }

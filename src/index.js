@@ -5,7 +5,7 @@ import number from './number';
 import object from './object';
 import string from './string';
 
-import { wrapArgs, wrapAny, isSchema } from './utils';
+import { wrapArgs, wrapAny, isSchema, isSchemaError } from './utils';
 
 const allow = wrapArgs('allow');
 const reject = wrapArgs('reject');
@@ -24,6 +24,7 @@ export default {
   reject,
   custom,
   isSchema,
+  isSchemaError,
 };
 
 export {
@@ -38,4 +39,5 @@ export {
   reject,
   custom,
   isSchema,
+  isSchemaError,
 };

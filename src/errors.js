@@ -44,3 +44,7 @@ export class AssertionError extends Error {
     };
   }
 }
+
+export function isSchemaError(arg) {
+  return arg instanceof ValidationError;
+}
