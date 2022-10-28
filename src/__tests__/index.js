@@ -615,7 +615,7 @@ describe('array', () => {
     await assertFail(schema, 1, ['Value must be an array.']);
   });
 
-  it.skip('should validate all elements', async () => {
+  it('should validate all elements', async () => {
     await assertFail(
       yd.array(yd.string()),
       [1, 2],
@@ -828,13 +828,16 @@ describe('serialization', () => {
       error = err;
     }
     expect(JSON.parse(JSON.stringify(error))).toEqual({
+      type: 'validation',
       message: 'Object failed validation.',
       details: [
         {
+          type: 'field',
           field: 'a',
           message: '"a" is required.',
         },
         {
+          type: 'field',
           field: 'b',
           message: '"b" must be a string.',
         },
@@ -851,13 +854,16 @@ describe('serialization', () => {
       error = err;
     }
     expect(JSON.parse(JSON.stringify(error))).toEqual({
+      type: 'validation',
       message: 'Array failed validation.',
       details: [
         {
+          type: 'element',
           index: 0,
           message: 'Element at index 0 must be a string.',
         },
         {
+          type: 'element',
           index: 1,
           message: 'Element at index 1 must be a string.',
         },
@@ -881,6 +887,7 @@ describe('serialization', () => {
       error = err;
     }
     expect(JSON.parse(JSON.stringify(error))).toEqual({
+      type: 'validation',
       message: 'Input failed validation.',
       details: [
         {

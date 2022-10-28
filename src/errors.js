@@ -6,6 +6,7 @@ export class ValidationError extends Error {
 
   toJSON() {
     return {
+      type: 'validation',
       message: this.message,
       details: this.details,
     };
@@ -21,17 +22,11 @@ export class FieldError extends Error {
 
   toJSON() {
     return {
+      type: 'field',
       message: this.message,
       field: this.field,
       details: this.details,
     };
-  }
-}
-
-export class ArrayError extends Error {
-  constructor(message, details) {
-    super(message);
-    this.details = details;
   }
 }
 
@@ -44,6 +39,7 @@ export class ElementError extends Error {
 
   toJSON() {
     return {
+      type: 'element',
       message: this.message,
       index: this.index,
       details: this.details,
@@ -62,6 +58,13 @@ export class AssertionError extends Error {
       type: this.type,
       message: this.message,
     };
+  }
+}
+
+export class ArrayError extends Error {
+  constructor(message, details) {
+    super(message);
+    this.details = details;
   }
 }
 
