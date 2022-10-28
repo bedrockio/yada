@@ -1071,4 +1071,44 @@ describe('other', () => {
     expect(result.a).toBe(1);
     expect(result.b).toBe('b');
   });
+
+  it('should get full error message', async () => {
+    const schema = yd.object({
+      a: yd.string(),
+      b: yd.number(),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        a: 1,
+        b: '2',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe(
+      '"a" must be a string. "b" must be a number.'
+    );
+  });
+
+  it('should get full error message with delimiter', async () => {
+    const schema = yd.object({
+      a: yd.string(),
+      b: yd.number(),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        a: 1,
+        b: '2',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage('\n')).toBe(
+      '"a" must be a string.\n"b" must be a number.'
+    );
+  });
 });

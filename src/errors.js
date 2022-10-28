@@ -1,48 +1,57 @@
 export class ValidationError extends Error {
-  constructor(message, details) {
+  constructor(message, details = [], type = 'validation') {
     super(message);
     this.details = details;
+    this.type = type;
   }
 
   toJSON() {
     return {
-      type: 'validation',
+      type: this.type,
       message: this.message,
       details: this.details,
     };
   }
+
+  getFullMessage(delimiter = ' ') {
+    if (this.details) {
+      return this.details
+        .map((error) => {
+          return isSchemaError(error) ? error.getFullMessage() : error.message;
+        })
+        .join(delimiter);
+    } else {
+      return this.message;
+    }
+  }
 }
 
-export class FieldError extends Error {
+export class FieldError extends ValidationError {
   constructor(message, field, details) {
-    super(message);
+    super(message, details, 'field');
     this.field = field;
     this.details = details;
   }
 
   toJSON() {
     return {
-      type: 'field',
-      message: this.message,
       field: this.field,
-      details: this.details,
+      ...super.toJSON(),
     };
   }
 }
 
-export class ElementError extends Error {
+export class ElementError extends ValidationError {
   constructor(message, index, details) {
-    super(message);
+    super(message, details, 'element');
     this.index = index;
     this.details = details;
   }
 
   toJSON() {
     return {
-      type: 'element',
-      message: this.message,
       index: this.index,
-      details: this.details,
+      ...super.toJSON(),
     };
   }
 }
@@ -69,10 +78,5 @@ export class ArrayError extends Error {
 }
 
 export function isSchemaError(arg) {
-  return (
-    arg instanceof ValidationError ||
-    arg instanceof FieldError ||
-    arg instanceof ArrayError ||
-    arg instanceof AssertionError
-  );
+  return arg instanceof ValidationError || arg instanceof ArrayError;
 }
