@@ -1,4 +1,5 @@
 import TypeSchema from './TypeSchema';
+import { FieldError } from './errors';
 import { wrapSchema } from './utils';
 import { isSchema } from './Schema';
 
@@ -20,11 +21,23 @@ class ObjectSchema extends TypeSchema {
     for (let [key, schema] of Object.entries(fields)) {
       this.assert('field', async (obj, options) => {
         if (obj) {
-          const val = await schema.validate(obj[key], {
-            ...options,
-            field: key,
-            label: `"${key}"`,
-          });
+          let val;
+          try {
+            val = await schema.validate(obj[key], {
+              ...options,
+              label: `"${key}"`,
+            });
+          } catch (error) {
+            if (error.details?.length === 1) {
+              throw new FieldError(error.details[0].message, key);
+            } else {
+              throw new FieldError(
+                'Field failed validation.',
+                key,
+                error.details
+              );
+            }
+          }
           return {
             ...obj,
             ...(val !== undefined && {

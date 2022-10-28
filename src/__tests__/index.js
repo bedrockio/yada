@@ -226,20 +226,16 @@ describe('string', () => {
   });
 
   it('should validate a password with options', async () => {
-    const options = {
+    const schema = yd.string().password({
       minLength: 4,
       minLowercase: 1,
       minUppercase: 1,
       minNumbers: 1,
       minSymbols: 1,
-    };
-    const schema = yd.string().password(options);
+    });
     await assertPass(schema, 'aB1%');
     await assertFail(schema, '123456789abcde', [
-      'Must be at least 4 characters.',
-      'Must contain at least 1 lowercase character.',
       'Must contain at least 1 uppercase character.',
-      'Must contain at least 1 number.',
       'Must contain at least 1 symbol.',
     ]);
   });
@@ -496,33 +492,6 @@ describe('object', () => {
     expect(name).toBe('hello');
   });
 
-  it('should correctly serialize', async () => {
-    const schema = yd.object({
-      a: yd.string().required(),
-    });
-    try {
-      expect.assertions(1);
-      await schema.validate({});
-    } catch (error) {
-      const data = JSON.parse(JSON.stringify(error));
-      expect(data).toEqual({
-        message: 'Input failed validation.',
-        details: [
-          {
-            field: 'a',
-            message: '"a" is required.',
-            details: [
-              {
-                type: 'required',
-                message: '"a" is required.',
-              },
-            ],
-          },
-        ],
-      });
-    }
-  });
-
   it('should validate xnor as custom validator', async () => {
     const schema = yd
       .object({
@@ -646,10 +615,9 @@ describe('array', () => {
     await assertFail(schema, 1, ['Value must be an array.']);
   });
 
-  it('should validate all elements', async () => {
-    const schema = yd.array(yd.string());
+  it.skip('should validate all elements', async () => {
     await assertFail(
-      schema,
+      yd.array(yd.string()),
       [1, 2],
       [
         'Element at index 0 must be a string.',
@@ -664,7 +632,7 @@ describe('array', () => {
     try {
       await schema.validate([1, 2]);
     } catch (error) {
-      expect(error.details[0].details).toEqual([
+      expect(error.details).toEqual([
         new Error('Element at index 0 must be a string.'),
         new Error('Element at index 1 must be a string.'),
       ]);
@@ -842,6 +810,101 @@ describe('default', () => {
     expect(await schema.validate({ a: null })).toEqual({ a: null });
     expect(await schema.validate({ a: 'b' })).toEqual({ a: 'b' });
     expect(await schema.validate({ b: 'b' })).toEqual({ a: 'a', b: 'b' });
+  });
+});
+
+describe('serialization', () => {
+  it('should correctly serialize object error', async () => {
+    const schema = yd.object({
+      a: yd.string().required(),
+      b: yd.string().required(),
+    });
+    let error;
+    try {
+      await schema.validate({
+        b: 1,
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: 'Input failed validation.',
+      details: [
+        {
+          field: 'a',
+          message: '"a" is required.',
+        },
+        {
+          field: 'b',
+          message: '"b" must be a string.',
+        },
+      ],
+    });
+  });
+
+  it('should correctly serialize array error', async () => {
+    const schema = yd.array(yd.string());
+    let error;
+    try {
+      await schema.validate([1, 2]);
+    } catch (err) {
+      error = err;
+    }
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: 'Input failed validation.',
+      details: [
+        {
+          index: 0,
+          message: 'Element at index 0 must be a string.',
+        },
+        {
+          index: 1,
+          message: 'Element at index 1 must be a string.',
+        },
+      ],
+    });
+  });
+
+  it('should correctly serialize password error', async () => {
+    const schema = yd.string().password({
+      minLength: 6,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    });
+    let error;
+    try {
+      expect.assertions(1);
+      await schema.validate('');
+    } catch (err) {
+      error = err;
+    }
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: 'Input failed validation.',
+      details: [
+        {
+          type: 'password',
+          message: 'Must be at least 6 characters.',
+        },
+        {
+          type: 'password',
+          message: 'Must contain at least 1 lowercase character.',
+        },
+        {
+          type: 'password',
+          message: 'Must contain at least 1 uppercase character.',
+        },
+        {
+          type: 'password',
+          message: 'Must contain at least 1 number.',
+        },
+        {
+          type: 'password',
+          message: 'Must contain at least 1 symbol.',
+        },
+      ],
+    });
   });
 });
 

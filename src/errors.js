@@ -6,27 +6,47 @@ export class ValidationError extends Error {
 
   toJSON() {
     return {
-      ...(this.message && {
-        message: this.message,
-      }),
+      message: this.message,
       details: this.details,
     };
   }
 }
 
 export class FieldError extends Error {
-  constructor(message, details, meta = {}) {
-    super(message || details.map((err) => err.message).join(' '));
+  constructor(message, field, details) {
+    super(message);
+    this.field = field;
     this.details = details;
-    this.meta = meta;
   }
 
   toJSON() {
-    const { label, ...rest } = this.meta;
     return {
-      ...rest,
-      details: this.details,
       message: this.message,
+      field: this.field,
+      details: this.details,
+    };
+  }
+}
+
+export class ArrayError extends Error {
+  constructor(message, details) {
+    super(message);
+    this.details = details;
+  }
+}
+
+export class ElementError extends Error {
+  constructor(message, index, details) {
+    super(message);
+    this.index = index;
+    this.details = details;
+  }
+
+  toJSON() {
+    return {
+      message: this.message,
+      index: this.index,
+      details: this.details,
     };
   }
 }
@@ -46,5 +66,10 @@ export class AssertionError extends Error {
 }
 
 export function isSchemaError(arg) {
-  return arg instanceof ValidationError;
+  return (
+    arg instanceof ValidationError ||
+    arg instanceof FieldError ||
+    arg instanceof ArrayError ||
+    arg instanceof AssertionError
+  );
 }

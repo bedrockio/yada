@@ -1,4 +1,5 @@
-import { ValidationError, FieldError, AssertionError } from './errors';
+import { ValidationError, ArrayError, AssertionError } from './errors';
+import { isSchemaError } from './errors';
 
 const INITIAL = ['required', 'type', 'transform'];
 
@@ -55,7 +56,7 @@ export default class Schema {
   }
 
   async validate(value, options = {}) {
-    const details = [];
+    let details = [];
 
     options = {
       root: value,
@@ -71,7 +72,11 @@ export default class Schema {
           value = result;
         }
       } catch (error) {
-        details.push(error);
+        if (error instanceof ArrayError) {
+          details = [...details, ...error.details];
+        } else {
+          details.push(error);
+        }
         if (assertion.halt) {
           break;
         }
@@ -80,15 +85,8 @@ export default class Schema {
 
     if (details.length) {
       let { message } = this.meta;
-      if (options.field || options.index) {
-        throw new FieldError(message, details, {
-          field: options.field,
-          index: options.index,
-        });
-      } else {
-        message ||= 'Input failed validation.';
-        throw new ValidationError(message, details);
-      }
+      message ||= 'Input failed validation.';
+      throw new ValidationError(message, details);
     }
     return value;
   }
@@ -160,7 +158,7 @@ export default class Schema {
     try {
       return await fn(value, options);
     } catch (error) {
-      if (error instanceof FieldError) {
+      if (isSchemaError(error)) {
         throw error;
       }
       let { message = error.message, label = options.label } = this.meta;

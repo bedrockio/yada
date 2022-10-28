@@ -2,8 +2,14 @@ import validator from 'validator';
 
 import TypeSchema from './TypeSchema';
 import { wrapSchema } from './utils';
-import { FieldError } from './errors';
-import { PASSWORD_DEFAULTS, PASSWORD_LABELS } from './password';
+import {
+  PASSWORD_DEFAULTS,
+  validateLength,
+  validateLowercase,
+  validateUppercase,
+  validateNumbers,
+  validateSymbols,
+} from './password';
 
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -182,20 +188,31 @@ class StringSchema extends TypeSchema {
     });
   }
 
-  password(options = PASSWORD_DEFAULTS) {
-    return this.format('password', (str) => {
-      if (!validator.isStrongPassword(str, options)) {
-        const fields = Object.entries(options)
-          .map(([key, val]) => {
-            const fn = PASSWORD_LABELS[key];
-            if (fn && val > 0) {
-              return new Error(fn(val));
-            }
-          })
-          .filter((msg) => msg);
-        throw new FieldError('Invalid password.', fields);
-      }
-    });
+  password(options = {}) {
+    const { minLength, minLowercase, minUppercase, minNumbers, minSymbols } = {
+      ...PASSWORD_DEFAULTS,
+      ...options,
+    };
+
+    const schema = this.clone();
+
+    if (minLength) {
+      schema.assert('password', validateLength(minLength));
+    }
+    if (minLowercase) {
+      schema.assert('password', validateLowercase(minLowercase));
+    }
+    if (minUppercase) {
+      schema.assert('password', validateUppercase(minUppercase));
+    }
+    if (minNumbers) {
+      schema.assert('password', validateNumbers(minNumbers));
+    }
+    if (minSymbols) {
+      schema.assert('password', validateSymbols(minSymbols));
+    }
+
+    return schema;
   }
 
   url(options) {
