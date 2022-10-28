@@ -4,7 +4,7 @@ import { wrapSchema } from './utils';
 
 class ArraySchema extends Schema {
   constructor(...schemas) {
-    super();
+    super({ message: 'Array failed validation.' });
 
     if (schemas.length === 1 && Array.isArray(schemas[0])) {
       schemas = schemas[0];

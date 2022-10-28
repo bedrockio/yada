@@ -5,7 +5,7 @@ import { isSchema } from './Schema';
 
 class ObjectSchema extends TypeSchema {
   constructor(fields = {}) {
-    super(Object);
+    super(Object, { message: 'Object failed validation.' });
     this.fields = fields;
     this.transform((obj) => {
       if (obj) {

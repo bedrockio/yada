@@ -828,7 +828,7 @@ describe('serialization', () => {
       error = err;
     }
     expect(JSON.parse(JSON.stringify(error))).toEqual({
-      message: 'Input failed validation.',
+      message: 'Object failed validation.',
       details: [
         {
           field: 'a',
@@ -851,7 +851,7 @@ describe('serialization', () => {
       error = err;
     }
     expect(JSON.parse(JSON.stringify(error))).toEqual({
-      message: 'Input failed validation.',
+      message: 'Array failed validation.',
       details: [
         {
           index: 0,
@@ -998,12 +998,12 @@ describe('toOpenApi', () => {
 describe('other', () => {
   it('should provide a default error message', async () => {
     await assertErrorMessage(yd.string(), 3, 'Input failed validation.');
-    await assertErrorMessage(yd.object(), 3, 'Input failed validation.');
+    await assertErrorMessage(yd.object(), 3, 'Object failed validation.');
   });
 
   it('should allow a custom message', async () => {
     const schema = yd.string().message('Needs a string');
-    await assertFail(schema, 1, ['Needs a string']);
+    await assertErrorMessage(schema, 3, 'Needs a string');
   });
 
   it('should allow a custom label', async () => {

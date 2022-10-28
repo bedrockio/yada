@@ -1,9 +1,9 @@
 import Schema from './Schema';
 
 export default class TypeSchema extends Schema {
-  constructor(Class) {
+  constructor(Class, meta) {
     const type = Class.name.toLowerCase();
-    super({ type });
+    super({ type, ...meta });
     this.assertType(Class, type);
   }
 

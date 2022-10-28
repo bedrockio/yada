@@ -84,8 +84,7 @@ export default class Schema {
     }
 
     if (details.length) {
-      let { message } = this.meta;
-      message ||= 'Input failed validation.';
+      const { message = 'Input failed validation.' } = this.meta;
       throw new ValidationError(message, details);
     }
     return value;
@@ -161,8 +160,8 @@ export default class Schema {
       if (isSchemaError(error)) {
         throw error;
       }
-      let { message = error.message, label = options.label } = this.meta;
-      message = message.replace(/{label}/g, label || 'Value');
+      const { label = options.label } = this.meta;
+      const message = error.message.replace(/{label}/g, label || 'Value');
       throw new AssertionError(message, type);
     }
   }
