@@ -9,7 +9,7 @@ export default class TypeSchema extends Schema {
 
   assertType(Class, type) {
     const n = this.meta.type.match(/^[aeiou]/) ? 'n' : '';
-    const msg = `{label} must be a${n} ${type}.`;
+    const msg = `Must be a${n} ${type}.`;
     return this.assert('type', (val, options) => {
       if (val !== undefined) {
         if (typeof val !== type) {

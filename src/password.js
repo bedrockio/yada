@@ -15,7 +15,7 @@ export function validateLength(expected) {
   return (str = '') => {
     if (str.length < expected) {
       throw new Error(
-        getMessage('{label} must be at least {length} character{s}.', expected)
+        getMessage('Must be at least {length} character{s}.', expected)
       );
     }
   };
@@ -23,22 +23,22 @@ export function validateLength(expected) {
 
 export const validateLowercase = validateRegex(
   LOWER_REG,
-  '{label} must contain at least {length} lowercase character{s}.'
+  'Must contain at least {length} lowercase character{s}.'
 );
 
 export const validateUppercase = validateRegex(
   UPPER_REG,
-  '{label} must contain at least {length} uppercase character{s}.'
+  'Must contain at least {length} uppercase character{s}.'
 );
 
 export const validateNumbers = validateRegex(
   NUMBER_REG,
-  '{label} must contain at least {length} number{s}.'
+  'Must contain at least {length} number{s}.'
 );
 
 export const validateSymbols = validateRegex(
   SYMBOL_REG,
-  '{label} must contain at least {length} symbol{s}.'
+  'Must contain at least {length} symbol{s}.'
 );
 
 function validateRegex(reg, msg) {

@@ -21,7 +21,7 @@ class StringSchema extends TypeSchema {
   min(length) {
     return this.clone().assert('length', (str) => {
       if (str && str.length < length) {
-        throw new Error(`{label} must be ${length} characters or more.`);
+        throw new Error(`Must be ${length} characters or more.`);
       }
     });
   }
@@ -29,7 +29,7 @@ class StringSchema extends TypeSchema {
   max(length) {
     return this.clone().assert('length', (str) => {
       if (str && str.length > length) {
-        throw new Error(`{label} must be ${length} characters or less.`);
+        throw new Error(`Must be ${length} characters or less.`);
       }
     });
   }
@@ -45,7 +45,7 @@ class StringSchema extends TypeSchema {
       const lower = str.toLowerCase();
       if (lower !== str) {
         if (assert) {
-          throw new Error('{label} must be in lower case.');
+          throw new Error('Must be in lower case.');
         }
         return lower;
       }
@@ -57,7 +57,7 @@ class StringSchema extends TypeSchema {
       const upper = str.toUpperCase();
       if (upper !== str) {
         if (assert) {
-          throw new Error('{label} must be in upper case.');
+          throw new Error('Must be in upper case.');
         }
         return upper;
       }
@@ -70,7 +70,7 @@ class StringSchema extends TypeSchema {
     }
     return this.clone().assert('regex', (str) => {
       if (str && !reg.test(str)) {
-        throw new Error(`{label} must match pattern ${reg}.`);
+        throw new Error(`Must match pattern ${reg}.`);
       }
     });
   }
@@ -78,7 +78,7 @@ class StringSchema extends TypeSchema {
   email() {
     return this.format('email', (str) => {
       if (!validator.isEmail(str)) {
-        throw new Error('{label} has incorrect email format.');
+        throw new Error('Must be an email address.');
       }
     });
   }
@@ -86,7 +86,7 @@ class StringSchema extends TypeSchema {
   hex() {
     return this.format('hex', (str) => {
       if (!validator.isHexadecimal(str)) {
-        throw new Error('{label} must be hexadecimal.');
+        throw new Error('Must be hexadecimal.');
       }
     });
   }
@@ -94,7 +94,7 @@ class StringSchema extends TypeSchema {
   md5() {
     return this.format('md5', (str) => {
       if (!validator.isHash(str, 'md5')) {
-        throw new Error('{label} must be a hash in md5 format.');
+        throw new Error('Must be a hash in md5 format.');
       }
     });
   }
@@ -102,7 +102,7 @@ class StringSchema extends TypeSchema {
   sha1() {
     return this.format('sha1', (str) => {
       if (!validator.isHash(str, 'sha1')) {
-        throw new Error('{label} must be a hash in sha1 format.');
+        throw new Error('Must be a hash in sha1 format.');
       }
     });
   }
@@ -110,7 +110,7 @@ class StringSchema extends TypeSchema {
   ascii() {
     return this.format('ascii', (str) => {
       if (!validator.isAscii(str)) {
-        throw new Error('{label} must be ASCII.');
+        throw new Error('Must be ASCII.');
       }
     });
   }
@@ -118,7 +118,7 @@ class StringSchema extends TypeSchema {
   base64(options) {
     return this.format('base64', (str) => {
       if (!validator.isBase64(str, options)) {
-        throw new Error('{label} must be base64.');
+        throw new Error('Must be base64.');
       }
     });
   }
@@ -126,7 +126,7 @@ class StringSchema extends TypeSchema {
   creditCard() {
     return this.format('credit-card', (str) => {
       if (!validator.isCreditCard(str)) {
-        throw new Error('{label} must be a valid credit card number.');
+        throw new Error('Must be a valid credit card number.');
       }
     });
   }
@@ -134,7 +134,7 @@ class StringSchema extends TypeSchema {
   ip() {
     return this.format('ip', (str) => {
       if (!validator.isIP(str)) {
-        throw new Error('{label} must be a valid IP address.');
+        throw new Error('Must be a valid IP address.');
       }
     });
   }
@@ -142,7 +142,7 @@ class StringSchema extends TypeSchema {
   country() {
     return this.format('country', (str) => {
       if (!validator.isISO31661Alpha2(str)) {
-        throw new Error('{label} must be a valid country code.');
+        throw new Error('Must be a valid country code.');
       }
     });
   }
@@ -150,7 +150,7 @@ class StringSchema extends TypeSchema {
   locale() {
     return this.format('locale', (str) => {
       if (!validator.isLocale(str)) {
-        throw new Error('{label} must be a valid locale code.');
+        throw new Error('Must be a valid locale code.');
       }
     });
   }
@@ -158,7 +158,7 @@ class StringSchema extends TypeSchema {
   jwt() {
     return this.format('jwt', (str) => {
       if (!validator.isJWT(str)) {
-        throw new Error('{label} must be a valid JWT token.');
+        throw new Error('Must be a valid JWT token.');
       }
     });
   }
@@ -167,7 +167,7 @@ class StringSchema extends TypeSchema {
     return this.format('slug', (str) => {
       // Validator shows some issues here so use a custom regex.
       if (!SLUG_REG.test(str)) {
-        throw new Error('{label} must be a valid slug.');
+        throw new Error('Must be a valid slug.');
       }
     });
   }
@@ -175,7 +175,7 @@ class StringSchema extends TypeSchema {
   latlng() {
     return this.format('latlng', (str) => {
       if (!validator.isLatLong(str)) {
-        throw new Error('{label} must be a valid lat,lng coordinate.');
+        throw new Error('Must be a valid lat,lng coordinate.');
       }
     });
   }
@@ -183,7 +183,7 @@ class StringSchema extends TypeSchema {
   postalCode(locale = 'any') {
     return this.format('postal-code', (str) => {
       if (!validator.isPostalCode(str, locale)) {
-        throw new Error('{label} must be a valid postal code.');
+        throw new Error('Must be a valid postal code.');
       }
     });
   }
@@ -218,7 +218,7 @@ class StringSchema extends TypeSchema {
   url(options) {
     return this.format('url', (str) => {
       if (!validator.isURL(str, options)) {
-        throw new Error('{label} must be a valid URL.');
+        throw new Error('Must be a valid URL.');
       }
     });
   }
@@ -226,7 +226,7 @@ class StringSchema extends TypeSchema {
   domain(options) {
     return this.format('domain', (str) => {
       if (!validator.isFQDN(str, options)) {
-        throw new Error('{label} must be a valid domain.');
+        throw new Error('Must be a valid domain.');
       }
     });
   }
@@ -234,7 +234,7 @@ class StringSchema extends TypeSchema {
   uuid(version) {
     return this.format('uuid', (str) => {
       if (!validator.isUUID(str, version)) {
-        throw new Error('{label} must be a valid unique id.');
+        throw new Error('Must be a valid unique id.');
       }
     });
   }
@@ -242,7 +242,7 @@ class StringSchema extends TypeSchema {
   btc() {
     return this.format('bitcoin-address', (str) => {
       if (!validator.isBtcAddress(str)) {
-        throw new Error('{label} must be a valid Bitcoin address.');
+        throw new Error('Must be a valid Bitcoin address.');
       }
     });
   }
@@ -250,7 +250,7 @@ class StringSchema extends TypeSchema {
   eth() {
     return this.format('etherium-address', (str) => {
       if (!validator.isEthereumAddress(str)) {
-        throw new Error('{label} must be a valid Ethereum address.');
+        throw new Error('Must be a valid Ethereum address.');
       }
     });
   }
@@ -258,7 +258,7 @@ class StringSchema extends TypeSchema {
   swift() {
     return this.format('swift-code', (str) => {
       if (!validator.isBIC(str)) {
-        throw new Error('{label} must be a valid SWIFT code.');
+        throw new Error('Must be a valid SWIFT code.');
       }
     });
   }
@@ -266,7 +266,7 @@ class StringSchema extends TypeSchema {
   mongo() {
     return this.format('mongo-object-id', (str) => {
       if (!validator.isMongoId(str)) {
-        throw new Error('{label} must be a valid ObjectId.');
+        throw new Error('Must be a valid ObjectId.');
       }
     });
   }

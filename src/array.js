@@ -16,7 +16,7 @@ class ArraySchema extends Schema {
         if (options.cast) {
           return String(val).split(',');
         } else {
-          throw new Error('{label} must be an array.');
+          throw new Error('Must be an array.');
         }
       }
     });
@@ -30,12 +30,7 @@ class ArraySchema extends Schema {
           for (let i = 0; i < arr.length; i++) {
             const el = arr[i];
             try {
-              result.push(
-                await schema.validate(el, {
-                  ...options,
-                  label: `Element at index ${i}`,
-                })
-              );
+              result.push(await schema.validate(el, options));
             } catch (error) {
               if (error.details?.length === 1) {
                 errors.push(new ElementError(error.details[0].message, i));

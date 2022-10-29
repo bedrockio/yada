@@ -23,10 +23,7 @@ class ObjectSchema extends TypeSchema {
         if (obj) {
           let val;
           try {
-            val = await schema.validate(obj[key], {
-              ...options,
-              label: `"${key}"`,
-            });
+            val = await schema.validate(obj[key], options);
           } catch (error) {
             if (error.details?.length === 1) {
               throw new FieldError(error.details[0].message, key);

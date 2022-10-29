@@ -1,3 +1,5 @@
+import { getFullMessage } from './messages';
+
 export class ValidationError extends Error {
   constructor(message, details = [], type = 'validation') {
     super(message);
@@ -13,16 +15,11 @@ export class ValidationError extends Error {
     };
   }
 
-  getFullMessage(delimiter = ' ') {
-    if (this.details) {
-      return this.details
-        .map((error) => {
-          return isSchemaError(error) ? error.getFullMessage() : error.message;
-        })
-        .join(delimiter);
-    } else {
-      return this.message;
-    }
+  getFullMessage(options) {
+    return getFullMessage(this, {
+      delimiter: ' ',
+      ...options,
+    });
   }
 }
 

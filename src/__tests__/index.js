@@ -47,33 +47,33 @@ describe('string', () => {
     const schema = yd.string();
     await assertPass(schema, 'a');
     await assertPass(schema, undefined);
-    await assertFail(schema, null, ['Value must be a string.']);
-    await assertFail(schema, 1, ['Value must be a string.']);
+    await assertFail(schema, null, ['Must be a string.']);
+    await assertFail(schema, 1, ['Must be a string.']);
   });
 
   it('should validate a required string', async () => {
     const schema = yd.string().required();
     await assertPass(schema, 'a');
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 1, ['Value must be a string.']);
+    await assertFail(schema, 1, ['Must be a string.']);
   });
 
   it('should validate a minimum length', async () => {
     const schema = yd.string().min(4);
     await assertPass(schema, 'abcd');
-    await assertFail(schema, 'abc', ['Value must be 4 characters or more.']);
+    await assertFail(schema, 'abc', ['Must be 4 characters or more.']);
   });
 
   it('should validate a maximum length', async () => {
     const schema = yd.string().max(4);
     await assertPass(schema, 'a');
-    await assertFail(schema, 'abcde', ['Value must be 4 characters or less.']);
+    await assertFail(schema, 'abcde', ['Must be 4 characters or less.']);
   });
 
   it('should validate an email', async () => {
     const schema = yd.string().email();
     await assertPass(schema, 'foo@bar.com');
-    await assertFail(schema, 'foo@bar', ['Value has incorrect email format.']);
+    await assertFail(schema, 'foo@bar', ['Must be an email address.']);
   });
 
   it('should validate a regex pattern', async () => {
@@ -87,7 +87,7 @@ describe('string', () => {
     const reg = /^[A-Z]+$/;
     const schema = yd.string().matches(reg);
     await assertPass(schema, 'A');
-    await assertFail(schema, 'a', [`Value must match pattern ${reg}.`]);
+    await assertFail(schema, 'a', [`Must match pattern ${reg}.`]);
   });
 
   it('should trim a string', async () => {
@@ -107,8 +107,8 @@ describe('string', () => {
   it('should convert to assert lower case', async () => {
     const schema = yd.string().lowercase(true);
     await assertPass(schema, 'foo');
-    await assertFail(schema, 'Foo', ['Value must be in lower case.']);
-    await assertFail(schema, 'FOO', ['Value must be in lower case.']);
+    await assertFail(schema, 'Foo', ['Must be in lower case.']);
+    await assertFail(schema, 'FOO', ['Must be in lower case.']);
   });
 
   it('should convert to upper case', async () => {
@@ -120,20 +120,20 @@ describe('string', () => {
   it('should convert to assert upper case', async () => {
     const schema = yd.string().uppercase(true);
     await assertPass(schema, 'FOO');
-    await assertFail(schema, 'Foo', ['Value must be in upper case.']);
-    await assertFail(schema, 'foo', ['Value must be in upper case.']);
+    await assertFail(schema, 'Foo', ['Must be in upper case.']);
+    await assertFail(schema, 'foo', ['Must be in upper case.']);
   });
 
   it('should validate a hexadecimal string', async () => {
     const schema = yd.string().hex();
     await assertPass(schema, 'abc123456789');
-    await assertFail(schema, 'zzz', ['Value must be hexadecimal.']);
+    await assertFail(schema, 'zzz', ['Must be hexadecimal.']);
   });
 
   it('should validate an MD5 hash', async () => {
     await assertPass(yd.string().md5(), 'bed1e4d90fb9261a80ae92d339949559');
     await assertFail(yd.string().md5(), 'aaaa', [
-      'Value must be a hash in md5 format.',
+      'Must be a hash in md5 format.',
     ]);
   });
 
@@ -144,51 +144,47 @@ describe('string', () => {
     );
 
     await assertFail(yd.string().sha1(), 'bed1e4d90fb9261a80ae92d339949559', [
-      'Value must be a hash in sha1 format.',
+      'Must be a hash in sha1 format.',
     ]);
   });
 
   it('should validate an ascii string', async () => {
     const schema = yd.string().ascii();
     await assertPass(schema, 'abc123456789%&#');
-    await assertFail(schema, '¥¢£©', ['Value must be ASCII.']);
+    await assertFail(schema, '¥¢£©', ['Must be ASCII.']);
   });
 
   it('should validate a base64 string', async () => {
     const schema = yd.string().base64();
     await assertPass(schema, 'Zm9vYmFy');
-    await assertFail(schema, 'a', ['Value must be base64.']);
+    await assertFail(schema, 'a', ['Must be base64.']);
   });
 
   it('should validate a credit card', async () => {
     const schema = yd.string().creditCard();
     await assertPass(schema, '4111111111111111');
     await assertFail(schema, '5111111111111111', [
-      'Value must be a valid credit card number.',
+      'Must be a valid credit card number.',
     ]);
-    await assertFail(schema, 'foo', [
-      'Value must be a valid credit card number.',
-    ]);
+    await assertFail(schema, 'foo', ['Must be a valid credit card number.']);
   });
 
   it('should validate an ip address', async () => {
     const schema = yd.string().ip();
     await assertPass(schema, '192.168.0.0');
-    await assertFail(schema, '192.168.0', [
-      'Value must be a valid IP address.',
-    ]);
+    await assertFail(schema, '192.168.0', ['Must be a valid IP address.']);
   });
 
   it('should validate an ISO 3166-1 alpha-2 country code', async () => {
     const schema = yd.string().country();
     await assertPass(schema, 'jp');
-    await assertFail(schema, 'zz', ['Value must be a valid country code.']);
+    await assertFail(schema, 'zz', ['Must be a valid country code.']);
   });
 
   it('should validate a locale code', async () => {
     const schema = yd.string().locale();
     await assertPass(schema, 'ja-JP');
-    await assertFail(schema, 'japan', ['Value must be a valid locale code.']);
+    await assertFail(schema, 'japan', ['Must be a valid locale code.']);
   });
 
   it('should validate a JWT token', async () => {
@@ -196,33 +192,33 @@ describe('string', () => {
     const token =
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9lIn0.2dDMbovRrOV-rp-6_zl2ZwrckDpodOnBcg8KY7mBjw4';
     await assertPass(schema, token);
-    await assertFail(schema, 'token', ['Value must be a valid JWT token.']);
+    await assertFail(schema, 'token', ['Must be a valid JWT token.']);
   });
 
   it('should validate a latitude-longitude string', async () => {
     const schema = yd.string().latlng();
     await assertPass(schema, '41.7708727,140.7125196');
     await assertFail(schema, '41.7708727', [
-      'Value must be a valid lat,lng coordinate.',
+      'Must be a valid lat,lng coordinate.',
     ]);
   });
 
   it('should validate a postal code', async () => {
     const schema = yd.string().postalCode();
     await assertPass(schema, '80906');
-    await assertFail(schema, '80906z', ['Value must be a valid postal code.']);
+    await assertFail(schema, '80906z', ['Must be a valid postal code.']);
   });
 
   it('should validate a slug', async () => {
     const schema = yd.string().slug();
     await assertPass(schema, 'foo-bar');
-    await assertFail(schema, 'foo#-bar', ['Value must be a valid slug.']);
+    await assertFail(schema, 'foo#-bar', ['Must be a valid slug.']);
   });
 
   it('should validate a password', async () => {
     const schema = yd.string().password();
     await assertPass(schema, '123456789abcde');
-    await assertFail(schema, '1234', ['Value must be at least 12 characters.']);
+    await assertFail(schema, '1234', ['Must be at least 12 characters.']);
   });
 
   it('should validate a password with options', async () => {
@@ -235,55 +231,51 @@ describe('string', () => {
     });
     await assertPass(schema, 'aB1%');
     await assertFail(schema, '123456789abcde', [
-      'Value must contain at least 1 uppercase character.',
-      'Value must contain at least 1 symbol.',
+      'Must contain at least 1 uppercase character.',
+      'Must contain at least 1 symbol.',
     ]);
   });
 
   it('should validate a URL', async () => {
     const schema = yd.string().url();
     await assertPass(schema, 'http://foo.com');
-    await assertFail(schema, 'http://foo', ['Value must be a valid URL.']);
+    await assertFail(schema, 'http://foo', ['Must be a valid URL.']);
   });
 
   it('should validate a UUID v4', async () => {
     const schema = yd.string().uuid();
     await assertPass(schema, '60648997-e80c-45e2-8467-2084fc207dce');
-    await assertFail(schema, '60648997-e80c', [
-      'Value must be a valid unique id.',
-    ]);
+    await assertFail(schema, '60648997-e80c', ['Must be a valid unique id.']);
   });
 
   it('should validate a domain', async () => {
     const schema = yd.string().domain();
     await assertPass(schema, 'foo.com');
-    await assertFail(schema, 'foo', ['Value must be a valid domain.']);
+    await assertFail(schema, 'foo', ['Must be a valid domain.']);
   });
 
   it('should validate a Bitcoin address', async () => {
     const schema = yd.string().btc();
     await assertPass(schema, '3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5');
-    await assertFail(schema, 'foo', ['Value must be a valid Bitcoin address.']);
+    await assertFail(schema, 'foo', ['Must be a valid Bitcoin address.']);
   });
 
   it('should validate a Ethereum address', async () => {
     const schema = yd.string().eth();
     await assertPass(schema, '0xb794f5ea0ba39494ce839613fffba74279579268');
-    await assertFail(schema, 'foo', [
-      'Value must be a valid Ethereum address.',
-    ]);
+    await assertFail(schema, 'foo', ['Must be a valid Ethereum address.']);
   });
 
   it('should validate a SWIFT bank code', async () => {
     const schema = yd.string().swift();
     await assertPass(schema, 'AXISINBB250');
-    await assertFail(schema, 'foo', ['Value must be a valid SWIFT code.']);
+    await assertFail(schema, 'foo', ['Must be a valid SWIFT code.']);
   });
 
   it('should validate a MongoDB ObjectId', async () => {
     const schema = yd.string().mongo();
     await assertPass(schema, '61b8b032cac265007c34ce09');
-    await assertFail(schema, 'foo', ['Value must be a valid ObjectId.']);
+    await assertFail(schema, 'foo', ['Must be a valid ObjectId.']);
   });
 });
 
@@ -292,45 +284,45 @@ describe('number', () => {
     const schema = yd.number();
     await assertPass(schema, 1);
     await assertPass(schema, undefined);
-    await assertFail(schema, null, ['Value must be a number.']);
-    await assertFail(schema, 'a', ['Value must be a number.']);
+    await assertFail(schema, null, ['Must be a number.']);
+    await assertFail(schema, 'a', ['Must be a number.']);
   });
 
   it('should validate a required number', async () => {
     const schema = yd.number().required();
     await assertPass(schema, 1);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 'a', ['Value must be a number.']);
+    await assertFail(schema, 'a', ['Must be a number.']);
   });
 
   it('should validate a minimum value', async () => {
     const schema = yd.number().min(4);
     await assertPass(schema, 5);
-    await assertFail(schema, 1, ['Value must be greater than 4.']);
+    await assertFail(schema, 1, ['Must be greater than 4.']);
   });
 
   it('should validate a maximum value', async () => {
     const schema = yd.number().max(4);
     await assertPass(schema, 1);
-    await assertFail(schema, 5, ['Value must be less than 4.']);
+    await assertFail(schema, 5, ['Must be less than 4.']);
   });
 
   it('should validate an integer', async () => {
     const schema = yd.number().integer();
     await assertPass(schema, 1);
-    await assertFail(schema, 1.1, ['Value must be an integer.']);
+    await assertFail(schema, 1.1, ['Must be an integer.']);
   });
 
   it('should validate a positive number', async () => {
     const schema = yd.number().positive();
     await assertPass(schema, 1);
-    await assertFail(schema, -1, ['Value must be positive.']);
+    await assertFail(schema, -1, ['Must be positive.']);
   });
 
   it('should validate a negative number', async () => {
     const schema = yd.number().negative();
     await assertPass(schema, -1);
-    await assertFail(schema, 1, ['Value must be negative.']);
+    await assertFail(schema, 1, ['Must be negative.']);
   });
 
   it('should validate a multiple', async () => {
@@ -338,7 +330,7 @@ describe('number', () => {
     await assertPass(schema, 3);
     await assertPass(schema, 6);
     await assertPass(schema, 9);
-    await assertFail(schema, 10, ['Value must be a multiple of 3.']);
+    await assertFail(schema, 10, ['Must be a multiple of 3.']);
   });
 });
 
@@ -348,7 +340,7 @@ describe('boolean', () => {
     await assertPass(schema, true);
     await assertPass(schema, false);
     await assertPass(schema, undefined);
-    await assertFail(schema, 1, ['Value must be a boolean.']);
+    await assertFail(schema, 1, ['Must be a boolean.']);
   });
 
   it('should validate a required boolean', async () => {
@@ -356,7 +348,7 @@ describe('boolean', () => {
     await assertPass(schema, true);
     await assertPass(schema, false);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 1, ['Value must be a boolean.']);
+    await assertFail(schema, 1, ['Must be a boolean.']);
   });
 });
 
@@ -365,22 +357,22 @@ describe('allow', () => {
     const schema = yd.allow('one', 'two');
     await assertPass(schema, 'one');
     await assertPass(schema, 'two');
-    await assertFail(schema, 'three', ['Value must be one of ["one", "two"].']);
+    await assertFail(schema, 'three', ['Must be one of ["one", "two"].']);
   });
 
   it('should pass an array', async () => {
     const schema = yd.allow(['one', 'two']);
     await assertPass(schema, 'one');
     await assertPass(schema, 'two');
-    await assertFail(schema, 'three', ['Value must be one of ["one", "two"].']);
+    await assertFail(schema, 'three', ['Must be one of ["one", "two"].']);
   });
 
   it('should allow passing other schemas', async () => {
     const schema = yd.allow([yd.string(), yd.number()]);
     await assertPass(schema, 'a');
     await assertPass(schema, 5);
-    await assertFail(schema, true, ['Value must be one of [string, number].']);
-    await assertFail(schema, null, ['Value must be one of [string, number].']);
+    await assertFail(schema, true, ['Must be one of [string, number].']);
+    await assertFail(schema, null, ['Must be one of [string, number].']);
   });
 });
 
@@ -388,13 +380,13 @@ describe('reject', () => {
   it('should validate an enum', async () => {
     const schema = yd.reject('one');
     await assertPass(schema, 'two');
-    await assertFail(schema, 'one', ['Value must not be one of ["one"].']);
+    await assertFail(schema, 'one', ['Must not be one of ["one"].']);
   });
 
   it('should allow passing an array', async () => {
     const schema = yd.reject(['one']);
     await assertPass(schema, 'two');
-    await assertFail(schema, 'one', ['Value must not be one of ["one"].']);
+    await assertFail(schema, 'one', ['Must not be one of ["one"].']);
   });
 });
 
@@ -405,8 +397,8 @@ describe('object', () => {
     });
     await assertPass(schema, undefined);
     await assertPass(schema, { name: 'a' });
-    await assertFail(schema, { name: 1 }, ['"name" must be a string.']);
-    await assertFail(schema, 1, ['Value must be an object.']);
+    await assertFail(schema, { name: 1 }, ['Must be a string.']);
+    await assertFail(schema, 1, ['Must be an object.']);
   });
 
   it('should validate an object with a required field', async () => {
@@ -415,9 +407,9 @@ describe('object', () => {
     });
     await assertPass(schema, undefined);
     await assertPass(schema, { name: 'a' });
-    await assertFail(schema, {}, ['"name" is required.']);
-    await assertFail(schema, { name: 1 }, ['"name" must be a string.']);
-    await assertFail(schema, 1, ['Value must be an object.']);
+    await assertFail(schema, {}, ['Value is required.']);
+    await assertFail(schema, { name: 1 }, ['Must be a string.']);
+    await assertFail(schema, 1, ['Must be an object.']);
   });
 
   it('should validate a required object', async () => {
@@ -428,8 +420,8 @@ describe('object', () => {
       .required();
     await assertPass(schema, { name: 'a' });
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, { name: 1 }, ['"name" must be a string.']);
-    await assertFail(schema, 1, ['Value must be an object.']);
+    await assertFail(schema, { name: 1 }, ['Must be a string.']);
+    await assertFail(schema, 1, ['Must be an object.']);
   });
 
   it('should validate all fields', async () => {
@@ -439,7 +431,7 @@ describe('object', () => {
         b: yd.string().required(),
       })
       .required();
-    await assertFail(schema, {}, ['"a" is required.', '"b" is required.']);
+    await assertFail(schema, {}, ['Value is required.', 'Value is required.']);
   });
 
   it('should allow a custom validation', async () => {
@@ -450,27 +442,27 @@ describe('object', () => {
           .required()
           .custom((val) => {
             if (val.match(/^[A-Z]/)) {
-              throw new Error('{label} must start with lower case letter.');
+              throw new Error('Must start with lower case letter.');
             }
           })
           .custom((val) => {
             if (val.length < 4) {
-              throw new Error('{label} must be at least 4 characters.');
+              throw new Error('Must be at least 4 characters.');
             }
           }),
       })
       .required();
     await assertPass(schema, { name: 'abcd' });
-    await assertFail(schema, { name: 12 }, ['"name" must be a string.']);
+    await assertFail(schema, { name: 12 }, ['Must be a string.']);
     await assertFail(schema, { name: 'ABCD' }, [
-      '"name" must start with lower case letter.',
+      'Must start with lower case letter.',
     ]);
     await assertFail(schema, { name: 'abc' }, [
-      '"name" must be at least 4 characters.',
+      'Must be at least 4 characters.',
     ]);
     await assertFail(schema, { name: 'Abc' }, [
-      '"name" must start with lower case letter.',
-      '"name" must be at least 4 characters.',
+      'Must start with lower case letter.',
+      'Must be at least 4 characters.',
     ]);
   });
 
@@ -536,8 +528,8 @@ describe('object', () => {
     });
     const schema = schema1.append(schema2);
     await assertPass(schema, { foo: 'foo', bar: 'bar' });
-    await assertFail(schema, { foo: 'foo' }, ['"bar" is required.']);
-    await assertFail(schema, { bar: 'bar' }, ['"foo" is required.']);
+    await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
+    await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
   });
 
   it('should allow appending a plain object', async () => {
@@ -549,8 +541,8 @@ describe('object', () => {
     };
     const schema = schema1.append(schema2);
     await assertPass(schema, { foo: 'foo', bar: 'bar' });
-    await assertFail(schema, { foo: 'foo' }, ['"bar" is required.']);
-    await assertFail(schema, { bar: 'bar' }, ['"foo" is required.']);
+    await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
+    await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
   });
 });
 
@@ -558,27 +550,27 @@ describe('custom', () => {
   it('should allow an optional root validator', async () => {
     const schema = yd.custom((val) => {
       if (val === 'goodbye') {
-        throw new Error('{label} must not be goodbye.');
+        throw new Error('Must not be goodbye.');
       }
     });
     await assertPass(schema, undefined);
     await assertPass(schema, '');
     await assertPass(schema, 'hello');
-    await assertFail(schema, 'goodbye', ['Value must not be goodbye.']);
+    await assertFail(schema, 'goodbye', ['Must not be goodbye.']);
   });
 
   it('should allow a required root validator', async () => {
     const schema = yd
       .custom((val) => {
         if (val === 'goodbye') {
-          throw new Error('{label} must not be goodbye.');
+          throw new Error('Must not be goodbye.');
         }
       })
       .required();
     await assertPass(schema, '');
     await assertPass(schema, 'hello');
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 'goodbye', ['Value must not be goodbye.']);
+    await assertFail(schema, 'goodbye', ['Must not be goodbye.']);
   });
 
   it('should convert result', async () => {
@@ -595,7 +587,7 @@ describe('array', () => {
     await assertPass(schema, []);
     await assertPass(schema, ['a']);
     await assertPass(schema, undefined);
-    await assertFail(schema, 1, ['Value must be an array.']);
+    await assertFail(schema, 1, ['Must be an array.']);
   });
 
   it('should validate a required array', async () => {
@@ -603,7 +595,7 @@ describe('array', () => {
     await assertPass(schema, []);
     await assertPass(schema, ['a']);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 1, ['Value must be an array.']);
+    await assertFail(schema, 1, ['Must be an array.']);
   });
 
   it('should validate an array of strings', async () => {
@@ -611,18 +603,15 @@ describe('array', () => {
     await assertPass(schema, []);
     await assertPass(schema, ['a']);
     await assertPass(schema, undefined);
-    await assertFail(schema, [1], ['Element at index 0 must be a string.']);
-    await assertFail(schema, 1, ['Value must be an array.']);
+    await assertFail(schema, [1], ['Must be a string.']);
+    await assertFail(schema, 1, ['Must be an array.']);
   });
 
   it('should validate all elements', async () => {
     await assertFail(
       yd.array(yd.string()),
       [1, 2],
-      [
-        'Element at index 0 must be a string.',
-        'Element at index 1 must be a string.',
-      ]
+      ['Must be a string.', 'Must be a string.']
     );
   });
 
@@ -633,8 +622,8 @@ describe('array', () => {
       await schema.validate([1, 2]);
     } catch (error) {
       expect(error.details).toEqual([
-        new Error('Element at index 0 must be a string.'),
-        new Error('Element at index 1 must be a string.'),
+        new Error('Must be a string.'),
+        new Error('Must be a string.'),
       ]);
     }
   });
@@ -645,16 +634,8 @@ describe('array', () => {
     await assertPass(schema, ['a']);
     await assertPass(schema, [1]);
     await assertPass(schema, undefined);
-    await assertFail(
-      schema,
-      [true],
-      ['Element at index 0 must be one of [string, number].']
-    );
-    await assertFail(
-      schema,
-      [null],
-      ['Element at index 0 must be one of [string, number].']
-    );
+    await assertFail(schema, [true], ['Must be one of [string, number].']);
+    await assertFail(schema, [null], ['Must be one of [string, number].']);
   });
 
   it('should validate an array of different types with array', async () => {
@@ -663,16 +644,8 @@ describe('array', () => {
     await assertPass(schema, ['a']);
     await assertPass(schema, [1]);
     await assertPass(schema, undefined);
-    await assertFail(
-      schema,
-      [true],
-      ['Element at index 0 must be one of [string, number].']
-    );
-    await assertFail(
-      schema,
-      [null],
-      ['Element at index 0 must be one of [string, number].']
-    );
+    await assertFail(schema, [true], ['Must be one of [string, number].']);
+    await assertFail(schema, [null], ['Must be one of [string, number].']);
   });
 
   it('should validate an array of objects', async () => {
@@ -682,7 +655,7 @@ describe('array', () => {
       })
     );
     await assertPass(schema, [{ foo: 'hi' }]);
-    await assertFail(schema, [{ bar: 'hi' }], ['"foo" is required.']);
+    await assertFail(schema, [{ bar: 'hi' }], ['Value is required.']);
   });
 });
 
@@ -694,10 +667,10 @@ describe('date', () => {
     await assertPass(schema, 1642232606911);
     await assertPass(schema, undefined);
     await assertPass(schema, 0);
-    await assertFail(schema, null, ['Value must be a valid date.']);
-    await assertFail(schema, false, ['Value must be a valid date.']);
-    await assertFail(schema, NaN, ['Value must be a valid date.']);
-    await assertFail(schema, 'invalid', ['Value must be a valid date.']);
+    await assertFail(schema, null, ['Must be a valid date.']);
+    await assertFail(schema, false, ['Must be a valid date.']);
+    await assertFail(schema, NaN, ['Must be a valid date.']);
+    await assertFail(schema, 'invalid', ['Must be a valid date.']);
   });
 
   it('should validate a required date', async () => {
@@ -707,10 +680,10 @@ describe('date', () => {
     await assertPass(schema, 1642232606911);
     await assertPass(schema, 0);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, null, ['Value must be a valid date.']);
-    await assertFail(schema, false, ['Value must be a valid date.']);
-    await assertFail(schema, NaN, ['Value must be a valid date.']);
-    await assertFail(schema, 'invalid', ['Value must be a valid date.']);
+    await assertFail(schema, null, ['Must be a valid date.']);
+    await assertFail(schema, false, ['Must be a valid date.']);
+    await assertFail(schema, NaN, ['Must be a valid date.']);
+    await assertFail(schema, 'invalid', ['Must be a valid date.']);
   });
 
   it('should validate an iso date', async () => {
@@ -722,15 +695,15 @@ describe('date', () => {
     await assertPass(schema, '2022-01-15');
     await assertPass(schema, '2022-01');
 
-    await assertFail(schema, new Date(), ['Value must be a string.']);
-    await assertFail(schema, 1642232606911, ['Value must be a string.']);
+    await assertFail(schema, new Date(), ['Must be a string.']);
+    await assertFail(schema, 1642232606911, ['Must be a string.']);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, null, ['Value must be a string.']);
-    await assertFail(schema, false, ['Value must be a string.']);
-    await assertFail(schema, NaN, ['Value must be a string.']);
-    await assertFail(schema, 'invalid', ['Value must be in ISO 8601 format.']);
+    await assertFail(schema, null, ['Must be a string.']);
+    await assertFail(schema, false, ['Must be a string.']);
+    await assertFail(schema, NaN, ['Must be a string.']);
+    await assertFail(schema, 'invalid', ['Must be in ISO 8601 format.']);
     await assertFail(schema, '01 Jan 1970 00:00:00 GMT', [
-      'Value must be in ISO 8601 format.',
+      'Must be in ISO 8601 format.',
     ]);
   });
 
@@ -744,7 +717,7 @@ describe('date', () => {
     const schema = yd.date().min('2020-01-01');
     await assertPass(schema, '2020-12-02');
     await assertFail(schema, '2019-01-01', [
-      'Value must be after 2020-01-01T00:00:00.000Z.',
+      'Must be after 2020-01-01T00:00:00.000Z.',
     ]);
   });
 
@@ -752,7 +725,7 @@ describe('date', () => {
     const schema = yd.date().max('2020-01-01');
     await assertPass(schema, '2019-01-01');
     await assertFail(schema, '2020-12-02', [
-      'Value must be before 2020-01-01T00:00:00.000Z.',
+      'Must be before 2020-01-01T00:00:00.000Z.',
     ]);
   });
 
@@ -760,20 +733,20 @@ describe('date', () => {
     const schema = yd.date().past();
     const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await assertPass(schema, '2019-01-01');
-    await assertFail(schema, future, ['Value must be in the past.']);
+    await assertFail(schema, future, ['Must be in the past.']);
   });
 
   it('should validate a future date', async () => {
     const schema = yd.date().future();
     const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await assertPass(schema, future);
-    await assertFail(schema, '2019-01-01', ['Value must be in the future.']);
+    await assertFail(schema, '2019-01-01', ['Must be in the future.']);
   });
 
   it('should validate a timestamp', async () => {
     const schema = yd.date().timestamp();
     await assertPass(schema, 1642342419713);
-    await assertFail(schema, '2019-01-01', ['Value must be a timestamp.']);
+    await assertFail(schema, '2019-01-01', ['Must be a timestamp.']);
     const now = new Date();
     const val = await schema.validate(now.getTime());
     expect(val).toEqual(now);
@@ -782,7 +755,7 @@ describe('date', () => {
   it('should validate a unix timestamp', async () => {
     const schema = yd.date().timestamp('unix');
     await assertPass(schema, 1642342419713);
-    await assertFail(schema, '2019-01-01', ['Value must be a unix timestamp.']);
+    await assertFail(schema, '2019-01-01', ['Must be a unix timestamp.']);
 
     const now = new Date();
     const val = await schema.validate(now.getTime() / 1000);
@@ -834,12 +807,12 @@ describe('serialization', () => {
         {
           type: 'field',
           field: 'a',
-          message: '"a" is required.',
+          message: 'Value is required.',
         },
         {
           type: 'field',
           field: 'b',
-          message: '"b" must be a string.',
+          message: 'Must be a string.',
         },
       ],
     });
@@ -860,12 +833,12 @@ describe('serialization', () => {
         {
           type: 'element',
           index: 0,
-          message: 'Element at index 0 must be a string.',
+          message: 'Must be a string.',
         },
         {
           type: 'element',
           index: 1,
-          message: 'Element at index 1 must be a string.',
+          message: 'Must be a string.',
         },
       ],
     });
@@ -892,23 +865,23 @@ describe('serialization', () => {
       details: [
         {
           type: 'password',
-          message: 'Value must be at least 6 characters.',
+          message: 'Must be at least 6 characters.',
         },
         {
           type: 'password',
-          message: 'Value must contain at least 1 lowercase character.',
+          message: 'Must contain at least 1 lowercase character.',
         },
         {
           type: 'password',
-          message: 'Value must contain at least 1 uppercase character.',
+          message: 'Must contain at least 1 uppercase character.',
         },
         {
           type: 'password',
-          message: 'Value must contain at least 1 number.',
+          message: 'Must contain at least 1 number.',
         },
         {
           type: 'password',
-          message: 'Value must contain at least 1 symbol.',
+          message: 'Must contain at least 1 symbol.',
         },
       ],
     });
@@ -1013,20 +986,6 @@ describe('other', () => {
     await assertErrorMessage(schema, 3, 'Needs a string');
   });
 
-  it('should allow a custom label', async () => {
-    const schema = yd.string().label('This field');
-    await assertFail(schema, 1, ['This field must be a string.']);
-  });
-
-  it('should allow a custom label for an object', async () => {
-    const schema = yd.object({
-      firstName: yd.string().label('"First Name"'),
-    });
-    await assertFail(schema, { firstName: 1 }, [
-      '"First Name" must be a string.',
-    ]);
-  });
-
   it('should have access to root object', async () => {
     const schema = yd.object({
       a: yd.array(yd.number()),
@@ -1071,7 +1030,9 @@ describe('other', () => {
     expect(result.a).toBe(1);
     expect(result.b).toBe('b');
   });
+});
 
+describe('getFullMessage', () => {
   it('should get full error message', async () => {
     const schema = yd.object({
       a: yd.string(),
@@ -1107,8 +1068,10 @@ describe('other', () => {
     } catch (err) {
       error = err;
     }
-    expect(error.getFullMessage('\n')).toBe(
-      '"a" must be a string.\n"b" must be a number.'
-    );
+    expect(
+      error.getFullMessage({
+        delimiter: '\n',
+      })
+    ).toBe('"a" must be a string.\n"b" must be a number.');
   });
 });

@@ -14,7 +14,7 @@ export default class Schema {
   required() {
     return this.clone({ required: true }).assert('required', (val) => {
       if (val === undefined) {
-        throw new Error('{label} is required.');
+        throw new Error('Value is required.');
       }
     });
   }
@@ -45,10 +45,6 @@ export default class Schema {
 
   message(message) {
     return this.clone({ message });
-  }
-
-  label(label) {
-    return this.clone({ label });
   }
 
   cast() {
@@ -110,7 +106,7 @@ export default class Schema {
       return el;
     });
     const not = reject ? ' not ' : ' ';
-    const msg = `{label} must${not}be one of [${types.join(', ')}].`;
+    const msg = `Must${not}be one of [${types.join(', ')}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
         for (let el of set) {
@@ -160,9 +156,7 @@ export default class Schema {
       if (isSchemaError(error)) {
         throw error;
       }
-      const { label = options.label } = this.meta;
-      const message = error.message.replace(/{label}/g, label || 'Value');
-      throw new AssertionError(message, type);
+      throw new AssertionError(error.message, type);
     }
   }
 
