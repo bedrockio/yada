@@ -2,10 +2,11 @@ import TypeSchema from './TypeSchema';
 import { FieldError } from './errors';
 import { wrapSchema } from './utils';
 import { isSchema } from './Schema';
+import { getLocalizedTag as l } from './localization';
 
 class ObjectSchema extends TypeSchema {
   constructor(fields = {}) {
-    super(Object, { message: 'Object failed validation.' });
+    super(Object, { message: l`Object failed validation.` });
     this.fields = fields;
     this.transform((obj) => {
       if (obj) {

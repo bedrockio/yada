@@ -1074,4 +1074,126 @@ describe('getFullMessage', () => {
       })
     ).toBe('"a" must be a string.\n"b" must be a number.');
   });
+
+  it('should get full error message for password fields', async () => {
+    const schema = yd.object({
+      password: yd.string().password({
+        minLength: 12,
+        minNumbers: 1,
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({ password: 'a' });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe(
+      '"password" must be at least 12 characters. "password" must contain at least 1 number.'
+    );
+  });
+
+  it('should get full error message with natural fields', async () => {
+    const schema = yd.object({
+      authCode: yd.string().required(),
+      pass_code: yd.string().required(),
+      'my-token': yd.string().required(),
+    });
+
+    let error;
+    try {
+      await schema.validate({});
+    } catch (err) {
+      error = err;
+    }
+    expect(
+      error.getFullMessage({
+        labels: 'natural',
+      })
+    ).toBe(
+      'Auth code is required. Pass code is required. My token is required.'
+    );
+  });
+});
+
+describe('localization', () => {
+  it('should be able to use a localizer', async () => {
+    const strings = {
+      'Must be at least {0} character{1}.': '{0}文字以上入力して下さい。',
+      'Object failed validation.': '不正な入力がありました。',
+    };
+    yd.useLocalizer((template) => {
+      return strings[template];
+    });
+    const schema = yd.object({
+      password: yd.string().password({
+        minLength: 6,
+        minNumbers: 1,
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        password: 'a',
+      });
+    } catch (err) {
+      error = err;
+    }
+    const obj = JSON.parse(JSON.stringify(error));
+    expect(obj.message).toBe('不正な入力がありました。');
+    expect(obj.details[0].details[0].message).toBe('6文字以上入力して下さい。');
+  });
+
+  it('should be able to pass a function for complex localizations', async () => {
+    const strings = {
+      'Must be at least {0} character{1}.': (num) => {
+        const chars = num === 1 ? 'carattere' : 'caratteri';
+        return `Deve contenere almeno ${num} ${chars}.`;
+      },
+    };
+    yd.useLocalizer((template) => {
+      return strings[template];
+    });
+    const schema = yd.object({
+      password: yd.string().password({
+        minLength: 6,
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        password: 'a',
+      });
+    } catch (err) {
+      error = err;
+    }
+    const obj = JSON.parse(JSON.stringify(error));
+    expect(obj.details[0].message).toBe('Deve contenere almeno 6 caratteri.');
+  });
+
+  it('should be able to inspect localization templates', async () => {
+    const schema = yd.object({
+      password: yd.string().password({
+        minLength: 6,
+        minNumbers: 1,
+      }),
+    });
+
+    yd.getLocalizerTemplates.clear();
+
+    try {
+      await schema.validate({
+        password: 'a',
+      });
+    } catch (err) {
+      expect(yd.getLocalizerTemplates()).toEqual([
+        'Must be at least {0} character{1}.',
+        'Must contain at least {0} number{1}.',
+        'Input failed validation.',
+      ]);
+    }
+  });
 });

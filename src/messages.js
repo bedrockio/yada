@@ -5,25 +5,64 @@ export function getFullMessage(error, options) {
   if (error.details) {
     return error.details
       .map((error) => {
-        return isSchemaError(error)
-          ? getFullMessage(error, options)
-          : error.message;
+        if (isSchemaError(error)) {
+          return getFullMessage(error, {
+            ...options,
+            ...(error.field && {
+              field: error.field,
+            }),
+            ...(error.index ?? {
+              index: error.index,
+            }),
+          });
+        } else {
+          return error.message;
+        }
       })
       .join(delimiter);
   } else {
-    return getLabeledMessage(error);
+    return getLabeledMessage(error, options);
   }
 }
 
-function getLabeledMessage(error) {
-  const base = downcase(error.message);
-  if (error.type === 'field') {
-    return `"${error.field}" ${base}`;
-  } else if (error.type === 'element') {
-    return `"Element at index ${error.index}" ${base}`;
+function getLabeledMessage(error, options) {
+  const { field, index } = options;
+  const base = getBase(error.message);
+  if (field) {
+    const label = getLabel(field, options);
+    return `${label} ${base}`;
+  } else if (index != null) {
+    return `"Element at index ${index}" ${base}`;
   } else {
     return `Value ${base}`;
   }
+}
+
+function getLabel(field, options) {
+  const { labels } = options;
+  if (labels === 'natural') {
+    return naturalize(field);
+  } else {
+    return `"${field}"`;
+  }
+}
+
+function getBase(str) {
+  if (str === 'Value is required.') {
+    return 'is required.';
+  } else {
+    return downcase(str);
+  }
+}
+
+function naturalize(str) {
+  const first = str.slice(0, 1).toUpperCase();
+  let rest = str.slice(1);
+  rest = rest.replace(/[A-Z]+/, (caps) => {
+    return ' ' + caps.toLowerCase();
+  });
+  rest = rest.replace(/[-_]/g, ' ');
+  return first + rest;
 }
 
 function downcase(str) {

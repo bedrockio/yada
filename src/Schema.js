@@ -1,4 +1,5 @@
 import { ValidationError, ArrayError, AssertionError } from './errors';
+import { getLocalizedTag as l } from './localization';
 import { isSchemaError } from './errors';
 
 const INITIAL = ['required', 'type', 'transform'];
@@ -14,7 +15,7 @@ export default class Schema {
   required() {
     return this.clone({ required: true }).assert('required', (val) => {
       if (val === undefined) {
-        throw new Error('Value is required.');
+        throw new Error(l`Value is required.`);
       }
     });
   }
@@ -80,7 +81,7 @@ export default class Schema {
     }
 
     if (details.length) {
-      const { message = 'Input failed validation.' } = this.meta;
+      const { message = l`Input failed validation.` } = this.meta;
       throw new ValidationError(message, details);
     }
     return value;

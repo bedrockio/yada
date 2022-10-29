@@ -6,6 +6,7 @@ import object from './object';
 import string from './string';
 
 import { wrapArgs, wrapAny, isSchema, isSchemaError } from './utils';
+import { useLocalizer, getLocalizerTemplates } from './localization';
 
 const allow = wrapArgs('allow');
 const reject = wrapArgs('reject');
@@ -25,6 +26,8 @@ export default {
   custom,
   isSchema,
   isSchemaError,
+  useLocalizer,
+  getLocalizerTemplates,
 };
 
 export {
@@ -40,4 +43,5 @@ export {
   custom,
   isSchema,
   isSchemaError,
+  useLocalizer,
 };

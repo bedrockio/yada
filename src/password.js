@@ -1,3 +1,5 @@
+import { getLocalizedTag as l } from './localization';
+
 const LOWER_REG = /[a-z]/g;
 const UPPER_REG = /[A-Z]/g;
 const NUMBER_REG = /[0-9]/g;
@@ -14,46 +16,40 @@ export const PASSWORD_DEFAULTS = {
 export function validateLength(expected) {
   return (str = '') => {
     if (str.length < expected) {
-      throw new Error(
-        getMessage('Must be at least {length} character{s}.', expected)
-      );
+      const s = expected === 1 ? '' : 's';
+      throw new Error(l`Must be at least ${expected} character${s}.`);
     }
   };
 }
 
 export const validateLowercase = validateRegex(
   LOWER_REG,
-  'Must contain at least {length} lowercase character{s}.'
+  (expected, s) => l`Must contain at least ${expected} lowercase character${s}.`
 );
 
 export const validateUppercase = validateRegex(
   UPPER_REG,
-  'Must contain at least {length} uppercase character{s}.'
+  (expected, s) => l`Must contain at least ${expected} uppercase character${s}.`
 );
 
 export const validateNumbers = validateRegex(
   NUMBER_REG,
-  'Must contain at least {length} number{s}.'
+  (expected, s) => l`Must contain at least ${expected} number${s}.`
 );
 
 export const validateSymbols = validateRegex(
   SYMBOL_REG,
-  'Must contain at least {length} symbol{s}.'
+  (expected, s) => l`Must contain at least ${expected} symbol${s}.`
 );
 
-function validateRegex(reg, msg) {
+function validateRegex(reg, getMessage) {
   return (expected) => {
     return (str = '') => {
       const length = str.match(reg)?.length || 0;
       if (length < expected) {
-        throw new Error(getMessage(msg, expected));
+        const s = expected === 1 ? '' : 's';
+        throw new Error(getMessage(expected, s));
       }
     };
   };
-}
-
-function getMessage(msg, n) {
-  msg = msg.replace(/{length}/, n);
-  msg = msg.replace(/{s}/, n === 1 ? '' : 's');
-  return msg;
 }

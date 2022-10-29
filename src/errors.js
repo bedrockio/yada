@@ -75,5 +75,9 @@ export class ArrayError extends Error {
 }
 
 export function isSchemaError(arg) {
-  return arg instanceof ValidationError || arg instanceof ArrayError;
+  return (
+    arg instanceof ValidationError ||
+    arg instanceof ArrayError ||
+    arg instanceof AssertionError
+  );
 }
