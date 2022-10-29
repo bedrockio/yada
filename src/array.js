@@ -56,6 +56,10 @@ class ArraySchema extends Schema {
     }
   }
 
+  cast() {
+    return this.clone({ cast: true });
+  }
+
   toString() {
     return 'array';
   }

@@ -26,6 +26,10 @@ export default class TypeSchema extends Schema {
     });
   }
 
+  cast() {
+    return this.clone({ cast: true });
+  }
+
   format(name, fn) {
     return this.clone({ format: name }).assert('format', fn);
   }

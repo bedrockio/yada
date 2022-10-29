@@ -1,10 +1,10 @@
 import {
+  isSchemaError,
   ValidationError,
   AssertionError,
   LocalizedError,
   ArrayError,
 } from './errors';
-import { isSchemaError } from './errors';
 
 const INITIAL = ['required', 'type', 'transform'];
 
@@ -41,19 +41,15 @@ export default class Schema {
   }
 
   allow(...set) {
-    return this.assertEnum(set);
+    return this.assertEnum(set, true);
   }
 
   reject(...set) {
-    return this.assertEnum(set, true);
+    return this.assertEnum(set, false);
   }
 
   message(message) {
     return this.clone({ message });
-  }
-
-  cast() {
-    return this.clone({ cast: true });
   }
 
   async validate(value, options = {}) {
@@ -100,7 +96,7 @@ export default class Schema {
     return clone;
   }
 
-  assertEnum(set, reject = false) {
+  assertEnum(set, allow) {
     if (set.length === 1 && Array.isArray(set[0])) {
       set = set[0];
     }
@@ -110,7 +106,7 @@ export default class Schema {
       }
       return el;
     });
-    const msg = `${reject ? 'Must not' : 'Must'} be one of [{types}].`;
+    const msg = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
         for (let el of set) {
@@ -121,7 +117,7 @@ export default class Schema {
             } catch (error) {
               continue;
             }
-          } else if ((el === val) !== reject) {
+          } else if ((el === val) === allow) {
             return;
           }
         }
