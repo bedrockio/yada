@@ -62,10 +62,12 @@ class DateSchema extends Schema {
   iso() {
     const schema = this.clone();
     schema.assert('type', (val) => {
-      if (typeof val !== 'string') {
-        throw new LocalizedError('Must be a string.');
-      } else if (!validator.isISO8601(val)) {
-        throw new LocalizedError('Must be in ISO 8601 format.');
+      if (val !== undefined) {
+        if (typeof val !== 'string') {
+          throw new LocalizedError('Must be a string.');
+        } else if (!validator.isISO8601(val || '')) {
+          throw new LocalizedError('Must be in ISO 8601 format.');
+        }
       }
     });
     return schema;
