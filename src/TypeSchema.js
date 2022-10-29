@@ -1,5 +1,5 @@
 import Schema from './Schema';
-import { getLocalizedTag as l } from './localization';
+import { LocalizedError } from './errors';
 
 export default class TypeSchema extends Schema {
   constructor(Class, meta) {
@@ -10,14 +10,16 @@ export default class TypeSchema extends Schema {
 
   assertType(Class, type) {
     const n = this.meta.type.match(/^[aeiou]/) ? 'n' : '';
-    const msg = l`Must be a${n} ${type}.`;
+    const msg = `Must be a${n} {type}.`;
     return this.assert('type', (val, options) => {
       if (val !== undefined) {
         if (typeof val !== type) {
           if (options.cast) {
             return Class(val);
           } else {
-            throw new Error(msg);
+            throw new LocalizedError(msg, {
+              type,
+            });
           }
         }
       }

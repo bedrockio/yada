@@ -1,8 +1,15 @@
 import { getFullMessage } from './messages';
+import { getLocalized } from './localization';
+
+export class LocalizedError extends Error {
+  constructor(message, values) {
+    super(getLocalized(message, values));
+  }
+}
 
 export class ValidationError extends Error {
   constructor(message, details = [], type = 'validation') {
-    super(message);
+    super(getLocalized(message));
     this.details = details;
     this.type = type;
   }
@@ -77,7 +84,7 @@ export class ArrayError extends Error {
 export function isSchemaError(arg) {
   return (
     arg instanceof ValidationError ||
-    arg instanceof ArrayError ||
-    arg instanceof AssertionError
+    arg instanceof AssertionError ||
+    arg instanceof ArrayError
   );
 }

@@ -7,13 +7,9 @@ export function getFullMessage(error, options) {
       .map((error) => {
         if (isSchemaError(error)) {
           return getFullMessage(error, {
+            field: error.field,
+            index: error.index,
             ...options,
-            ...(error.field && {
-              field: error.field,
-            }),
-            ...(error.index ?? {
-              index: error.index,
-            }),
           });
         } else {
           return error.message;
@@ -39,8 +35,8 @@ function getLabeledMessage(error, options) {
 }
 
 function getLabel(field, options) {
-  const { labels } = options;
-  if (labels === 'natural') {
+  const { natural } = options;
+  if (natural) {
     return naturalize(field);
   } else {
     return `"${field}"`;

@@ -1,15 +1,15 @@
 import Schema from './Schema';
-import { ArrayError, ElementError } from './errors';
-import { getLocalizedTag as l } from './localization';
+import { ArrayError, ElementError, LocalizedError } from './errors';
 import { wrapSchema } from './utils';
 
 class ArraySchema extends Schema {
   constructor(...schemas) {
-    super({ message: l`Array failed validation.` });
+    super({ message: 'Array failed validation.' });
 
     if (schemas.length === 1 && Array.isArray(schemas[0])) {
       schemas = schemas[0];
     }
+
     this.schemas = schemas;
 
     this.assert('type', (val, options) => {
@@ -17,7 +17,7 @@ class ArraySchema extends Schema {
         if (options.cast) {
           return String(val).split(',');
         } else {
-          throw new Error(l`Must be an array.`);
+          throw new LocalizedError('Must be an array.');
         }
       }
     });

@@ -1,5 +1,9 @@
-import { ValidationError, ArrayError, AssertionError } from './errors';
-import { getLocalizedTag as l } from './localization';
+import {
+  ValidationError,
+  AssertionError,
+  LocalizedError,
+  ArrayError,
+} from './errors';
 import { isSchemaError } from './errors';
 
 const INITIAL = ['required', 'type', 'transform'];
@@ -15,7 +19,7 @@ export default class Schema {
   required() {
     return this.clone({ required: true }).assert('required', (val) => {
       if (val === undefined) {
-        throw new Error(l`Value is required.`);
+        throw new LocalizedError('Value is required.');
       }
     });
   }
@@ -81,7 +85,7 @@ export default class Schema {
     }
 
     if (details.length) {
-      const { message = l`Input failed validation.` } = this.meta;
+      const { message = 'Input failed validation.' } = this.meta;
       throw new ValidationError(message, details);
     }
     return value;
@@ -106,8 +110,7 @@ export default class Schema {
       }
       return el;
     });
-    const not = reject ? ' not ' : ' ';
-    const msg = `Must${not}be one of [${types.join(', ')}].`;
+    const msg = `${reject ? 'Must not' : 'Must'} be one of [{types}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
         for (let el of set) {
@@ -122,7 +125,9 @@ export default class Schema {
             return;
           }
         }
-        throw new Error(msg);
+        throw new LocalizedError(msg, {
+          types: types.join(', '),
+        });
       }
     });
   }

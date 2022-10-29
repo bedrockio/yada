@@ -1,6 +1,6 @@
 import validator from 'validator';
 import { wrapSchema } from './utils';
-import { getLocalizedTag as l } from './localization';
+import { LocalizedError } from './errors';
 
 import Schema from './Schema';
 
@@ -11,7 +11,7 @@ class DateSchema extends Schema {
       if (val !== undefined) {
         const date = new Date(val);
         if ((!val && val !== 0) || isNaN(date.getTime())) {
-          throw new Error(l`Must be a valid date.`);
+          throw new LocalizedError('Must be a valid date.');
         } else {
           return date;
         }
@@ -23,7 +23,9 @@ class DateSchema extends Schema {
     min = new Date(min);
     return this.clone().assert('min', (date) => {
       if (date !== undefined && date < min) {
-        throw new Error(l`Must be after ${min.toISOString()}.`);
+        throw new LocalizedError('Must be after {date}.', {
+          date: min.toISOString(),
+        });
       }
     });
   }
@@ -32,7 +34,9 @@ class DateSchema extends Schema {
     max = new Date(max);
     return this.clone().assert('max', (date) => {
       if (date !== undefined && date > max) {
-        throw new Error(l`Must be before ${max.toISOString()}.`);
+        throw new LocalizedError('Must be before {date}.', {
+          date: max.toISOString(),
+        });
       }
     });
   }
@@ -41,7 +45,7 @@ class DateSchema extends Schema {
     return this.clone().assert('past', (date) => {
       const now = new Date();
       if (date !== undefined && date > now) {
-        throw new Error(l`Must be in the past.`);
+        throw new LocalizedError('Must be in the past.');
       }
     });
   }
@@ -50,7 +54,7 @@ class DateSchema extends Schema {
     return this.clone().assert('future', (date) => {
       const now = new Date();
       if (date !== undefined && date < now) {
-        throw new Error(l`Must be in the future.`);
+        throw new LocalizedError('Must be in the future.');
       }
     });
   }
@@ -59,9 +63,9 @@ class DateSchema extends Schema {
     const schema = this.clone();
     schema.assert('type', (val) => {
       if (typeof val !== 'string') {
-        throw new Error(l`Must be a string.`);
+        throw new LocalizedError('Must be a string.');
       } else if (!validator.isISO8601(val)) {
-        throw new Error(l`Must be in ISO 8601 format.`);
+        throw new LocalizedError('Must be in ISO 8601 format.');
       }
     });
     return schema;
@@ -70,13 +74,15 @@ class DateSchema extends Schema {
   timestamp(type) {
     const isUnix = type === 'unix';
     if (type && !isUnix) {
-      throw new Error(l`Only allows "unix" as an argument.`);
+      throw new LocalizedError('Only allows "unix" as an argument.');
     }
     const schema = this.clone();
     const suffix = isUnix ? 'unix timestamp' : 'timestamp';
     schema.assert('timestamp', (date, { original }) => {
       if (typeof original !== 'number') {
-        throw new Error(l`Must be a ${suffix}.`);
+        throw new LocalizedError('Must be a {suffix}.', {
+          suffix,
+        });
       } else if (isUnix) {
         return new Date(original * 1000);
       }

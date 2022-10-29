@@ -1,43 +1,33 @@
+const TOKEN_REG = /{(.+?)}/g;
+
 let localizer;
+let templates = {};
 
-let templates = new Set();
-
-export function useLocalizer(fn) {
+export function useLocalizer(arg) {
+  const fn = typeof arg === 'function' ? arg : (template) => arg[template];
   localizer = fn;
+  templates = {};
 }
 
-export function getLocalizedTag(strings, ...args) {
-  let template = strings
-    .map((part, i) => {
-      if (i < strings.length - 1) {
-        part += `{${i}}`;
-      }
-      return part;
-    })
-    .join('');
-
-  templates.add(template);
+export function getLocalized(template, values) {
+  templates[template] ||= template;
 
   if (localizer) {
     let localized = localizer(template);
     if (typeof localized === 'function') {
-      localized = localized(...args);
+      localized = localized(values);
     }
     if (localized) {
+      templates[template] = localized;
       template = localized;
     }
   }
-  const str = template.replace(/{(\d+)}/g, (match, index) => {
-    return args[index];
+
+  return template.replace(TOKEN_REG, (match, token) => {
+    return values[token];
   });
-  return str;
 }
 
 export function getLocalizerTemplates() {
-  return Array.from(templates);
+  return templates;
 }
-
-// For testing
-getLocalizerTemplates.clear = () => {
-  templates = new Set();
-};

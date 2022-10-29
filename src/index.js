@@ -44,4 +44,5 @@ export {
   isSchema,
   isSchemaError,
   useLocalizer,
+  getLocalizerTemplates,
 };

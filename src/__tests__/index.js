@@ -1109,7 +1109,7 @@ describe('getFullMessage', () => {
     }
     expect(
       error.getFullMessage({
-        labels: 'natural',
+        natural: true,
       })
     ).toBe(
       'Auth code is required. Pass code is required. My token is required.'
@@ -1118,9 +1118,23 @@ describe('getFullMessage', () => {
 });
 
 describe('localization', () => {
-  it('should be able to use a localizer', async () => {
+  it('should be able to pass an object to useLocalizer', async () => {
+    yd.useLocalizer({
+      'Must be a {type}.': 'Gotta be a {type}.',
+    });
+    let error;
+    try {
+      await yd.string().validate(1);
+    } catch (err) {
+      error = err;
+    }
+    expect(error.details[0].message).toBe('Gotta be a string.');
+  });
+
+  it('should be able to pass a function to useLocalizer', async () => {
     const strings = {
-      'Must be at least {0} character{1}.': '{0}文字以上入力して下さい。',
+      'Must be at least {length} character{s}.':
+        '{length}文字以上入力して下さい。',
       'Object failed validation.': '不正な入力がありました。',
     };
     yd.useLocalizer((template) => {
@@ -1141,16 +1155,17 @@ describe('localization', () => {
     } catch (err) {
       error = err;
     }
-    const obj = JSON.parse(JSON.stringify(error));
-    expect(obj.message).toBe('不正な入力がありました。');
-    expect(obj.details[0].details[0].message).toBe('6文字以上入力して下さい。');
+    expect(error.message).toBe('不正な入力がありました。');
+    expect(error.details[0].details[0].message).toBe(
+      '6文字以上入力して下さい。'
+    );
   });
 
   it('should be able to pass a function for complex localizations', async () => {
     const strings = {
-      'Must be at least {0} character{1}.': (num) => {
-        const chars = num === 1 ? 'carattere' : 'caratteri';
-        return `Deve contenere almeno ${num} ${chars}.`;
+      'Must be at least {length} character{s}.': ({ length }) => {
+        const chars = length === 1 ? 'carattere' : 'caratteri';
+        return `Deve contenere almeno ${length} ${chars}.`;
       },
     };
     yd.useLocalizer((template) => {
@@ -1170,30 +1185,29 @@ describe('localization', () => {
     } catch (err) {
       error = err;
     }
-    const obj = JSON.parse(JSON.stringify(error));
-    expect(obj.details[0].message).toBe('Deve contenere almeno 6 caratteri.');
+    expect(error.details[0].message).toBe('Deve contenere almeno 6 caratteri.');
   });
 
   it('should be able to inspect localization templates', async () => {
+    yd.useLocalizer({
+      'Input failed validation.': '不正な入力がありました。',
+    });
     const schema = yd.object({
       password: yd.string().password({
         minLength: 6,
         minNumbers: 1,
       }),
     });
-
-    yd.getLocalizerTemplates.clear();
-
     try {
       await schema.validate({
         password: 'a',
       });
     } catch (err) {
-      expect(yd.getLocalizerTemplates()).toEqual([
-        'Must be at least {0} character{1}.',
-        'Must contain at least {0} number{1}.',
-        'Input failed validation.',
-      ]);
+      const templates = yd.getLocalizerTemplates();
+      expect(templates).toMatchObject({
+        'Input failed validation.': '不正な入力がありました。',
+        'Object failed validation.': 'Object failed validation.',
+      });
     }
   });
 });
