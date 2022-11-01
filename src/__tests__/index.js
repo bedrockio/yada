@@ -579,6 +579,28 @@ describe('custom', () => {
     });
     expect(await schema.validate('hello')).toBe('goodbye');
   });
+
+  it('should allow a custom assertion type', async () => {
+    const schema = yd.custom('permissions', () => {
+      throw new Error('Not enough permissions!');
+    });
+    let error;
+    try {
+      await schema.validate('foo');
+    } catch (err) {
+      error = err;
+    }
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      type: 'validation',
+      message: 'Input failed validation.',
+      details: [
+        {
+          type: 'permissions',
+          message: 'Not enough permissions!',
+        },
+      ],
+    });
+  });
 });
 
 describe('array', () => {
@@ -892,8 +914,8 @@ describe('isSchema', () => {
   it('should correctly identify a schema', () => {
     expect(isSchema(yd.string())).toBe(true);
     expect(isSchema(yd.date())).toBe(true);
-    expect(isSchema(yd.custom())).toBe(true);
     expect(isSchema(yd.object({}))).toBe(true);
+    expect(isSchema(yd.custom(() => {}))).toBe(true);
     expect(isSchema(undefined)).toBe(false);
     expect(isSchema(null)).toBe(false);
     expect(isSchema({})).toBe(false);

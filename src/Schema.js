@@ -32,8 +32,15 @@ export default class Schema {
     });
   }
 
-  custom(fn) {
-    return this.clone().assert('custom', async (val, options) => {
+  custom(...args) {
+    const type = args.length > 1 ? args[0] : 'custom';
+    const fn = args.length > 1 ? args[1] : args[0];
+    if (!type) {
+      throw new Error('Assertion type required.');
+    } else if (!fn) {
+      throw new Error('Assertion function required.');
+    }
+    return this.clone().assert(type, async (val, options) => {
       if (val !== undefined) {
         return await fn(val, options);
       }
