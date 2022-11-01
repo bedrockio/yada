@@ -68,7 +68,7 @@ class StringSchema extends TypeSchema {
     });
   }
 
-  matches(reg) {
+  match(reg) {
     if (!(reg instanceof RegExp)) {
       throw new LocalizedError('Argument must be a regular expression');
     }

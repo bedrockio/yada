@@ -1,6 +1,17 @@
 import yd from '../index';
 import { isSchema, isSchemaError } from '../utils';
 
+async function assertPass(schema, obj) {
+  try {
+    await schema.validate(obj);
+    expect(true).toBe(true);
+  } catch (error) {
+    // eslint-disable-next-line
+    console.error(error);
+    throw error;
+  }
+}
+
 async function assertFail(schema, obj, errors) {
   try {
     await schema.validate(obj);
@@ -29,17 +40,6 @@ async function assertErrorMessage(schema, obj, message) {
     error = err;
   }
   expect(error.message).toEqual(message);
-}
-
-async function assertPass(schema, obj) {
-  try {
-    await schema.validate(obj);
-    expect(true).toBe(true);
-  } catch (error) {
-    // eslint-disable-next-line
-    console.error(error);
-    throw error;
-  }
 }
 
 describe('string', () => {
@@ -78,14 +78,14 @@ describe('string', () => {
 
   it('should validate a regex pattern', async () => {
     expect(() => {
-      yd.string().matches();
+      yd.string().match();
     }).toThrow('Argument must be a regular expression');
     expect(() => {
-      yd.string().matches('foo');
+      yd.string().match('foo');
     }).toThrow('Argument must be a regular expression');
 
     const reg = /^[A-Z]+$/;
-    const schema = yd.string().matches(reg);
+    const schema = yd.string().match(reg);
     await assertPass(schema, 'A');
     await assertFail(schema, 'a', [`Must match pattern ${reg}.`]);
   });
@@ -678,6 +678,23 @@ describe('array', () => {
     );
     await assertPass(schema, [{ foo: 'hi' }]);
     await assertFail(schema, [{ bar: 'hi' }], ['Value is required.']);
+  });
+
+  it('should validate a minimum length', async () => {
+    const schema = yd.array().min(1);
+    await assertPass(schema, ['one']);
+    await assertFail(schema, [], ['Must contain at least 1 element.']);
+  });
+
+  it('should validate a maximum length', async () => {
+    const schema = yd.array().max(1);
+    await assertPass(schema, []);
+    await assertPass(schema, ['one']);
+    await assertFail(
+      schema,
+      ['one', 'two'],
+      ['Cannot contain more than 1 element.']
+    );
   });
 });
 

@@ -56,6 +56,33 @@ class ArraySchema extends Schema {
     }
   }
 
+  min(length) {
+    return this.clone().assert('length', (arr) => {
+      if (arr && arr.length < length) {
+        const s = length === 1 ? '' : 's';
+        throw new LocalizedError('Must contain at least {length} element{s}.', {
+          length,
+          s,
+        });
+      }
+    });
+  }
+
+  max(length) {
+    return this.clone().assert('length', (arr) => {
+      if (arr && arr.length > length) {
+        const s = length === 1 ? '' : 's';
+        throw new LocalizedError(
+          'Cannot contain more than {length} element{s}.',
+          {
+            length,
+            s,
+          }
+        );
+      }
+    });
+  }
+
   cast() {
     return this.clone({ cast: true });
   }
