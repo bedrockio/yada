@@ -51,15 +51,19 @@ class ObjectSchema extends TypeSchema {
     }
   }
 
-  append(arg) {
-    const fields = isSchema(arg) ? arg.fields : arg;
-    return new ObjectSchema({ ...this.fields, ...fields });
+  clone(meta) {
+    return new ObjectSchema(this.fields, { ...this.meta, ...meta });
   }
 
   stripUnknown() {
-    return new ObjectSchema(this.fields, {
+    return this.clone({
       stripUnknown: true,
     });
+  }
+
+  append(arg) {
+    const fields = isSchema(arg) ? arg.fields : arg;
+    return new ObjectSchema({ ...this.fields, ...fields });
   }
 
   toString() {

@@ -525,6 +525,7 @@ describe('object', () => {
 
   it('should optionally strip out unknown keys', async () => {
     let schema;
+
     schema = yd
       .object({
         a: yd.string(),
@@ -570,6 +571,34 @@ describe('object', () => {
     await assertPass(schema, { foo: 'foo', bar: 'bar' });
     await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
     await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
+  });
+
+  it('should play well with append and custom methods', async () => {
+    let schema = yd
+      .object({
+        a: yd.string(),
+        b: yd.string(),
+      })
+      .append({
+        c: yd.string(),
+      })
+      .custom((val) => {
+        if (Object.keys(val).length === 0) {
+          throw new Error('Object must not be empty');
+        }
+      })
+      .stripUnknown();
+    const result = await schema.validate({
+      a: 'a',
+      b: 'b',
+      c: 'c',
+      d: 'd',
+    });
+    expect(result).toEqual({
+      a: 'a',
+      b: 'b',
+      c: 'c',
+    });
   });
 });
 

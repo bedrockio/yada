@@ -3,12 +3,17 @@ import { ArrayError, ElementError, LocalizedError } from './errors';
 import { wrapSchema } from './utils';
 
 class ArraySchema extends Schema {
-  constructor(...schemas) {
-    super({ message: 'Array failed validation.' });
+  constructor(...args) {
+    let schemas, meta;
 
-    if (schemas.length === 1 && Array.isArray(schemas[0])) {
-      schemas = schemas[0];
+    if (Array.isArray(args[0])) {
+      schemas = args[0];
+      meta = args[1];
+    } else {
+      schemas = args;
     }
+
+    super({ message: 'Array failed validation.', ...meta });
 
     this.schemas = schemas;
 
@@ -54,6 +59,10 @@ class ArraySchema extends Schema {
         }
       });
     }
+  }
+
+  clone(meta) {
+    return new ArraySchema(this.schemas, { ...this.meta, ...meta });
   }
 
   min(length) {
