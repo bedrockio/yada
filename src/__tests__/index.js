@@ -525,7 +525,6 @@ describe('object', () => {
 
   it('should optionally strip out unknown keys', async () => {
     let schema;
-
     schema = yd
       .object({
         a: yd.string(),
@@ -537,8 +536,14 @@ describe('object', () => {
     let result = await schema.validate({ a: 'a', b: 'b', c: 'c' });
     expect(result.c).toBeUndefined();
 
-    schema = yd.object().stripUnknown();
-    expect(await schema.validate({ foo: 'bar' })).toEqual({});
+    schema = yd
+      .object({
+        foo: yd.string(),
+      })
+      .stripUnknown();
+    expect(await schema.validate({ foo: 'foo', bar: 'bar' })).toEqual({
+      foo: 'foo',
+    });
   });
 
   it('should allow appending an object schema', async () => {
