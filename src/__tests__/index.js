@@ -503,19 +503,41 @@ describe('object', () => {
     ]);
   });
 
-  it('should strip out unknown keys', async () => {
+  it('should fail on unknown keys by default', async () => {
     const schema = yd.object({
       a: yd.string(),
       b: yd.string(),
     });
+    await assertPass(schema, {
+      a: 'a',
+      b: 'b',
+    });
+    await assertFail(
+      schema,
+      {
+        a: 'a',
+        b: 'b',
+        c: 'c',
+      },
+      ['Unknown field "c".']
+    );
+  });
+
+  it('should optionally strip out unknown keys', async () => {
+    let schema;
+
+    schema = yd
+      .object({
+        a: yd.string(),
+        b: yd.string(),
+      })
+      .stripUnknown();
     assertPass(schema, undefined);
     assertPass(schema, {});
     let result = await schema.validate({ a: 'a', b: 'b', c: 'c' });
     expect(result.c).toBeUndefined();
-  });
 
-  it('should allow empty object', async () => {
-    const schema = yd.object();
+    schema = yd.object().stripUnknown();
     expect(await schema.validate({ foo: 'bar' })).toEqual({});
   });
 
@@ -677,7 +699,7 @@ describe('array', () => {
       })
     );
     await assertPass(schema, [{ foo: 'hi' }]);
-    await assertFail(schema, [{ bar: 'hi' }], ['Value is required.']);
+    await assertFail(schema, [{ bar: 'hi' }], ['Unknown field "bar".']);
   });
 
   it('should validate a minimum length', async () => {

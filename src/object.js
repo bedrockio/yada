@@ -1,18 +1,23 @@
 import TypeSchema from './TypeSchema';
-import { FieldError } from './errors';
+import { FieldError, LocalizedError } from './errors';
 import { wrapSchema } from './utils';
 import { isSchema } from './Schema';
 
 class ObjectSchema extends TypeSchema {
-  constructor(fields = {}) {
-    super(Object, { message: 'Object failed validation.' });
+  constructor(fields = {}, meta) {
+    super(Object, { message: 'Object failed validation.', ...meta });
     this.fields = fields;
     this.transform((obj) => {
+      const { stripUnknown } = this.meta;
       if (obj) {
         const result = {};
         for (let key of Object.keys(obj)) {
           if (key in fields) {
             result[key] = obj[key];
+          } else if (!stripUnknown) {
+            throw new LocalizedError('Unknown field "{key}".', {
+              key,
+            });
           }
         }
         return result;
@@ -49,6 +54,12 @@ class ObjectSchema extends TypeSchema {
   append(arg) {
     const fields = isSchema(arg) ? arg.fields : arg;
     return new ObjectSchema({ ...this.fields, ...fields });
+  }
+
+  stripUnknown() {
+    return new ObjectSchema(this.fields, {
+      stripUnknown: true,
+    });
   }
 
   toString() {
