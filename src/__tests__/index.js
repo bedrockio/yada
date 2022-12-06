@@ -523,6 +523,13 @@ describe('object', () => {
     );
   });
 
+  it('not fail on unknown keys when no schema is defined', async () => {
+    const schema = yd.object();
+    await assertPass(schema, {
+      foo: 'bar',
+    });
+  });
+
   it('should optionally strip out unknown keys', async () => {
     let schema;
 
