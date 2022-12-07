@@ -13,9 +13,12 @@ class ArraySchema extends Schema {
       schemas = args;
     }
 
-    super({ message: 'Array failed validation.', ...meta });
+    super({ message: 'Array failed validation.', ...meta, schemas });
+    this.setup();
+  }
 
-    this.schemas = schemas;
+  setup() {
+    const { schemas } = this.meta;
 
     this.assert('type', (val, options) => {
       if (val !== undefined && !Array.isArray(val)) {
@@ -61,10 +64,6 @@ class ArraySchema extends Schema {
     }
   }
 
-  clone(meta) {
-    return new ArraySchema(this.schemas, { ...this.meta, ...meta });
-  }
-
   min(length) {
     return this.clone().assert('length', (arr) => {
       if (arr && arr.length < length) {
@@ -102,15 +101,16 @@ class ArraySchema extends Schema {
 
   toOpenApi() {
     let other;
-    if (this.schemas.length > 1) {
+    const { schemas } = this.meta;
+    if (schemas.length > 1) {
       other = {
-        oneOf: this.schemas.map((schema) => {
+        oneOf: schemas.map((schema) => {
           return schema.toOpenApi();
         }),
       };
-    } else if (this.schemas.length === 1) {
+    } else if (schemas.length === 1) {
       other = {
-        items: this.schemas[0].toOpenApi(),
+        items: schemas[0].toOpenApi(),
       };
     }
 

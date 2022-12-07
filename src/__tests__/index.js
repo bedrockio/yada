@@ -525,32 +525,11 @@ describe('object', () => {
 
   it('not fail on unknown keys when no schema is defined', async () => {
     const schema = yd.object();
-    await assertPass(schema, {
+    const result = await schema.validate({
       foo: 'bar',
     });
-  });
-
-  it('should optionally strip out unknown keys', async () => {
-    let schema;
-
-    schema = yd
-      .object({
-        a: yd.string(),
-        b: yd.string(),
-      })
-      .stripUnknown();
-    assertPass(schema, undefined);
-    assertPass(schema, {});
-    let result = await schema.validate({ a: 'a', b: 'b', c: 'c' });
-    expect(result.c).toBeUndefined();
-
-    schema = yd
-      .object({
-        foo: yd.string(),
-      })
-      .stripUnknown();
-    expect(await schema.validate({ foo: 'foo', bar: 'bar' })).toEqual({
-      foo: 'foo',
+    expect(result).toEqual({
+      foo: 'bar',
     });
   });
 
@@ -580,31 +559,87 @@ describe('object', () => {
     await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
   });
 
-  it('should play well with append and custom methods', async () => {
-    let schema = yd
-      .object({
-        a: yd.string(),
-        b: yd.string(),
-      })
-      .append({
-        c: yd.string(),
-      })
-      .custom((val) => {
-        if (Object.keys(val).length === 0) {
-          throw new Error('Object must not be empty');
-        }
-      })
-      .stripUnknown();
-    const result = await schema.validate({
-      a: 'a',
-      b: 'b',
-      c: 'c',
-      d: 'd',
+  describe('stripUnknown', () => {
+    it('should optionally strip out unknown keys', async () => {
+      let schema;
+
+      schema = yd
+        .object({
+          a: yd.string(),
+          b: yd.string(),
+        })
+        .stripUnknown();
+      assertPass(schema, undefined);
+      assertPass(schema, {});
+      let result = await schema.validate({ a: 'a', b: 'b', c: 'c' });
+      expect(result.c).toBeUndefined();
+
+      schema = yd
+        .object({
+          foo: yd.string(),
+        })
+        .stripUnknown();
+      expect(await schema.validate({ foo: 'foo', bar: 'bar' })).toEqual({
+        foo: 'foo',
+      });
     });
-    expect(result).toEqual({
-      a: 'a',
-      b: 'b',
-      c: 'c',
+
+    it('should respect preceeding append and custom validations', async () => {
+      let schema = yd
+        .object({
+          a: yd.string(),
+          b: yd.string(),
+        })
+        .append({
+          c: yd.string(),
+        })
+        .custom((val) => {
+          if (Object.keys(val).length === 0) {
+            throw new Error('Object must not be empty.');
+          }
+        })
+        .stripUnknown();
+      const result = await schema.validate({
+        a: 'a',
+        b: 'b',
+        c: 'c',
+        d: 'd',
+      });
+      expect(result).toEqual({
+        a: 'a',
+        b: 'b',
+        c: 'c',
+      });
+      await assertFail(schema, {}, ['Object must not be empty.']);
+    });
+
+    it('should respect following append and custom validations', async () => {
+      let schema = yd
+        .object({
+          a: yd.string(),
+          b: yd.string(),
+        })
+        .stripUnknown()
+        .custom((val) => {
+          if (Object.keys(val).length === 0) {
+            throw new Error('Object must not be empty.');
+          }
+        })
+        .append({
+          c: yd.string(),
+        });
+      const result = await schema.validate({
+        a: 'a',
+        b: 'b',
+        c: 'c',
+        d: 'd',
+      });
+      expect(result).toEqual({
+        a: 'a',
+        b: 'b',
+        c: 'c',
+      });
+      await assertFail(schema, {}, ['Object must not be empty.']);
     });
   });
 });

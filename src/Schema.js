@@ -6,7 +6,7 @@ import {
   ArrayError,
 } from './errors';
 
-const INITIAL = ['required', 'type', 'transform'];
+const INITIAL = ['required', 'type', 'default', 'transform'];
 
 export default class Schema {
   constructor(meta = {}) {
@@ -25,7 +25,7 @@ export default class Schema {
   }
 
   default(value) {
-    return this.clone({ default: value }).assert('transform', async (val) => {
+    return this.clone({ default: value }).assert('default', async (val) => {
       if (val === undefined) {
         return value;
       }
@@ -42,7 +42,7 @@ export default class Schema {
     }
     return this.clone().assert(type, async (val, options) => {
       if (val !== undefined) {
-        return await fn(val, options);
+        return await fn.call(this, val, options);
       }
     });
   }
@@ -94,14 +94,14 @@ export default class Schema {
     return value;
   }
 
-  // Private
-
   clone(meta) {
     const clone = Object.create(this.constructor.prototype);
     clone.assertions = [...this.assertions];
     clone.meta = { ...this.meta, ...meta };
     return clone;
   }
+
+  // Private
 
   assertEnum(set, allow) {
     if (set.length === 1 && Array.isArray(set[0])) {
@@ -136,15 +136,19 @@ export default class Schema {
   }
 
   assert(type, fn) {
-    this.assertions.push({
+    this.pushAssertion({
       halt: INITIAL.includes(type),
       type,
       fn,
     });
+    return this;
+  }
+
+  pushAssertion(assertion) {
+    this.assertions.push(assertion);
     this.assertions.sort((a, b) => {
       return this.getSortIndex(a.type) - this.getSortIndex(b.type);
     });
-    return this;
   }
 
   transform(fn) {
@@ -160,7 +164,7 @@ export default class Schema {
   async runAssertion(assertion, value, options = {}) {
     const { type, fn } = assertion;
     try {
-      return await fn(value, options);
+      return await fn.call(this, value, options);
     } catch (error) {
       if (isSchemaError(error)) {
         throw error;
