@@ -699,6 +699,17 @@ describe('custom', () => {
       ],
     });
   });
+
+  it('should pass options on validation to custom assertion', async () => {
+    let result;
+    const schema = yd.custom((val, { foo }) => {
+      result = foo;
+    });
+    await schema.validate(null, {
+      foo: 'bar',
+    });
+    expect(result).toBe('bar');
+  });
 });
 
 describe('array', () => {
