@@ -1,11 +1,11 @@
 import yd from '../index';
 import { isSchema, isSchemaError } from '../utils';
 
-async function assertPass(schema, obj, expected) {
+async function assertPass(schema, obj, expected, options) {
   try {
-    const result = await schema.validate(obj);
+    const result = await schema.validate(obj, options);
     if (expected) {
-      expect(result).toBe(expected);
+      expect(result).toEqual(expected);
     } else {
       expect(true).toBe(true);
     }
@@ -404,6 +404,7 @@ describe('object', () => {
     await assertPass(schema, { name: 'a' });
     await assertFail(schema, { name: 1 }, ['Must be a string.']);
     await assertFail(schema, 1, ['Must be an object.']);
+    await assertFail(schema, null, ['Must be an object.']);
   });
 
   it('should validate an object with a required field', async () => {
@@ -415,6 +416,7 @@ describe('object', () => {
     await assertFail(schema, {}, ['Value is required.']);
     await assertFail(schema, { name: 1 }, ['Must be a string.']);
     await assertFail(schema, 1, ['Must be an object.']);
+    await assertFail(schema, null, ['Must be an object.']);
   });
 
   it('should validate a required object', async () => {
@@ -1128,6 +1130,106 @@ describe('toOpenApi', () => {
   });
 });
 
+describe('casting', () => {
+  it('should cast a boolean', async () => {
+    const schema = yd.boolean();
+    const options = {
+      cast: true,
+    };
+    await assertPass(schema, 'true', true, options);
+    await assertPass(schema, 'True', true, options);
+    await assertPass(schema, 'false', false, options);
+    await assertPass(schema, 'False', false, options);
+    await assertPass(schema, '0', false, options);
+    await assertPass(schema, '1', true, options);
+    await assertFail(schema, 'foo', ['Must be a boolean.']);
+  });
+
+  it('should cast a nested boolean', async () => {
+    const schema = yd.object({
+      a: yd.boolean(),
+    });
+    const options = {
+      cast: true,
+    };
+    await assertPass(schema, { a: 'true' }, { a: true }, options);
+    await assertPass(schema, { a: 'True' }, { a: true }, options);
+    await assertPass(schema, { a: 'false' }, { a: false }, options);
+    await assertPass(schema, { a: 'False' }, { a: false }, options);
+    await assertFail(schema, { a: 'foo' }, ['Must be a boolean.']);
+  });
+
+  it('should not cast a boolean without flag', async () => {
+    const schema = yd.boolean();
+    await assertFail(schema, 'true', ['Must be a boolean.']);
+  });
+
+  it('should cast a number', async () => {
+    const schema = yd.number();
+    const options = {
+      cast: true,
+    };
+    await assertPass(schema, '0', 0, options);
+    await assertPass(schema, '1', 1, options);
+    await assertPass(schema, '1.1', 1.1, options);
+    await assertFail(schema, 'foo', ['Must be a number.']);
+    await assertFail(schema, 'null', ['Must be a number.']);
+  });
+
+  it('should cast a nested number', async () => {
+    const schema = yd.object({
+      a: yd.number(),
+    });
+    const options = {
+      cast: true,
+    };
+    await assertPass(schema, { a: '0' }, { a: 0 }, options);
+    await assertPass(schema, { a: '1' }, { a: 1 }, options);
+    await assertPass(schema, { a: '1.1' }, { a: 1.1 }, options);
+    await assertFail(schema, { a: 'foo' }, ['Must be a number.']);
+    await assertFail(schema, { a: 'null' }, ['Must be a number.']);
+  });
+
+  it('should not cast a number without flag', async () => {
+    const schema = yd.number();
+    await assertFail(schema, '0', ['Must be a number.']);
+  });
+
+  it('should cast to an array from commas', async () => {
+    const schema = yd.object({
+      a: yd.array(),
+      b: yd.string(),
+    });
+    const options = {
+      cast: true,
+    };
+    const result = await schema.validate({ a: 'a,b,c', b: 'b' }, options);
+    expect(result.a).toEqual(['a', 'b', 'c']);
+    expect(result.b).toBe('b');
+  });
+
+  it('should cast to an array of specific type', async () => {
+    const schema = yd.object({
+      a: yd.array(yd.number()),
+      b: yd.string(),
+    });
+    const options = {
+      cast: true,
+    };
+    const result = await schema.validate({ a: '1,2,3', b: 'b' }, options);
+    expect(result.a).toEqual([1, 2, 3]);
+    expect(result.b).toBe('b');
+  });
+
+  it('should not cast to an array without flag', async () => {
+    const schema = yd.object({
+      a: yd.array(yd.number()),
+      b: yd.string(),
+    });
+    await assertFail(schema, { a: '1,2,3', b: 'b' }, ['Must be an array.']);
+  });
+});
+
 describe('other', () => {
   it('should provide a default error message', async () => {
     await assertErrorMessage(yd.string(), 3, 'Input failed validation.');
@@ -1150,38 +1252,6 @@ describe('other', () => {
     });
     await assertPass(schema, { a: [1, 2, 3], b: 1 });
     await assertFail(schema, { a: [1, 2, 3], b: 4 }, ['"a" must include "b"']);
-  });
-
-  it('should cast to an array from commas', async () => {
-    const schema = yd.object({
-      a: yd.array().cast(),
-      b: yd.string(),
-    });
-    const result = await schema.validate({ a: '1,2,3', b: 'b' });
-    expect(result.a).toEqual(['1', '2', '3']);
-    expect(result.b).toBe('b');
-  });
-
-  it('should cast to an array of specific type', async () => {
-    const schema = yd.object({
-      a: yd.array(yd.number()).cast(),
-      b: yd.string(),
-    });
-    const result = await schema.validate({ a: '1,2,3', b: 'b' });
-    expect(result.a).toEqual([1, 2, 3]);
-    expect(result.b).toBe('b');
-  });
-
-  it('should cast values globally', async () => {
-    // Useful for query params for example:
-    // ?a=1&b=b <- does not know that "a" should be cast to a number
-    const schema = yd.object({
-      a: yd.number(),
-      b: yd.string(),
-    });
-    const result = await schema.validate({ a: '1', b: 'b' }, { cast: true });
-    expect(result.a).toBe(1);
-    expect(result.b).toBe('b');
   });
 
   it('should correctly validate chained formats', async () => {
@@ -1215,7 +1285,7 @@ describe('getFullMessage', () => {
     try {
       await schema.validate({
         a: 1,
-        b: '2',
+        b: 'a',
       });
     } catch (err) {
       error = err;
@@ -1235,7 +1305,7 @@ describe('getFullMessage', () => {
     try {
       await schema.validate({
         a: 1,
-        b: '2',
+        b: 'a',
       });
     } catch (err) {
       error = err;
@@ -1292,7 +1362,7 @@ describe('getFullMessage', () => {
 describe('localization', () => {
   it('should be able to pass an object to useLocalizer', async () => {
     yd.useLocalizer({
-      'Must be a {type}.': 'Gotta be a {type}.',
+      'Must be a string.': 'Gotta be a string.',
     });
     let error;
     try {

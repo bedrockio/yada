@@ -12,6 +12,11 @@ class ObjectSchema extends TypeSchema {
   }
 
   setup() {
+    this.assert('type', (val) => {
+      if (val === null || typeof val !== 'object') {
+        throw new LocalizedError('Must be an object.');
+      }
+    });
     this.transform(function (obj) {
       const { fields, stripUnknown } = this.meta;
       const allowUnknown = Object.keys(fields).length === 0;
@@ -86,10 +91,6 @@ class ObjectSchema extends TypeSchema {
       }
     }
     return merged;
-  }
-
-  toString() {
-    return 'object';
   }
 
   toOpenApi() {

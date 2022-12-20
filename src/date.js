@@ -7,7 +7,7 @@ import Schema from './Schema';
 class DateSchema extends Schema {
   constructor() {
     super();
-    this.transform((val) => {
+    this.assert('type', (val) => {
       const date = new Date(val);
       if ((!val && val !== 0) || isNaN(date.getTime())) {
         throw new LocalizedError('Must be a valid date input.');

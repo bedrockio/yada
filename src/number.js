@@ -5,6 +5,15 @@ import { wrapSchema } from './utils';
 class NumberSchema extends TypeSchema {
   constructor() {
     super(Number);
+    this.assert('type', function (val, options) {
+      if (typeof val === 'string' && options.cast) {
+        val = Number(val);
+      }
+      if (typeof val !== 'number' || isNaN(val)) {
+        throw new LocalizedError('Must be a number.');
+      }
+      return val;
+    });
   }
 
   min(min, msg) {

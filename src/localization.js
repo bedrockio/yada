@@ -9,7 +9,7 @@ export function useLocalizer(arg) {
   templates = {};
 }
 
-export function getLocalized(template, values) {
+export function getLocalized(template, values = {}) {
   templates[template] ||= template;
 
   if (localizer) {

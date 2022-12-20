@@ -19,18 +19,19 @@ class ArraySchema extends Schema {
 
   setup() {
     const { schemas } = this.meta;
-
-    this.assert('type', (val, options) => {
-      if (!Array.isArray(val)) {
-        if (options.cast) {
-          return String(val).split(',');
-        } else {
-          throw new LocalizedError('Must be an array.');
-        }
-      }
-    });
     const schema =
       schemas.length > 1 ? new Schema().allow(schemas) : schemas[0];
+
+    this.assert('type', (val, options) => {
+      if (typeof val === 'string' && options.cast) {
+        val = val.split(',');
+      }
+      if (!Array.isArray(val)) {
+        throw new LocalizedError('Must be an array.');
+      }
+      return val;
+    });
+
     if (schema) {
       this.assert('elements', async (arr, options) => {
         const errors = [];
@@ -60,7 +61,7 @@ class ArraySchema extends Schema {
 
   min(length) {
     return this.clone().assert('length', (arr) => {
-      if (arr && arr.length < length) {
+      if (arr.length < length) {
         const s = length === 1 ? '' : 's';
         throw new LocalizedError('Must contain at least {length} element{s}.', {
           length,
@@ -72,7 +73,7 @@ class ArraySchema extends Schema {
 
   max(length) {
     return this.clone().assert('length', (arr) => {
-      if (arr && arr.length > length) {
+      if (arr.length > length) {
         const s = length === 1 ? '' : 's';
         throw new LocalizedError(
           'Cannot contain more than {length} element{s}.',
@@ -83,10 +84,6 @@ class ArraySchema extends Schema {
         );
       }
     });
-  }
-
-  cast() {
-    return this.clone({ cast: true });
   }
 
   toString() {
