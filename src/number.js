@@ -10,7 +10,7 @@ class NumberSchema extends TypeSchema {
   min(min, msg) {
     msg ||= 'Must be greater than {min}.';
     return this.clone().assert('min', (num) => {
-      if (num !== undefined && num < min) {
+      if (num < min) {
         throw new LocalizedError(msg, {
           min,
         });
@@ -21,7 +21,7 @@ class NumberSchema extends TypeSchema {
   max(max, msg) {
     msg ||= 'Must be less than {max}.';
     return this.clone().assert('max', (num) => {
-      if (num !== undefined && num > max) {
+      if (num > max) {
         throw new LocalizedError(msg, {
           max,
         });
@@ -39,7 +39,7 @@ class NumberSchema extends TypeSchema {
 
   integer() {
     return this.clone().assert('integer', (num) => {
-      if (num !== undefined && !Number.isInteger(num)) {
+      if (!Number.isInteger(num)) {
         throw new LocalizedError('Must be an integer.');
       }
     });
@@ -47,7 +47,7 @@ class NumberSchema extends TypeSchema {
 
   multiple(mult) {
     return this.clone().assert('multiple', (num) => {
-      if (num !== undefined && num % mult !== 0) {
+      if (num % mult !== 0) {
         throw new LocalizedError('Must be a multiple of {mult}.', {
           mult,
         });

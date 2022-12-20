@@ -8,13 +8,11 @@ class DateSchema extends Schema {
   constructor() {
     super();
     this.transform((val) => {
-      if (val !== undefined) {
-        const date = new Date(val);
-        if ((!val && val !== 0) || isNaN(date.getTime())) {
-          throw new LocalizedError('Must be a valid date.');
-        } else {
-          return date;
-        }
+      const date = new Date(val);
+      if ((!val && val !== 0) || isNaN(date.getTime())) {
+        throw new LocalizedError('Must be a valid date input.');
+      } else {
+        return date;
       }
     });
   }
@@ -22,7 +20,7 @@ class DateSchema extends Schema {
   min(min) {
     min = new Date(min);
     return this.clone().assert('min', (date) => {
-      if (date !== undefined && date < min) {
+      if (date < min) {
         throw new LocalizedError('Must be after {date}.', {
           date: min.toISOString(),
         });
@@ -33,7 +31,7 @@ class DateSchema extends Schema {
   max(max) {
     max = new Date(max);
     return this.clone().assert('max', (date) => {
-      if (date !== undefined && date > max) {
+      if (date > max) {
         throw new LocalizedError('Must be before {date}.', {
           date: max.toISOString(),
         });
@@ -44,7 +42,7 @@ class DateSchema extends Schema {
   past() {
     return this.clone().assert('past', (date) => {
       const now = new Date();
-      if (date !== undefined && date > now) {
+      if (date > now) {
         throw new LocalizedError('Must be in the past.');
       }
     });
@@ -53,24 +51,21 @@ class DateSchema extends Schema {
   future() {
     return this.clone().assert('future', (date) => {
       const now = new Date();
-      if (date !== undefined && date < now) {
+      if (date < now) {
         throw new LocalizedError('Must be in the future.');
       }
     });
   }
 
   iso() {
-    const schema = this.clone();
-    schema.assert('type', (val) => {
-      if (val !== undefined) {
-        if (typeof val !== 'string') {
-          throw new LocalizedError('Must be a string.');
-        } else if (!validator.isISO8601(val || '')) {
-          throw new LocalizedError('Must be in ISO 8601 format.');
-        }
+    return this.clone({ format: 'iso' }).assert('format', (val, options) => {
+      const { original } = options;
+      if (typeof original !== 'string') {
+        throw new LocalizedError('Must be a string.');
+      } else if (!validator.isISO8601(original)) {
+        throw new LocalizedError('Must be in ISO 8601 format.');
       }
     });
-    return schema;
   }
 
   timestamp(type) {

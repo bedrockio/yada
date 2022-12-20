@@ -1,10 +1,14 @@
 import yd from '../index';
 import { isSchema, isSchemaError } from '../utils';
 
-async function assertPass(schema, obj) {
+async function assertPass(schema, obj, expected) {
   try {
-    await schema.validate(obj);
-    expect(true).toBe(true);
+    const result = await schema.validate(obj);
+    if (expected) {
+      expect(result).toBe(expected);
+    } else {
+      expect(true).toBe(true);
+    }
   } catch (error) {
     // eslint-disable-next-line
     console.error(error);
@@ -72,6 +76,7 @@ describe('string', () => {
 
   it('should validate an email', async () => {
     const schema = yd.string().email();
+    await assertPass(schema, undefined);
     await assertPass(schema, 'foo@bar.com');
     await assertFail(schema, 'foo@bar', ['Must be an email address.']);
   });
@@ -569,8 +574,8 @@ describe('object', () => {
           b: yd.string(),
         })
         .stripUnknown();
-      assertPass(schema, undefined);
-      assertPass(schema, {});
+      await assertPass(schema, undefined);
+      await assertPass(schema, {});
       let result = await schema.validate({ a: 'a', b: 'b', c: 'c' });
       expect(result.c).toBeUndefined();
 
@@ -815,10 +820,10 @@ describe('date', () => {
     await assertPass(schema, 1642232606911);
     await assertPass(schema, undefined);
     await assertPass(schema, 0);
-    await assertFail(schema, null, ['Must be a valid date.']);
-    await assertFail(schema, false, ['Must be a valid date.']);
-    await assertFail(schema, NaN, ['Must be a valid date.']);
-    await assertFail(schema, 'invalid', ['Must be a valid date.']);
+    await assertFail(schema, null, ['Must be a valid date input.']);
+    await assertFail(schema, false, ['Must be a valid date input.']);
+    await assertFail(schema, NaN, ['Must be a valid date input.']);
+    await assertFail(schema, 'invalid', ['Must be a valid date input.']);
   });
 
   it('should validate a required date', async () => {
@@ -828,10 +833,10 @@ describe('date', () => {
     await assertPass(schema, 1642232606911);
     await assertPass(schema, 0);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, null, ['Must be a valid date.']);
-    await assertFail(schema, false, ['Must be a valid date.']);
-    await assertFail(schema, NaN, ['Must be a valid date.']);
-    await assertFail(schema, 'invalid', ['Must be a valid date.']);
+    await assertFail(schema, null, ['Must be a valid date input.']);
+    await assertFail(schema, false, ['Must be a valid date input.']);
+    await assertFail(schema, NaN, ['Must be a valid date input.']);
+    await assertFail(schema, 'invalid', ['Must be a valid date input.']);
   });
 
   it('should validate an iso date', async () => {
@@ -846,10 +851,10 @@ describe('date', () => {
     await assertFail(schema, new Date(), ['Must be a string.']);
     await assertFail(schema, 1642232606911, ['Must be a string.']);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, null, ['Must be a string.']);
-    await assertFail(schema, false, ['Must be a string.']);
-    await assertFail(schema, NaN, ['Must be a string.']);
-    await assertFail(schema, 'invalid', ['Must be in ISO 8601 format.']);
+    await assertFail(schema, null, ['Must be a valid date input.']);
+    await assertFail(schema, false, ['Must be a valid date input.']);
+    await assertFail(schema, NaN, ['Must be a valid date input.']);
+    await assertFail(schema, 'invalid', ['Must be a valid date input.']);
     await assertFail(schema, '01 Jan 1970 00:00:00 GMT', [
       'Must be in ISO 8601 format.',
     ]);
@@ -1177,6 +1182,25 @@ describe('other', () => {
     const result = await schema.validate({ a: '1', b: 'b' }, { cast: true });
     expect(result.a).toBe(1);
     expect(result.b).toBe('b');
+  });
+
+  it('should correctly validate chained formats', async () => {
+    let schema;
+
+    schema = yd.string().lowercase().email();
+    await assertPass(schema, undefined, undefined);
+    await assertPass(schema, 'bar@foo.com', 'bar@foo.com');
+    await assertPass(schema, 'BAR@FOO.COM', 'bar@foo.com');
+
+    schema = yd.string().lowercase().email().default('Foo@bar.com');
+    await assertPass(schema, undefined, 'foo@bar.com');
+    await assertPass(schema, 'bar@foo.com', 'bar@foo.com');
+    await assertPass(schema, 'BAR@foo.com', 'bar@foo.com');
+
+    schema = yd.string().required().email().default('foo@bar.com');
+    await assertPass(schema, undefined, 'foo@bar.com');
+    await assertPass(schema, 'bar@foo.com', 'bar@foo.com');
+    await assertPass(schema, 'BAR@foo.com', 'BAR@foo.com');
   });
 });
 

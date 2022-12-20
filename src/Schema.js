@@ -6,7 +6,8 @@ import {
   ArrayError,
 } from './errors';
 
-const INITIAL = ['required', 'type', 'default', 'transform'];
+const INITIAL_TYPES = ['default', 'required', 'type', 'transform'];
+const REQUIRED_TYPES = ['default', 'required'];
 
 export default class Schema {
   constructor(meta = {}) {
@@ -41,9 +42,7 @@ export default class Schema {
       throw new Error('Assertion function required.');
     }
     return this.clone().assert(type, async (val, options) => {
-      if (val !== undefined) {
-        return await fn.call(this, val, options);
-      }
+      return await fn.call(this, val, options);
     });
   }
 
@@ -64,12 +63,15 @@ export default class Schema {
 
     options = {
       root: value,
-      original: value,
       ...this.meta,
       ...options,
+      original: value,
     };
 
     for (let assertion of this.assertions) {
+      if (!assertion.required && value === undefined) {
+        break;
+      }
       try {
         const result = await this.runAssertion(assertion, value, options);
         if (result !== undefined) {
@@ -91,6 +93,7 @@ export default class Schema {
       const { message = 'Input failed validation.' } = this.meta;
       throw new ValidationError(message, details);
     }
+
     return value;
   }
 
@@ -137,7 +140,8 @@ export default class Schema {
 
   assert(type, fn) {
     this.pushAssertion({
-      halt: INITIAL.includes(type),
+      halt: INITIAL_TYPES.includes(type),
+      required: REQUIRED_TYPES.includes(type),
       type,
       fn,
     });
@@ -161,8 +165,8 @@ export default class Schema {
   }
 
   getSortIndex(type) {
-    const index = INITIAL.indexOf(type);
-    return index === -1 ? INITIAL.length : index;
+    const index = INITIAL_TYPES.indexOf(type);
+    return index === -1 ? INITIAL_TYPES.length : index;
   }
 
   async runAssertion(assertion, value, options = {}) {
