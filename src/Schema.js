@@ -25,7 +25,7 @@ export default class Schema {
   }
 
   default(value) {
-    return this.clone({ default: value }).assert('default', async (val) => {
+    return this.clone({ default: value }).assert('default', (val) => {
       if (val === undefined) {
         return value;
       }
@@ -152,7 +152,11 @@ export default class Schema {
   }
 
   transform(fn) {
-    this.assert('transform', fn);
+    this.assert('transform', function (val, options) {
+      if (val !== undefined) {
+        return fn.call(this, val, options);
+      }
+    });
     return this;
   }
 
