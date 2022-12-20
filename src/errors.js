@@ -31,9 +31,10 @@ export class ValidationError extends Error {
 }
 
 export class FieldError extends ValidationError {
-  constructor(message, field, details) {
+  constructor(message, field, original, details) {
     super(message, details, 'field');
     this.field = field;
+    this.original = original;
     this.details = details;
   }
 
@@ -61,9 +62,10 @@ export class ElementError extends ValidationError {
 }
 
 export class AssertionError extends Error {
-  constructor(message, type) {
+  constructor(message, type, original) {
     super(message);
     this.type = type;
+    this.original = original;
   }
 
   toJSON() {

@@ -1272,6 +1272,55 @@ describe('other', () => {
     await assertPass(schema, 'bar@foo.com', 'bar@foo.com');
     await assertPass(schema, 'BAR@foo.com', 'BAR@foo.com');
   });
+
+  it('should expose original error', async () => {
+    const err = new Error('Bad!');
+    const schema = yd.custom(() => {
+      throw err;
+    });
+    try {
+      await schema.validate('test');
+    } catch (error) {
+      expect(error.details[0].original).toBe(err);
+      expect(JSON.parse(JSON.stringify(error))).toEqual({
+        type: 'validation',
+        message: 'Input failed validation.',
+        details: [
+          {
+            message: 'Bad!',
+            type: 'custom',
+          },
+        ],
+      });
+    }
+  });
+
+  it('should expose original error on field', async () => {
+    const err = new Error('Bad!');
+    const schema = yd.object({
+      a: yd.custom(() => {
+        throw err;
+      }),
+    });
+    try {
+      await schema.validate({
+        a: 'test',
+      });
+    } catch (error) {
+      expect(error.details[0].original).toBe(err);
+      expect(JSON.parse(JSON.stringify(error))).toEqual({
+        type: 'validation',
+        message: 'Object failed validation.',
+        details: [
+          {
+            type: 'field',
+            field: 'a',
+            message: 'Bad!',
+          },
+        ],
+      });
+    }
+  });
 });
 
 describe('getFullMessage', () => {

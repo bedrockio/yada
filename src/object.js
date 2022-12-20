@@ -42,11 +42,13 @@ class ObjectSchema extends TypeSchema {
             val = await schema.validate(obj[key], options);
           } catch (error) {
             if (error.details?.length === 1) {
-              throw new FieldError(error.details[0].message, key);
+              const { message, original } = error.details[0];
+              throw new FieldError(message, key, original);
             } else {
               throw new FieldError(
                 'Field failed validation.',
                 key,
+                error.original,
                 error.details
               );
             }
