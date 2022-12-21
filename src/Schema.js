@@ -67,8 +67,8 @@ export default class Schema {
 
     options = {
       root: value,
-      ...this.meta,
       ...options,
+      ...this.meta,
       original: value,
     };
 

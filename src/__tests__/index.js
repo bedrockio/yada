@@ -565,6 +565,43 @@ describe('object', () => {
     await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
     await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
   });
+
+  it('should not merge default values', async () => {
+    const schema = yd
+      .object({
+        a: yd.string(),
+      })
+      .append(
+        yd.object({
+          nested: yd
+            .object({
+              b: yd.string(),
+            })
+            .default({
+              b: 'c',
+            }),
+        })
+      );
+    await assertPass(schema, { a: 'a' });
+  });
+
+  it('should pass through all options to nested schemas', async () => {
+    let foo;
+    const schema = yd.object({
+      a: yd.custom((val, options) => {
+        foo = options.foo;
+      }),
+    });
+    await assertPass(
+      schema,
+      { a: 'b' },
+      { a: 'b' },
+      {
+        foo: 'bar',
+      }
+    );
+    expect(foo).toBe('bar');
+  });
 });
 
 describe('custom', () => {

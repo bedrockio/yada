@@ -6,8 +6,8 @@ import { isSchema } from './Schema';
 const BASE_ASSERTIONS = ['type', 'transform', 'field'];
 
 class ObjectSchema extends TypeSchema {
-  constructor(fields = {}, meta = {}) {
-    super(Object, { message: 'Object failed validation.', ...meta, fields });
+  constructor(fields = {}) {
+    super(Object, { message: 'Object failed validation.', fields });
     this.setup();
   }
 
@@ -72,12 +72,7 @@ class ObjectSchema extends TypeSchema {
       ...schema.meta.fields,
     };
 
-    const meta = {
-      ...this.meta,
-      ...schema.meta,
-    };
-
-    const merged = new ObjectSchema(fields, meta);
+    const merged = new ObjectSchema(fields);
 
     const assertions = [...this.assertions, ...schema.assertions];
     for (let assertion of assertions) {
@@ -86,6 +81,7 @@ class ObjectSchema extends TypeSchema {
         merged.pushAssertion(assertion);
       }
     }
+
     return merged;
   }
 
