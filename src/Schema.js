@@ -42,7 +42,7 @@ export default class Schema {
       throw new Error('Assertion function required.');
     }
     return this.clone().assert(type, async (val, options) => {
-      return await fn.call(this, val, options);
+      return await fn(val, options);
     });
   }
 
@@ -56,6 +56,10 @@ export default class Schema {
 
   message(message) {
     return this.clone({ message });
+  }
+
+  options(options) {
+    return this.clone({ ...options });
   }
 
   async validate(value, options = {}) {
@@ -156,9 +160,9 @@ export default class Schema {
   }
 
   transform(fn) {
-    this.assert('transform', function (val, options) {
+    this.assert('transform', (val, options) => {
       if (val !== undefined) {
-        return fn.call(this, val, options);
+        return fn(val, options);
       }
     });
     return this;
@@ -172,7 +176,7 @@ export default class Schema {
   async runAssertion(assertion, value, options = {}) {
     const { type, fn } = assertion;
     try {
-      return await fn.call(this, value, options);
+      return await fn(value, options);
     } catch (error) {
       if (isSchemaError(error)) {
         throw error;

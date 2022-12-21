@@ -17,8 +17,8 @@ class ObjectSchema extends TypeSchema {
         throw new LocalizedError('Must be an object.');
       }
     });
-    this.transform(function (obj) {
-      const { fields, stripUnknown } = this.meta;
+    this.transform((obj, options) => {
+      const { fields, stripUnknown } = options;
       const allowUnknown = Object.keys(fields).length === 0;
       if (obj) {
         const result = {};
@@ -35,7 +35,7 @@ class ObjectSchema extends TypeSchema {
       }
     });
     for (let [key, schema] of Object.entries(this.meta.fields)) {
-      this.assert('field', async function (obj, options) {
+      this.assert('field', async (obj, options) => {
         if (obj) {
           let val;
           try {
@@ -62,12 +62,6 @@ class ObjectSchema extends TypeSchema {
         }
       });
     }
-  }
-
-  stripUnknown() {
-    return this.clone({
-      stripUnknown: true,
-    });
   }
 
   append(arg) {
