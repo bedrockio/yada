@@ -1081,6 +1081,97 @@ describe('toOpenApi', () => {
       ],
     });
   });
+
+  it('should convert enum types', async () => {
+    const schema = yd.allow(yd.string(), yd.array(yd.string()));
+    expect(schema.toOpenApi()).toEqual({
+      oneOf: [
+        {
+          type: 'string',
+        },
+
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+      ],
+    });
+  });
+
+  it('should convert string enum types', async () => {
+    const schema = yd.string().allow('foo', 'bar');
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      enum: ['foo', 'bar'],
+    });
+  });
+
+  it('should convert mixed enum types', async () => {
+    const schema = yd.allow(1, 2, yd.string());
+    expect(schema.toOpenApi()).toEqual({
+      oneOf: [
+        {
+          type: 'number',
+          enum: [1, 2],
+        },
+        {
+          type: 'string',
+        },
+      ],
+    });
+  });
+
+  it('should convert date formats', async () => {
+    let schema = yd.date().iso();
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      format: 'date-time',
+    });
+
+    schema = yd.date().iso('date');
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      format: 'date',
+    });
+
+    schema = yd.date().timestamp();
+    expect(schema.toOpenApi()).toEqual({
+      type: 'number',
+      format: 'timestamp',
+    });
+
+    schema = yd.date().timestamp('unix');
+    expect(schema.toOpenApi()).toEqual({
+      type: 'number',
+      format: 'unix timestamp',
+    });
+  });
+
+  it('should convert number min/max', async () => {
+    let schema = yd.number().min(5).max(50);
+    expect(schema.toOpenApi()).toEqual({
+      type: 'number',
+      minimum: 5,
+      maximum: 50,
+    });
+
+    schema = yd.number().multiple(5);
+    expect(schema.toOpenApi()).toEqual({
+      type: 'number',
+      multipleOf: 5,
+    });
+  });
+
+  it('should convert string minLength/maxLength', async () => {
+    const schema = yd.string().min(5).max(50);
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      minLength: 5,
+      maxLength: 50,
+    });
+  });
 });
 
 describe('options', () => {

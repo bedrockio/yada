@@ -18,7 +18,7 @@ class NumberSchema extends TypeSchema {
 
   min(min, msg) {
     msg ||= 'Must be greater than {min}.';
-    return this.clone().assert('min', (num) => {
+    return this.clone({ min }).assert('min', (num) => {
       if (num < min) {
         throw new LocalizedError(msg, {
           min,
@@ -29,7 +29,7 @@ class NumberSchema extends TypeSchema {
 
   max(max, msg) {
     msg ||= 'Must be less than {max}.';
-    return this.clone().assert('max', (num) => {
+    return this.clone({ max }).assert('max', (num) => {
       if (num > max) {
         throw new LocalizedError(msg, {
           max,
@@ -54,14 +54,30 @@ class NumberSchema extends TypeSchema {
     });
   }
 
-  multiple(mult) {
-    return this.clone().assert('multiple', (num) => {
-      if (num % mult !== 0) {
-        throw new LocalizedError('Must be a multiple of {mult}.', {
-          mult,
+  multiple(multiple) {
+    return this.clone({ multiple }).assert('multiple', (num) => {
+      if (num % multiple !== 0) {
+        throw new LocalizedError('Must be a multiple of {multiple}.', {
+          multiple,
         });
       }
     });
+  }
+
+  toOpenApi() {
+    const { min, max, multiple } = this.meta;
+    return {
+      ...super.toOpenApi(),
+      ...(min != null && {
+        minimum: min,
+      }),
+      ...(max != null && {
+        maximum: max,
+      }),
+      ...(multiple != null && {
+        multipleOf: multiple,
+      }),
+    };
   }
 }
 

@@ -24,7 +24,7 @@ class StringSchema extends TypeSchema {
   }
 
   min(length) {
-    return this.clone().assert('length', (str) => {
+    return this.clone({ min: length }).assert('length', (str) => {
       if (str && str.length < length) {
         throw new LocalizedError('Must be {length} characters or more.', {
           length,
@@ -34,7 +34,7 @@ class StringSchema extends TypeSchema {
   }
 
   max(length) {
-    return this.clone().assert('length', (str) => {
+    return this.clone({ max: length }).assert('length', (str) => {
       if (str && str.length > length) {
         throw new LocalizedError('Must be {length} characters or less.', {
           length,
@@ -280,6 +280,19 @@ class StringSchema extends TypeSchema {
         throw new LocalizedError('Must be a valid ObjectId.');
       }
     });
+  }
+
+  toOpenApi() {
+    const { min, max } = this.meta;
+    return {
+      ...super.toOpenApi(),
+      ...(min != null && {
+        minLength: min,
+      }),
+      ...(max != null && {
+        maxLength: max,
+      }),
+    };
   }
 }
 

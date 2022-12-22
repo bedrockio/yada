@@ -186,20 +186,57 @@ export default class Schema {
   }
 
   toOpenApi() {
+    const { required, format, default: defaultValue } = this.meta;
     return {
-      ...(this.meta.required && {
+      ...(required && {
         required: true,
       }),
-      ...(this.meta.default && {
-        default: this.meta.default,
+      ...(defaultValue && {
+        default: defaultValue,
       }),
-      ...(this.meta.enum && {
-        enum: this.meta.enum,
+      ...(format && {
+        format,
       }),
-      ...(this.meta.format && {
-        format: this.meta.format,
-      }),
+      ...this.enumToOpenApi(),
     };
+  }
+
+  enumToOpenApi() {
+    const { enum: allowed } = this.meta;
+    if (allowed?.length) {
+      const type = typeof allowed[0];
+      const allowEnum = allowed.every((entry) => {
+        const entryType = typeof entry;
+        return entryType !== 'object' && entryType === type;
+      });
+      if (allowEnum) {
+        return {
+          type,
+          enum: allowed,
+        };
+      } else {
+        const oneOf = [];
+        for (let entry of allowed) {
+          if (isSchema(entry)) {
+            oneOf.push(entry.toOpenApi());
+          } else {
+            const type = typeof entry;
+            let forType = oneOf.find((el) => {
+              return el.type === type;
+            });
+            if (!forType) {
+              forType = {
+                type,
+                enum: [],
+              };
+              oneOf.push(forType);
+            }
+            forType.enum.push(entry);
+          }
+        }
+        return { oneOf };
+      }
+    }
   }
 }
 

@@ -57,8 +57,8 @@ class DateSchema extends Schema {
     });
   }
 
-  iso() {
-    return this.clone({ format: 'iso' }).assert('format', (val, options) => {
+  iso(format = 'date-time') {
+    return this.clone({ format }).assert('format', (val, options) => {
       const { original } = options;
       if (typeof original !== 'string') {
         throw new LocalizedError('Must be a string.');
@@ -73,12 +73,12 @@ class DateSchema extends Schema {
     if (type && !isUnix) {
       throw new LocalizedError('Only allows "unix" as an argument.');
     }
-    const schema = this.clone();
-    const suffix = isUnix ? 'unix timestamp' : 'timestamp';
+    const format = isUnix ? 'unix timestamp' : 'timestamp';
+    const schema = this.clone({ format });
     schema.assert('timestamp', (date, { original }) => {
       if (typeof original !== 'number') {
-        throw new LocalizedError('Must be a {suffix}.', {
-          suffix,
+        throw new LocalizedError('Must be a {format}.', {
+          format,
         });
       } else if (isUnix) {
         return new Date(original * 1000);
@@ -89,6 +89,14 @@ class DateSchema extends Schema {
 
   toString() {
     return 'date';
+  }
+
+  toOpenApi() {
+    const { format } = this.meta;
+    return {
+      type: format.includes('timestamp') ? 'number' : 'string',
+      ...super.toOpenApi(),
+    };
   }
 }
 
