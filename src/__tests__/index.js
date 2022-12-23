@@ -1172,6 +1172,52 @@ describe('toOpenApi', () => {
       maxLength: 50,
     });
   });
+
+  it('should allow tagging a schema', async () => {
+    const schema = yd
+      .object({
+        num: yd.number(),
+        str: yd.string(),
+      })
+      .tag({
+        'x-schema': 'my-schema',
+      });
+
+    expect(schema.toOpenApi()).toEqual({
+      type: 'object',
+      properties: {
+        num: {
+          type: 'number',
+        },
+        str: {
+          type: 'string',
+        },
+      },
+      'x-schema': 'my-schema',
+    });
+  });
+
+  it('should allow a description as a shortcut', async () => {
+    const schema = yd
+      .object({
+        num: yd.number(),
+        str: yd.string(),
+      })
+      .description('My Schema!');
+
+    expect(schema.toOpenApi()).toEqual({
+      type: 'object',
+      description: 'My Schema!',
+      properties: {
+        num: {
+          type: 'number',
+        },
+        str: {
+          type: 'string',
+        },
+      },
+    });
+  });
 });
 
 describe('options', () => {

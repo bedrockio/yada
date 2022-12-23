@@ -58,6 +58,16 @@ export default class Schema {
     return this.clone({ message });
   }
 
+  tag(tags) {
+    return this.clone({ tags });
+  }
+
+  description(description) {
+    return this.tag({
+      description,
+    });
+  }
+
   options(options) {
     return this.clone({ ...options });
   }
@@ -186,7 +196,7 @@ export default class Schema {
   }
 
   toOpenApi() {
-    const { required, format, default: defaultValue } = this.meta;
+    const { required, format, tags, default: defaultValue } = this.meta;
     return {
       ...(required && {
         required: true,
@@ -198,6 +208,7 @@ export default class Schema {
         format,
       }),
       ...this.enumToOpenApi(),
+      ...tags,
     };
   }
 
