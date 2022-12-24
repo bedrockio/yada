@@ -107,6 +107,7 @@ class ArraySchema extends Schema {
 
     return {
       type: 'array',
+      ...super.toOpenApi(),
       ...other,
     };
   }
