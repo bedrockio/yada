@@ -59,7 +59,12 @@ export default class Schema {
   }
 
   tag(tags) {
-    return this.clone({ tags });
+    return this.clone({
+      tags: {
+        ...this.meta.tags,
+        ...tags,
+      },
+    });
   }
 
   description(description) {

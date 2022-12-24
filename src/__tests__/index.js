@@ -1218,6 +1218,21 @@ describe('toOpenApi', () => {
       },
     });
   });
+
+  it('should not override other tags', async () => {
+    const schema = yd
+      .string()
+      .tag({
+        'x-schema': 'my-schema',
+      })
+      .description('My Schema!');
+
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      'x-schema': 'my-schema',
+      description: 'My Schema!',
+    });
+  });
 });
 
 describe('options', () => {
