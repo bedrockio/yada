@@ -200,7 +200,7 @@ export default class Schema {
     }
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     const { required, format, tags, default: defaultValue } = this.meta;
     return {
       ...(required && {
@@ -214,6 +214,7 @@ export default class Schema {
       }),
       ...this.enumToOpenApi(),
       ...tags,
+      ...extra,
     };
   }
 

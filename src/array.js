@@ -90,7 +90,7 @@ class ArraySchema extends Schema {
     return 'array';
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     let other;
     const { schemas } = this.meta;
     if (schemas.length > 1) {
@@ -107,7 +107,7 @@ class ArraySchema extends Schema {
 
     return {
       type: 'array',
-      ...super.toOpenApi(),
+      ...super.toOpenApi(extra),
       ...other,
     };
   }

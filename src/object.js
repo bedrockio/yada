@@ -85,13 +85,13 @@ class ObjectSchema extends TypeSchema {
     return merged;
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     const properties = {};
     for (let [key, schema] of Object.entries(this.meta.fields)) {
       properties[key] = schema.toOpenApi();
     }
     return {
-      ...super.toOpenApi(),
+      ...super.toOpenApi(extra),
       ...(Object.keys(properties).length > 0 && {
         properties,
       }),

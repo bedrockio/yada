@@ -91,11 +91,11 @@ class DateSchema extends Schema {
     return 'date';
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     const { format } = this.meta;
     return {
       type: format.includes('timestamp') ? 'number' : 'string',
-      ...super.toOpenApi(),
+      ...super.toOpenApi(extra),
     };
   }
 }

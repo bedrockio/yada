@@ -14,10 +14,10 @@ export default class TypeSchema extends Schema {
     return this.meta.type;
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     return {
       type: this.meta.type,
-      ...super.toOpenApi(),
+      ...super.toOpenApi(extra),
     };
   }
 }

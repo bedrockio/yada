@@ -282,10 +282,10 @@ class StringSchema extends TypeSchema {
     });
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     const { min, max } = this.meta;
     return {
-      ...super.toOpenApi(),
+      ...super.toOpenApi(extra),
       ...(min != null && {
         minLength: min,
       }),

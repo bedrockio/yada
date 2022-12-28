@@ -64,10 +64,10 @@ class NumberSchema extends TypeSchema {
     });
   }
 
-  toOpenApi() {
+  toOpenApi(extra) {
     const { min, max, multiple } = this.meta;
     return {
-      ...super.toOpenApi(),
+      ...super.toOpenApi(extra),
       ...(min != null && {
         minimum: min,
       }),

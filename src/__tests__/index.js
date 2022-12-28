@@ -1233,6 +1233,20 @@ describe('toOpenApi', () => {
       description: 'My Schema!',
     });
   });
+
+  it('should be able to set metadata in the method', async () => {
+    const schema = yd.string();
+    expect(
+      schema.toOpenApi({
+        'x-schema': 'my-schema',
+        description: 'My Schema!',
+      })
+    ).toEqual({
+      type: 'string',
+      'x-schema': 'my-schema',
+      description: 'My Schema!',
+    });
+  });
 });
 
 describe('options', () => {
