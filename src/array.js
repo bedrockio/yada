@@ -86,6 +86,21 @@ class ArraySchema extends Schema {
     });
   }
 
+  latlng() {
+    return this.clone({ format: 'latlng' }).assert('format', (arr) => {
+      if (arr.length !== 2) {
+        throw new LocalizedError('Must be an array of length 2.');
+      } else {
+        const [lat, lng] = arr;
+        if (typeof lat !== 'number' || lat < -90 || lat > 90) {
+          throw new LocalizedError('Invalid latitude.');
+        } else if (typeof lng !== 'number' || lng < -180 || lng > 180) {
+          throw new LocalizedError('Invalid longitude.');
+        }
+      }
+    });
+  }
+
   toString() {
     return 'array';
   }

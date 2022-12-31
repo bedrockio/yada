@@ -765,6 +765,17 @@ describe('array', () => {
       ['Cannot contain more than 1 element.']
     );
   });
+
+  it('should a lat/lng tuple', async () => {
+    const schema = yd.array().latlng();
+    await assertPass(schema, [35, 139]);
+    await assertFail(schema, [], ['Must be an array of length 2.']);
+    await assertFail(schema, [35], ['Must be an array of length 2.']);
+    await assertFail(schema, [null, 139], ['Invalid latitude.']);
+    await assertFail(schema, [35, null], ['Invalid longitude.']);
+    await assertFail(schema, [100, 130], ['Invalid latitude.']);
+    await assertFail(schema, [35, 200], ['Invalid longitude.']);
+  });
 });
 
 describe('date', () => {
