@@ -39,6 +39,28 @@ class DateSchema extends Schema {
     });
   }
 
+  before(max) {
+    max = new Date(max);
+    return this.clone().assert('before', (date) => {
+      if (date >= max) {
+        throw new LocalizedError('Must be before {date}.', {
+          date: max.toISOString(),
+        });
+      }
+    });
+  }
+
+  after(min) {
+    min = new Date(min);
+    return this.clone().assert('after', (date) => {
+      if (date <= min) {
+        throw new LocalizedError('Must be after {date}.', {
+          date: min.toISOString(),
+        });
+      }
+    });
+  }
+
   past() {
     return this.clone().assert('past', (date) => {
       const now = new Date();
@@ -68,23 +90,28 @@ class DateSchema extends Schema {
     });
   }
 
-  timestamp(type) {
-    const isUnix = type === 'unix';
-    if (type && !isUnix) {
-      throw new LocalizedError('Only allows "unix" as an argument.');
-    }
-    const format = isUnix ? 'unix timestamp' : 'timestamp';
-    const schema = this.clone({ format });
-    schema.assert('timestamp', (date, { original }) => {
-      if (typeof original !== 'number') {
-        throw new LocalizedError('Must be a {format}.', {
-          format,
-        });
-      } else if (isUnix) {
-        return new Date(original * 1000);
+  timestamp() {
+    return this.clone({ format: 'timestamp' }).assert(
+      'format',
+      (date, { original }) => {
+        if (typeof original !== 'number') {
+          throw new LocalizedError('Must be a timestamp in milliseconds.');
+        }
       }
-    });
-    return schema;
+    );
+  }
+
+  unix() {
+    return this.clone({ format: 'unix timestamp' }).assert(
+      'format',
+      (date, { original }) => {
+        if (typeof original !== 'number') {
+          throw new LocalizedError('Must be a timestamp in seconds.');
+        } else {
+          return new Date(original * 1000);
+        }
+      }
+    );
   }
 
   toString() {

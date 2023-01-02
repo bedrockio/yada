@@ -835,6 +835,7 @@ describe('date', () => {
   it('should validate a minimum date', async () => {
     const schema = yd.date().min('2020-01-01');
     await assertPass(schema, '2020-12-02');
+    await assertPass(schema, '2020-01-01');
     await assertFail(schema, '2019-01-01', [
       'Must be after 2020-01-01T00:00:00.000Z.',
     ]);
@@ -843,6 +844,7 @@ describe('date', () => {
   it('should validate a maximum date', async () => {
     const schema = yd.date().max('2020-01-01');
     await assertPass(schema, '2019-01-01');
+    await assertPass(schema, '2020-01-01');
     await assertFail(schema, '2020-12-02', [
       'Must be before 2020-01-01T00:00:00.000Z.',
     ]);
@@ -862,19 +864,39 @@ describe('date', () => {
     await assertFail(schema, '2019-01-01', ['Must be in the future.']);
   });
 
+  it('should validate a date before', async () => {
+    const schema = yd.date().before('2020-01-01');
+    await assertPass(schema, '2019-01-01');
+    await assertPass(schema, '2019-12-31');
+    await assertFail(schema, '2020-01-01', [
+      'Must be before 2020-01-01T00:00:00.000Z.',
+    ]);
+  });
+
+  it('should validate a date after', async () => {
+    const schema = yd.date().after('2020-01-01');
+    await assertPass(schema, '2020-01-02');
+    await assertPass(schema, '2021-01-01');
+    await assertFail(schema, '2020-01-01', [
+      'Must be after 2020-01-01T00:00:00.000Z.',
+    ]);
+  });
+
   it('should validate a timestamp', async () => {
     const schema = yd.date().timestamp();
     await assertPass(schema, 1642342419713);
-    await assertFail(schema, '2019-01-01', ['Must be a timestamp.']);
+    await assertFail(schema, '2019-01-01', [
+      'Must be a timestamp in milliseconds.',
+    ]);
     const now = new Date();
     const val = await schema.validate(now.getTime());
     expect(val).toEqual(now);
   });
 
   it('should validate a unix timestamp', async () => {
-    const schema = yd.date().timestamp('unix');
+    const schema = yd.date().unix();
     await assertPass(schema, 1642342419713);
-    await assertFail(schema, '2019-01-01', ['Must be a unix timestamp.']);
+    await assertFail(schema, '2019-01-01', ['Must be a timestamp in seconds.']);
 
     const now = new Date();
     const val = await schema.validate(now.getTime() / 1000);
@@ -1153,7 +1175,7 @@ describe('toOpenApi', () => {
       format: 'timestamp',
     });
 
-    schema = yd.date().timestamp('unix');
+    schema = yd.date().unix();
     expect(schema.toOpenApi()).toEqual({
       type: 'number',
       format: 'unix timestamp',
