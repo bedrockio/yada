@@ -16,10 +16,14 @@ const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 class StringSchema extends TypeSchema {
   constructor() {
     super(String);
-    this.assert('type', (val) => {
+    this.assert('type', (val, options) => {
+      if (typeof val !== 'string' && options.cast) {
+        val = String(val);
+      }
       if (typeof val !== 'string') {
         throw new LocalizedError('Must be a string.');
       }
+      return val;
     });
   }
 

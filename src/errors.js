@@ -1,15 +1,15 @@
 import { getFullMessage } from './messages';
-import { getLocalized } from './localization';
+import { localize } from './localization';
 
 export class LocalizedError extends Error {
   constructor(message, values) {
-    super(getLocalized(message, values));
+    super(localize(message, values));
   }
 }
 
 export class ValidationError extends Error {
   constructor(message, details = [], type = 'validation') {
-    super(getLocalized(message));
+    super(localize(message));
     this.details = details;
     this.type = type;
   }

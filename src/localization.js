@@ -9,21 +9,26 @@ export function useLocalizer(arg) {
   templates = {};
 }
 
-export function getLocalized(template, values = {}) {
-  templates[template] ||= template;
-
+export function getLocalized(template) {
   if (localizer) {
-    let localized = localizer(template);
+    return localizer(template);
+  }
+}
+
+export function localize(template, values = {}) {
+  let message = template;
+  if (localizer) {
+    let localized = getLocalized(template);
     if (typeof localized === 'function') {
       localized = localized(values);
     }
     if (localized) {
-      templates[template] = localized;
-      template = localized;
+      message = localized;
     }
   }
+  templates[template] = message;
 
-  return template.replace(TOKEN_REG, (match, token) => {
+  return message.replace(TOKEN_REG, (match, token) => {
     return values[token];
   });
 }

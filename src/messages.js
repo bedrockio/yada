@@ -1,4 +1,5 @@
 import { isSchemaError } from './errors';
+import { localize } from './localization';
 
 export function getFullMessage(error, options) {
   const { delimiter } = options;
@@ -25,16 +26,21 @@ function getLabeledMessage(error, options) {
   const { field, index } = options;
   const base = getBase(error.message);
   if (field) {
-    const label = getLabel(field, options);
-    return `${label} ${base}`;
+    const msg = `{field} ${base}`;
+    return localize(msg, {
+      field: getFieldLabel(field, options),
+    });
   } else if (index != null) {
-    return `"Element at index ${index}" ${base}`;
+    const msg = `Element at index "{index}" ${base}`;
+    return localize(msg, {
+      index,
+    });
   } else {
-    return `Value ${base}`;
+    return localize(base);
   }
 }
 
-function getLabel(field, options) {
+function getFieldLabel(field, options) {
   const { natural } = options;
   if (natural) {
     return naturalize(field);

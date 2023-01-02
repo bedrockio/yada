@@ -1456,6 +1456,15 @@ describe('options', () => {
       });
       await assertFail(schema, { a: '1,2,3', b: 'b' }, ['Must be an array.']);
     });
+
+    it('should cast a string', async () => {
+      const schema = yd.string();
+      const options = {
+        cast: true,
+      };
+      await assertPass(schema, '1', '1', options);
+      await assertPass(schema, 1, '1', options);
+    });
   });
 
   describe('chaining', () => {
@@ -1759,10 +1768,66 @@ describe('localization', () => {
       });
     } catch (err) {
       const templates = yd.getLocalizerTemplates();
-      expect(templates).toMatchObject({
+      expect(templates).toEqual({
+        'Must be at least {length} character{s}.':
+          'Must be at least {length} character{s}.',
+        'Must contain at least {length} number{s}.':
+          'Must contain at least {length} number{s}.',
         'Input failed validation.': '不正な入力がありました。',
+        'Field failed validation.': 'Field failed validation.',
         'Object failed validation.': 'Object failed validation.',
       });
+    }
+  });
+
+  it('should localize the full message', async () => {
+    yd.useLocalizer({
+      '{field} must be a string.': '{field}: 文字列を入力してください。',
+      '{field} must be a number.': '{field}: 数字を入力してください。',
+    });
+    const schema = yd.object({
+      name: yd.string(),
+      age: yd.number(),
+    });
+    try {
+      await schema.validate({
+        name: 1,
+        age: '15',
+      });
+    } catch (err) {
+      expect(err.getFullMessage()).toBe(
+        '"name": 文字列を入力してください。 "age": 数字を入力してください。'
+      );
+      expect(yd.getLocalizerTemplates()).toMatchObject({
+        '{field} must be a number.': '{field}: 数字を入力してください。',
+        '{field} must be a string.': '{field}: 文字列を入力してください。',
+      });
+    }
+  });
+
+  it('should allow a custom localized error to be thrown', async () => {
+    yd.useLocalizer({
+      'Invalid coordinates': '座標に不正な入力がありました。',
+    });
+    const schema = yd.custom(() => {
+      throw new yd.LocalizedError('Invalid coordinates');
+    });
+    try {
+      await schema.validate({
+        coords: 'coords',
+      });
+    } catch (err) {
+      expect(JSON.parse(JSON.stringify(err))).toEqual({
+        type: 'validation',
+        message: 'Input failed validation.',
+        details: [
+          {
+            type: 'custom',
+            message: '座標に不正な入力がありました。',
+          },
+        ],
+      });
+      expect(err.getFullMessage()).toBe('座標に不正な入力がありました。');
     }
   });
 });

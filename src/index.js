@@ -7,6 +7,7 @@ import string from './string';
 
 import { wrapArgs, wrapAny, isSchema, isSchemaError } from './utils';
 import { useLocalizer, getLocalizerTemplates } from './localization';
+import { LocalizedError } from './errors';
 
 const allow = wrapArgs('allow');
 const reject = wrapArgs('reject');
@@ -28,6 +29,7 @@ export default {
   isSchemaError,
   useLocalizer,
   getLocalizerTemplates,
+  LocalizedError,
 };
 
 export {
@@ -45,4 +47,5 @@ export {
   isSchemaError,
   useLocalizer,
   getLocalizerTemplates,
+  LocalizedError,
 };
