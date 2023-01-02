@@ -11,12 +11,23 @@ Concepts
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Types](#types)
-- [Allow](#allow)
-- [Reject](#reject)
-- [Custom](#custom)
-- [Default](#default)
-- [Differences with Joi](#differences-with-joi)
+  - [String](#string)
+  - [Number](#number)
+  - [Boolean](#boolean)
+  - [Array](#array)
+  - [Object](#object)
+  - [Date](#date)
+- [Common Methods](#common-methods)
+  - [Allow](#allow)
+  - [Reject](#reject)
+  - [Custom](#custom)
+  - [Default](#default)
+- [Validation Options](#validation-options)
+- [Error Messages](#error-messages)
+- [Localization](#localization)
+- [OpenApi](#openapi)
 - [Utils](#utils)
+- [Differences with Joi](#differences-with-joi)
 
 ## Installation
 
@@ -136,19 +147,196 @@ console.log(Array.isArray(arr)); // true
 
 ## Types
 
-Basic validation types are:
+The core validation types are:
 
-- string
-- number
-- boolean
-- object
-- array
-- date
+- [String](#string)
+- [Number](#number)
+- [Boolean](#boolean)
+- [Array](#array)
+- [Object](#object)
+- [Date](#date)
 
 These perform an initial type check on validation and will halt execution of any
-further validations (except `required` which is run up front).
+further validations (except `required` which is run up front). The above types
+are all "basic" types as they can be serialized as JSON with the exception of
+[dates](#date).
 
-## Allow
+### String
+
+Strings are the most basic validation type. They are simple but come in many
+different formats that can be validated against. Most string validations use
+[validator](https://www.npmjs.com/package/validator) under the hood. Validations
+that allow options will be passed through to that library.
+
+#### Methods:
+
+- `ascii` - Must be ASCII characters.
+- `base64` - Must be base64 encoded. Allows options.
+- `btc` - Must be a valid BTC address.
+- `country` - Must be a valid
+  [ISO 3166-1 alpha 2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code.
+- `creditCard` - Must be a valid credit card number.
+- `domain` - Must be a fully qualified domain name. Allows options.
+- `email` - Must be a valid email address.
+- `eth` - Must be a valid ETH address. Does not validate checksums.
+- `hex` - Must be valid hexadecimal input.
+- `ip` - Must be a valid IP address. Allows v4 or v6.
+- `jwt` - Must be a valid JWT token.
+- `latlng` - Must be a valid string representation of a lat/lng coordinate (ie.
+  `"35.686648,139.6975552"`).
+- `locale` - Must be a valid locale code.
+- `match` - Must match the regex pattern passed as an argument.
+- `max` - Length must be less than equal to `n` characters, passed as an
+  argument.
+- `md5` - Must be an MD5 hash.
+- `min` - Length must be more than or equal to `n` characters, passed as an
+  argument.
+- `mongo` - Must be a valid hexadecimal representation of a
+  [Mongo ObjectId](https://www.mongodb.com/docs/manual/reference/bson-types/#std-label-objectid).
+- `password` - Must be a valid password as defined by the options object passed
+  as an argument:
+  - `minLength`
+  - `minLowercase`
+  - `minUppercase`
+  - `minNumbers`
+  - `minSymbols`
+- `postalCode` - Must be a valid postal code. Accepts a `locale`.
+- `sha1` - Must be a SHA1 hash.
+- `slug` - Must be a URL slug, ie. a-z, numbers, or hyphen.
+- `swift` - Must be a valid SWIFT (Bank Identification) code.
+- `url` - Must be a valid URL. Allows options.
+- `uuid` - Must be a valid UUID. Allows a `version` string.
+
+There are also transform methods that will transform input:
+
+- `trim` - Trims input with `String#trim`.
+- `lowercase` - Transforms input into lower case. Passing `true` as the first
+  argument will instead error if input is not lower case.
+- `uppercase` - Transforms input into upper case. Passing `true` as the first
+  argument will instead error if input is not upper case.
+
+### Number
+
+Numbers have a handful of useful valiadtions:
+
+#### Methods:
+
+- `integer` - Must be an integer.
+- `max` - Must be less than or equal to `n`, passed as an argument.
+- `min` - Must be greater than or equal to `n`, passed as an argument.
+- `multiple` - Must be a multiple of `n`, passed as an argument.
+- `negative` - Must be a negative number.
+- `positive` - Must be a positive number.
+
+### Boolean
+
+`.boolean()` simply validates that input is a boolean value. There are no
+further validation methods. Note that when `.required()` is used the input must
+be a boolean, either `true` or `false`.
+
+### Array
+
+Array schemas validate that input is an array. By default elements may be of any
+type, however however other schemas may be passed in as arguments:
+
+```js
+// Allows arrays containing either strings or numbers.
+const schema = yd.array(yd.string(), yd.number());
+```
+
+A single array may also be passed in place of enumerated arguments:
+
+```js
+// Allows arrays containing either strings or numbers.
+const schema = yd.array([schemas]);
+```
+
+#### Methods:
+
+- `max` - Length must be less than equal to `n` characters, passed as an
+  argument.
+- `min` - Length must be more than or equal to `n` characters, passed as an
+- `latlng` - Must be a 2 element array of numbers that represent latitude (`-90`
+  to `90`) and longitude(`-180` to `180`) coordinates.
+
+## Object
+
+Object schemas validate that input is an object and further validate individual
+fields:
+
+```js
+const schema = yd.object({
+  name: yd.string().required(),
+  dob: yd.date(),
+});
+```
+
+Note that schema fields will only be validated if input exists:
+
+```js
+// No object passed so no error thrown.
+await schema.validate();
+
+// Object passed but required field did
+// not pass validation so error is thrown.
+await schema.validate({
+  dob: '2020-01-01',
+});
+
+// Passes
+await schema.validate({
+  name: 'Jules',
+  dob: '2020-01-01',
+});
+```
+
+To ensure that the object exists, simply use `.required()`.
+
+```js
+const schema = yd
+  .object({
+    // ...
+  })
+  .required();
+```
+
+#### Methods:
+
+- `append` - Appends the passed argument to create a new object schema. Accepts
+  either an object or another `.object()` schema.
+
+## Date
+
+Dates are similar to the basic types with the exception that in addition to date
+objects they will also accept input that can resolve into a date. By default
+this will include any string input or a number representing a timestamp in
+milliseconds.
+
+#### Methods:
+
+- `after` - Input must resolve to a date after the supplied argument. Compare to
+  `min` which allows the date to be the same moment.
+- `before` - Input must resolve to a date before the supplied argument. Compare
+  to `max` which allows the date to be the same moment.
+- `future` - Input must resolve to a date in the future.
+- `iso` - Input must be a string in
+  [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format which will resolve
+  into a date. Note that this format can reprsent both a date (`2020-01-01`) as
+  well as a datetime (`2020-01-01T00:00:00.000Z`).
+- `max` - Input must resolve to a date before or equal to the supplied argument.
+  Compare to `before` which does not allow the input to be the same moment.
+- `min` - Input must resolve to a date after or equal to the supplied argument.
+  Compare to `after` which does not allow the input to be the same moment.
+- `past` - Input must resolve to a date in the past.
+- `timestamp` - Input must be a number in milliseconds which will resolve into a
+  date.
+- `unix - Input must be a number in seconds which will resolve into a date.
+
+## Common Methods
+
+The following methods are common to all schemas.
+
+### Allow
 
 Alternates are validated with the `allow` schema. This may be used to validate
 literals as enums:
@@ -171,7 +359,7 @@ const schema = yd.object({
 });
 ```
 
-## Reject
+### Reject
 
 The `reject` schema is simply an inverse of `allow`. Anything that does not
 match will be allowed through:
@@ -188,7 +376,7 @@ await schema.validate(true); // pass
 await schema.validate('true'); // error!
 ```
 
-## Custom
+### Custom
 
 The `custom` schema allows for custom validations expressed in code. A custom
 schema may either throw an error or transform the input by returning a value
@@ -207,16 +395,18 @@ console.info(await schema.validate('far')); // "bar"
 console.info(await schema.validate('foo')); // error thrown: "foo" is not allowed!
 ```
 
-### Arguments
+#### Arguments
 
 Custom validators are passed two arguments: the initial `value` and an `options`
 object that contains meta information that can be helpful:
 
 - `root`: The root value passed into the validation. This is helpful to create
   complex validations that depend on other fields, etc.
-- TODO: more?
+- `original`: The original input passed in before transformation.
+- `...rest`: Other fields specific to the schema as well as any options passed
+  into the schema when validating.
 
-### Examples
+#### Examples
 
 Validating input that depends on another field in an object schema:
 
@@ -229,6 +419,22 @@ const schema = yd.object({
     }
   }),
 });
+```
+
+Validating input that depends on options passed in at runtime:
+
+```js
+const schema = yd.custom((val, options) => {
+  if (options.foo) {
+    // Do something
+  } else {
+    // Do soemthing else
+  }
+}));
+
+await schema.validate('test', {
+  foo: 'bar'
+})
 ```
 
 Asynchronous validation from an external service:
@@ -251,7 +457,7 @@ const schema = yd.object({
 });
 ```
 
-## Default
+### Default
 
 The `default` method will return a default value if one is not passed:
 
@@ -261,10 +467,192 @@ console.log(await schema.validate()); // "hi!"
 console.log(await schema.validate('hello!')); // "hello!"
 ```
 
+## Validation Options
+
+Validation options in Yada can be passed at runtime on validation or baked into
+the schema with the `options` method. The following can be considered
+equivalent:
+
+```js
+await schema.validate(input, {
+  stripUnknown: true,
+});
+await schema
+  .options({
+    stripUnknown: true,
+  })
+  .validate(input);
+```
+
+#### Options:
+
+- `stripUnknown` - Strips unknown fields on object schemas which otherwise would
+  throw an error.
+- `cast` - Casts input to its associated type. For strings and numbers this
+  performs a simple type coercion. For booleans `"true"` or `"1"` will be
+  considered `true` and `"false"` or `"0"` will be considered `false`. This
+  option is useful to convert query strings.
+
+## Error Messages
+
+Error objects thrown on validation expose details about the validations and
+fields which have errored. The `getFullMessage` method aggregates these as a
+single message separated by a space:
+
+```js
+const schema = yd.object({
+  email: yd.string().required(),
+  firstName: yd.string().required(),
+  lastName: yd.string().required(),
+});
+try {
+  await schema.validate({
+    firstName: 'Jules',
+  });
+} catch (error) {
+  console.info(error.getFullMessage());
+  // "email" is required "lastName" is required
+}
+```
+
+The delimiter can be customized with the `delimiter` option:
+
+```js
+console.info(
+  error.getFullMessage({
+    delimiter: '\n',
+  })
+);
+// "email" is required
+// "lastName" is required
+```
+
+Further the `natural` option will capitalize field names to correspond with form
+labels:
+
+```js
+console.info(
+  error.getFullMessage({
+    natural: true,
+  })
+);
+// "Email" is required
+// "Last Name" is required
+```
+
+## Localization
+
+Any error message can be localized with the `useLocalizer` method. This method
+accepts either a map of error messages to their localized strings or a function
+which returns that map:
+
+```js
+yd.useLocalizer({
+  'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
+  'Object failed validation.': '不正な入力がありました。',
+});
+```
+
+or
+
+```js
+yd.useLocalizer((template) => {
+  // Where "getMessages" could be a function
+  // that returns messages for a specific locale.
+  return getMessages()[template];
+});
+```
+
+Any validation message matching the keys passed to the map will result in the
+localized message instead. The curly braces allow for variable substitution.
+
+A special method `getLocalizerTemplates` will aggregte used error messages to
+allow quick discovery of strings that have not yet been localized:
+
+```js
+yd.useLocalizer({
+  'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
+  'Object failed validation.': '不正な入力がありました。',
+});
+// Error validation occuring here
+yd.getLocalizedTemplates();
+// {
+//   'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
+//   'Object failed validation.': '不正な入力がありました。',
+//   'Value must be a string.': 'Value must be a string.',
+//   ...etc
+// }
+```
+
+Finally an exported error object `LocalizedError` allows you to throw custom
+localized error messages. Template substitution can be used here as well:
+
+```js
+import { default as yd, LocalizedError } from '@bedrockio/yada';
+
+const max = 5;
+const schema = yd.custom((val) => {
+  if (val > chars) {
+    throw new LocalizedError('Cannot be greater than {max}.', {
+      max,
+    });
+  }
+});
+```
+
+## OpenApi
+
+One of the benefits of Yada is built-in OpenApi integration. Any schema can
+describe itself in OpenApi format including complex nested schemas.
+
+```js
+yd.string().allow('foo', 'bar').toOpenApi();
+// {
+//   type: 'string',
+//   enum: ['foo', 'bar'],
+// }
+```
+
+The `tag` method allows tagging custom OpenApi fields:
+
+```js
+yd.string().tag({
+  description: 'my description!',
+  x-field: 'my custom field!',
+}).toOpenApi();
+// {
+//   type: 'string',
+//   description: 'my description!',
+//   x-field: 'my custom field!!',
+// }
+```
+
+The `description` method is a shortcut:
+
+```js
+yd.string().description('my description!').toOpenApi();
+// {
+//   type: 'string',
+//   description: 'my description!',
+// }
+```
+
+## Utils
+
+Basic utility methods:
+
+- `isSchema`: returns `true` if the object passed is a schema.
+- `isSchemaError`: returns `true` if the error object is a schema error.
+- `useLocalizer`: Allows [localization](#localization) of error messages.
+- `getLocalizerTemplates`: Allows discovery of messages for
+  [localization](#localization).
+- `LocalizedError`: An error object that can be thrown in custom validations to
+  allow [localization](#localization).
+
 ## Differences with Joi
 
 Yada is intentionally kept extremely simple. Complex validations are expressed
-in code rather than requiring deep API understanding. For example (from the Joi
+in code rather than requiring complex API knowledge. For example (from the Joi
 docs):
 
 ```js
@@ -360,14 +748,3 @@ const schema = yd.object({
 
 This can be useful either to add context or to strip it away, for example to
 hide allowed values if they are private.
-
-Other differences:
-
-- Joi optionally can strip out unknown fields on object schemas. In Yada all
-  fields **must** be defined, otherwise they are stripped out.
-
-## Utils
-
-Basic utility methods:
-
-- `isSchema`: returns `true` if the object passed is a schema.
