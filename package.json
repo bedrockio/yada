@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/yada",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Validation library inspired by Joi.",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -32,7 +32,7 @@
   },
   "prettier": "@bedrockio/prettier-config",
   "volta": {
-    "node": "16.13.0",
+    "node": "18.13.0",
     "yarn": "1.22.19"
   }
 }
