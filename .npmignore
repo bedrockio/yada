@@ -1,0 +1,6 @@
+.vscode
+.eslintrc
+babel.config.json
+jest.config.json
+scripts
+src/__tests__

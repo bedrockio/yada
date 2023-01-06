@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/yada",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Validation library inspired by Joi.",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -8,6 +8,8 @@
     "lint": "eslint"
   },
   "type": "module",
+  "main": "dist/cjs/index.js",
+  "module": "src/index.js",
   "repository": "https://github.com/bedrockio/yada",
   "author": "Andrew Plummer <plummer.andrew@gmail.com>",
   "license": "MIT",
