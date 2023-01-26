@@ -1,4 +1,6 @@
 import yd from '../index';
+import { LocalizedError } from '../errors';
+import { useLocalizer, getLocalizerTemplates } from '../localization';
 import { isSchema, isSchemaError } from '../utils';
 
 async function assertPass(schema, obj, expected, options) {
@@ -1705,7 +1707,7 @@ describe('getFullMessage', () => {
 
 describe('localization', () => {
   it('should be able to pass an object to useLocalizer', async () => {
-    yd.useLocalizer({
+    useLocalizer({
       'Must be a string.': 'Gotta be a string.',
     });
     let error;
@@ -1723,7 +1725,7 @@ describe('localization', () => {
         '{length}文字以上入力して下さい。',
       'Object failed validation.': '不正な入力がありました。',
     };
-    yd.useLocalizer((template) => {
+    useLocalizer((template) => {
       return strings[template];
     });
     const schema = yd.object({
@@ -1754,7 +1756,7 @@ describe('localization', () => {
         return `Deve contenere almeno ${length} ${chars}.`;
       },
     };
-    yd.useLocalizer((template) => {
+    useLocalizer((template) => {
       return strings[template];
     });
     const schema = yd.object({
@@ -1775,7 +1777,7 @@ describe('localization', () => {
   });
 
   it('should be able to inspect localization templates', async () => {
-    yd.useLocalizer({
+    useLocalizer({
       'Input failed validation.': '不正な入力がありました。',
     });
     const schema = yd.object({
@@ -1789,7 +1791,7 @@ describe('localization', () => {
         password: 'a',
       });
     } catch (err) {
-      const templates = yd.getLocalizerTemplates();
+      const templates = getLocalizerTemplates();
       expect(templates).toEqual({
         'Must be at least {length} character{s}.':
           'Must be at least {length} character{s}.',
@@ -1803,7 +1805,7 @@ describe('localization', () => {
   });
 
   it('should localize the full message', async () => {
-    yd.useLocalizer({
+    useLocalizer({
       '{field} must be a string.': '{field}: 文字列を入力してください。',
       '{field} must be a number.': '{field}: 数字を入力してください。',
     });
@@ -1820,7 +1822,7 @@ describe('localization', () => {
       expect(err.getFullMessage()).toBe(
         '"name": 文字列を入力してください。 "age": 数字を入力してください。'
       );
-      expect(yd.getLocalizerTemplates()).toMatchObject({
+      expect(getLocalizerTemplates()).toMatchObject({
         '{field} must be a number.': '{field}: 数字を入力してください。',
         '{field} must be a string.': '{field}: 文字列を入力してください。',
       });
@@ -1828,11 +1830,11 @@ describe('localization', () => {
   });
 
   it('should allow a custom localized error to be thrown', async () => {
-    yd.useLocalizer({
+    useLocalizer({
       'Invalid coordinates': '座標に不正な入力がありました。',
     });
     const schema = yd.custom(() => {
-      throw new yd.LocalizedError('Invalid coordinates');
+      throw new LocalizedError('Invalid coordinates');
     });
     try {
       await schema.validate({

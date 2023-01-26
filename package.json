@@ -1,11 +1,12 @@
 {
   "name": "@bedrockio/yada",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Validation library inspired by Joi.",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "lint": "eslint",
     "build": "scripts/build",
-    "lint": "eslint"
+    "prepublish": "scripts/build"
   },
   "type": "module",
   "main": "dist/cjs/index.js",
