@@ -6,7 +6,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "lint": "eslint",
     "build": "scripts/build",
-    "prepublish": "scripts/build"
+    "prepublishOnly": "npm run build"
   },
   "type": "module",
   "main": "dist/cjs/index.js",
