@@ -4,6 +4,11 @@ import { localize } from './localization';
 export class LocalizedError extends Error {
   constructor(message, values) {
     super(localize(message, values));
+    this.values = values;
+  }
+
+  get type() {
+    return this.values?.type;
   }
 }
 

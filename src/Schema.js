@@ -196,7 +196,7 @@ export default class Schema {
       if (isSchemaError(error)) {
         throw error;
       }
-      throw new AssertionError(error.message, type, error);
+      throw new AssertionError(error.message, error.type || type, error);
     }
   }
 

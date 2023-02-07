@@ -28,6 +28,7 @@ class ObjectSchema extends TypeSchema {
           } else if (!stripUnknown) {
             throw new LocalizedError('Unknown field "{key}".', {
               key,
+              type: 'field',
             });
           }
         }
