@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/yada",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Validation library inspired by Joi.",
   "scripts": {
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest",

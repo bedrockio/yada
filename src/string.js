@@ -12,6 +12,7 @@ import {
 } from './password';
 
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PHONE_REG = /^\+?[1-9]\d{1,14}$/;
 
 class StringSchema extends TypeSchema {
   constructor() {
@@ -94,6 +95,14 @@ class StringSchema extends TypeSchema {
     return this.format('email', (str) => {
       if (!validator.isEmail(str)) {
         throw new LocalizedError('Must be an email address.');
+      }
+    });
+  }
+
+  phone() {
+    return this.format('phone', (str) => {
+      if (!PHONE_REG.test(str)) {
+        throw new LocalizedError('Must be a valid phone number.');
       }
     });
   }

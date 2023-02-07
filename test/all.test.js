@@ -83,6 +83,14 @@ describe('string', () => {
     await assertFail(schema, 'foo@bar', ['Must be an email address.']);
   });
 
+  it('should validate an E.164 phone number', async () => {
+    const schema = yd.string().phone();
+    await assertPass(schema, undefined);
+    await assertPass(schema, '+16175551212');
+    await assertFail(schema, '+1', ['Must be a valid phone number.']);
+    await assertFail(schema, 'foo', ['Must be a valid phone number.']);
+  });
+
   it('should validate a regex pattern', async () => {
     expect(() => {
       yd.string().match();
