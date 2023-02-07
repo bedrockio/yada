@@ -11,7 +11,7 @@
       }
     ]
   ],
-  "ignore": [
-    "**/__tests__/*.js"
+  "plugins": [
+    "add-module-exports"
   ]
 }

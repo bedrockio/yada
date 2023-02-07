@@ -1,7 +1,7 @@
-import yd from '../index';
-import { LocalizedError } from '../errors';
-import { useLocalizer, getLocalizerTemplates } from '../localization';
-import { isSchema, isSchemaError } from '../utils';
+import yd from '../src';
+import { LocalizedError } from '../src/errors';
+import { useLocalizer, getLocalizerTemplates } from '../src/localization';
+import { isSchema, isSchemaError } from '../src/utils';
 
 async function assertPass(schema, obj, expected, options) {
   try {

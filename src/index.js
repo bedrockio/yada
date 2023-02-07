@@ -25,9 +25,6 @@ export default {
   allow,
   reject,
   custom,
-};
-
-export {
   isSchema,
   isSchemaError,
   useLocalizer,
