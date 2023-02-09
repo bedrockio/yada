@@ -38,9 +38,22 @@ class ObjectSchema extends TypeSchema {
     for (let [key, schema] of Object.entries(this.meta.fields)) {
       this.assert('field', async (obj, options) => {
         if (obj) {
-          let val;
+          const val = obj[key];
+          const { strip } = schema.meta;
+
+          if (strip && strip(val, options)) {
+            delete obj[key];
+            return;
+          }
+
           try {
-            val = await schema.validate(obj[key], options);
+            const result = await schema.validate(val, options);
+            if (result !== undefined) {
+              return {
+                ...obj,
+                [key]: result,
+              };
+            }
           } catch (error) {
             if (error.details?.length === 1) {
               const { message, original } = error.details[0];
@@ -54,12 +67,6 @@ class ObjectSchema extends TypeSchema {
               );
             }
           }
-          return {
-            ...obj,
-            ...(val !== undefined && {
-              [key]: val,
-            }),
-          };
         }
       });
     }

@@ -22,6 +22,7 @@ Concepts
   - [Reject](#reject)
   - [Custom](#custom)
   - [Default](#default)
+  - [Strip](#strip)
 - [Validation Options](#validation-options)
 - [Error Messages](#error-messages)
 - [Localization](#localization)
@@ -466,6 +467,24 @@ const schema = yd.string().default('hi!');
 console.log(await schema.validate()); // "hi!"
 console.log(await schema.validate('hello!')); // "hello!"
 ```
+
+### Strip
+
+The `strip` method serves as a way to conditionally exclude fields when the
+schema is used inside an object schema:
+
+```js
+const schema = yd.object({
+  name: yd.string(),
+  age: yd.number().strip((val, { self }) => {
+    // That's private!
+    return !self;
+  }),
+});
+```
+
+Arguments are identical to those passed to [custom](#custom). The field will be
+stripped out if the function returns a truthy value.
 
 ## Validation Options
 

@@ -46,6 +46,10 @@ export default class Schema {
     });
   }
 
+  strip(strip) {
+    return this.clone({ strip });
+  }
+
   allow(...set) {
     return this.assertEnum(set, true);
   }

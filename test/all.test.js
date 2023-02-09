@@ -693,6 +693,29 @@ describe('custom', () => {
   });
 });
 
+describe('strip', () => {
+  it('should conditionally strip out fields', async () => {
+    const schema = yd.object({
+      name: yd.string(),
+      age: yd.number().strip((val, { self }) => {
+        return !self;
+      }),
+    });
+    const result = await schema.validate(
+      {
+        name: 'Brett',
+        age: 25,
+      },
+      {
+        isPrivate: true,
+      }
+    );
+    expect(result).toEqual({
+      name: 'Brett',
+    });
+  });
+});
+
 describe('array', () => {
   it('should validate an optional array', async () => {
     const schema = yd.array();
