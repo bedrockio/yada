@@ -59,6 +59,18 @@ class ArraySchema extends Schema {
     }
   }
 
+  length(length) {
+    return this.clone().assert('length', (arr) => {
+      if (arr.length !== length) {
+        const s = length === 1 ? '' : 's';
+        throw new LocalizedError('Must contain exactly {length} element{s}.', {
+          length,
+          s,
+        });
+      }
+    });
+  }
+
   min(length) {
     return this.clone().assert('length', (arr) => {
       if (arr.length < length) {

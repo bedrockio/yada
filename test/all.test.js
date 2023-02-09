@@ -770,6 +770,13 @@ describe('array', () => {
     await assertFail(schema, [{ bar: 'hi' }], ['Unknown field "bar".']);
   });
 
+  it('should validate a fixed length', async () => {
+    const schema = yd.array().length(2);
+    await assertFail(schema, [1], ['Must contain exactly 2 elements.']);
+    await assertPass(schema, [1, 2]);
+    await assertFail(schema, [1, 2, 3], ['Must contain exactly 2 elements.']);
+  });
+
   it('should validate a minimum length', async () => {
     const schema = yd.array().min(1);
     await assertPass(schema, ['one']);
