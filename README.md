@@ -301,11 +301,6 @@ const schema = yd
   .required();
 ```
 
-#### Methods:
-
-- `append` - Appends the passed argument to create a new object schema. Accepts
-  either an object or another `.object()` schema.
-
 ## Date
 
 Dates are similar to the basic types with the exception that in addition to date
@@ -375,6 +370,33 @@ await schema.validate('foo'); // error!
 const schema = yd.reject(yd.string(), yd.number());
 await schema.validate(true); // pass
 await schema.validate('true'); // error!
+```
+
+### Append
+
+Appends another schema:
+
+```js
+const schema1 = yd.string();
+const schema2 = yd.custom((str) => {
+  if (str === 'foo') {
+    throw new Error('Cannot be foo!');
+  }
+});
+const schema = schema1.append(schema2);
+```
+
+Note that when applied to an object schema the fields will be merged. In this
+case a plain object is also accepted:
+
+```js
+const schema1 = yd.object({
+  foo: yd.string(),
+});
+const schema2 = yd.object({
+  bar: yd.string(),
+});
+const schema = schema1.append(schema2);
 ```
 
 ### Custom

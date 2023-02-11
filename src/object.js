@@ -73,7 +73,16 @@ class ObjectSchema extends TypeSchema {
   }
 
   append(arg) {
-    const schema = isSchema(arg) ? arg : new ObjectSchema(arg);
+    let schema;
+    if (arg instanceof ObjectSchema) {
+      schema = arg;
+    } else if (isSchema(arg)) {
+      // If the schema is of a different type then
+      // simply append it and don't merge fields.
+      return super.append(arg);
+    } else {
+      schema = new ObjectSchema(arg);
+    }
 
     const fields = {
       ...this.meta.fields,

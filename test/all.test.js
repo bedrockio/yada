@@ -978,6 +978,56 @@ describe('default', () => {
   });
 });
 
+describe('append', () => {
+  it('should allow appending to a string schema', async () => {
+    const custom = yd.custom((str) => {
+      if (str === 'fop') {
+        throw new Error('You misspelled foo!');
+      }
+    });
+
+    const schema = yd.string().append(custom);
+
+    await assertPass(schema, 'foo');
+    await assertFail(schema, 'fop', ['You misspelled foo!']);
+  });
+
+  it('should append a custom schema to an object schema', async () => {
+    const custom = yd.custom((obj) => {
+      if (obj.foo === 'fop') {
+        throw new Error('You misspelled foo!');
+      }
+    });
+
+    const schema = yd
+      .object({
+        foo: yd.string(),
+      })
+      .append(custom);
+
+    await assertPass(schema, { foo: 'foo' });
+    await assertFail(schema, { foo: 'fop' }, ['You misspelled foo!']);
+  });
+
+  it('should preserve defaults', async () => {
+    const custom = yd.custom((str) => {
+      if (str === 'fop') {
+        throw new Error('You misspelled foo!');
+      }
+    });
+    const schema = yd.string().required();
+
+    await assertPass(schema.default('foo').append(custom));
+    await assertPass(schema.append(custom).default('foo'));
+    await assertFail(schema.default('fop').append(custom), undefined, [
+      'You misspelled foo!',
+    ]);
+    await assertFail(schema.append(custom).default('fop'), undefined, [
+      'You misspelled foo!',
+    ]);
+  });
+});
+
 describe('serialization', () => {
   it('should correctly serialize object error', async () => {
     const schema = yd.object({

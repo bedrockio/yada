@@ -127,6 +127,12 @@ export default class Schema {
     return clone;
   }
 
+  append(schema) {
+    const merged = this.clone(schema.meta);
+    merged.assertions = [...this.assertions, ...schema.assertions];
+    return merged;
+  }
+
   // Private
 
   assertEnum(set, allow) {
