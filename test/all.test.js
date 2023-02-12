@@ -623,6 +623,11 @@ describe('object', () => {
       expect(error.details[0].type).toBe('field');
     }
   });
+
+  it('should not allow unknown fields for empty objects', async () => {
+    const schema = yd.object({});
+    await assertFail(schema, { foo: 'bar' }, ['Unknown field "foo".']);
+  });
 });
 
 describe('custom', () => {

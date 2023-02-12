@@ -6,7 +6,7 @@ import { isSchema } from './Schema';
 const BASE_ASSERTIONS = ['type', 'transform', 'field'];
 
 class ObjectSchema extends TypeSchema {
-  constructor(fields = {}) {
+  constructor(fields) {
     super(Object, { message: 'Object failed validation.', fields });
     this.setup();
   }
@@ -19,11 +19,10 @@ class ObjectSchema extends TypeSchema {
     });
     this.transform((obj, options) => {
       const { fields, stripUnknown } = options;
-      const allowUnknown = Object.keys(fields).length === 0;
       if (obj) {
         const result = {};
         for (let key of Object.keys(obj)) {
-          if (key in fields || allowUnknown) {
+          if (!fields || key in fields) {
             result[key] = obj[key];
           } else if (!stripUnknown) {
             throw new LocalizedError('Unknown field "{key}".', {
@@ -35,7 +34,7 @@ class ObjectSchema extends TypeSchema {
         return result;
       }
     });
-    for (let [key, schema] of Object.entries(this.meta.fields)) {
+    for (let [key, schema] of Object.entries(this.getFields())) {
       this.assert('field', async (obj, options) => {
         if (obj) {
           const { path = [] } = options;
@@ -107,9 +106,13 @@ class ObjectSchema extends TypeSchema {
     return merged;
   }
 
+  getFields() {
+    return this.meta.fields || {};
+  }
+
   toOpenApi(extra) {
     const properties = {};
-    for (let [key, schema] of Object.entries(this.meta.fields)) {
+    for (let [key, schema] of Object.entries(this.getFields())) {
       properties[key] = schema.toOpenApi();
     }
     return {
