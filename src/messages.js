@@ -26,12 +26,12 @@ function getLabeledMessage(error, options) {
   const { field, index } = options;
   const base = getBase(error.message);
   if (field) {
-    const msg = `{field} ${base}`;
+    const msg = `{field} ${downcase(base)}`;
     return localize(msg, {
       field: getFieldLabel(field, options),
     });
   } else if (index != null) {
-    const msg = `Element at index "{index}" ${base}`;
+    const msg = `Element at index "{index}" ${downcase(base)}`;
     return localize(msg, {
       index,
     });
@@ -53,7 +53,7 @@ function getBase(str) {
   if (str === 'Value is required.') {
     return 'is required.';
   } else {
-    return downcase(str);
+    return str;
   }
 }
 

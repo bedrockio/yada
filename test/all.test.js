@@ -1802,6 +1802,19 @@ describe('getFullMessage', () => {
       'Auth code is required. Pass code is required. My token is required.'
     );
   });
+
+  it('should not interpolate tokens that do not exist', async () => {
+    const schema = yd.custom(() => {
+      throw new Error('Must {not} be.');
+    });
+    try {
+      await schema.validate({
+        foo: 'bar',
+      });
+    } catch (error) {
+      expect(error.getFullMessage()).toBe('Must {not} be.');
+    }
+  });
 });
 
 describe('localization', () => {

@@ -29,7 +29,7 @@ export function localize(template, values = {}) {
   templates[template] = message;
 
   return message.replace(TOKEN_REG, (match, token) => {
-    return values[token];
+    return token in values ? values[token] : match;
   });
 }
 
