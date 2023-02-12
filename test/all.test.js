@@ -1650,13 +1650,19 @@ describe('other', () => {
     await assertFail(schema, { a: [1, 2, 3], b: 4 }, ['"a" must include "b"']);
   });
 
-  it('should have access to current key', async () => {
+  it('should have access to current path', async () => {
     const schema = yd.object({
-      a: yd.number().custom((num, { key }) => {
-        return key;
+      a: yd.object({
+        b: yd.number().custom((num, { path }) => {
+          expect(path).toEqual(['a', 'b']);
+        }),
       }),
     });
-    expect(await schema.validate({ a: 12 })).toEqual({ a: 'a' });
+    await schema.validate({
+      a: {
+        b: 3,
+      },
+    });
   });
 
   it('should correctly validate chained formats', async () => {

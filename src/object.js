@@ -38,19 +38,21 @@ class ObjectSchema extends TypeSchema {
     for (let [key, schema] of Object.entries(this.meta.fields)) {
       this.assert('field', async (obj, options) => {
         if (obj) {
-          const val = obj[key];
+          const { path = [] } = options;
           const { strip } = schema.meta;
+          const val = obj[key];
+
+          options = {
+            ...options,
+            path: [...path, key],
+          };
 
           if (strip && strip(val, options)) {
             delete obj[key];
             return;
           }
-
           try {
-            const result = await schema.validate(val, {
-              ...options,
-              key,
-            });
+            const result = await schema.validate(val, options);
             if (result !== undefined) {
               return {
                 ...obj,
