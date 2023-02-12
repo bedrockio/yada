@@ -1640,7 +1640,7 @@ describe('other', () => {
   it('should have access to root object', async () => {
     const schema = yd.object({
       a: yd.array(yd.number()),
-      b: yd.number().custom((arr, { root }) => {
+      b: yd.number().custom((num, { root }) => {
         if (!root.a.includes(root.b)) {
           throw new Error('"a" must include "b"');
         }
@@ -1648,6 +1648,15 @@ describe('other', () => {
     });
     await assertPass(schema, { a: [1, 2, 3], b: 1 });
     await assertFail(schema, { a: [1, 2, 3], b: 4 }, ['"a" must include "b"']);
+  });
+
+  it('should have access to current key', async () => {
+    const schema = yd.object({
+      a: yd.number().custom((num, { key }) => {
+        return key;
+      }),
+    });
+    expect(await schema.validate({ a: 12 })).toEqual({ a: 'a' });
   });
 
   it('should correctly validate chained formats', async () => {

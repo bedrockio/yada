@@ -47,7 +47,10 @@ class ObjectSchema extends TypeSchema {
           }
 
           try {
-            const result = await schema.validate(val, options);
+            const result = await schema.validate(val, {
+              ...options,
+              key,
+            });
             if (result !== undefined) {
               return {
                 ...obj,
