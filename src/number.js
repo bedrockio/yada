@@ -1,6 +1,5 @@
 import TypeSchema from './TypeSchema';
 import { LocalizedError } from './errors';
-import { wrapSchema } from './utils';
 
 class NumberSchema extends TypeSchema {
   constructor() {
@@ -87,7 +86,6 @@ class NumberSchema extends TypeSchema {
   }
 }
 
-/**
- * @type {() => NumberSchema}
- */
-export default wrapSchema(NumberSchema);
+export default function () {
+  return new NumberSchema();
+}

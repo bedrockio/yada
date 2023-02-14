@@ -1,7 +1,6 @@
 import validator from 'validator';
 import TypeSchema from './TypeSchema';
 import { LocalizedError } from './errors';
-import { wrapSchema } from './utils';
 import {
   PASSWORD_DEFAULTS,
   validateLength,
@@ -155,7 +154,7 @@ class StringSchema extends TypeSchema {
   }
 
   /**
-   * @param {Object} [options]
+   * @param {object} [options]
    * @param {boolean} [options.urlSafe]
    */
   base64(options) {
@@ -235,7 +234,7 @@ class StringSchema extends TypeSchema {
   }
 
   /**
-   * @param {Object} [options]
+   * @param {object} [options]
    * @param {number} [options.minLength]
    * @param {number} [options.minNumbers]
    * @param {number} [options.minSymbols]
@@ -270,7 +269,7 @@ class StringSchema extends TypeSchema {
   }
 
   /**
-   * @param {Object} [options]
+   * @param {object} [options]
    * @param {boolean} [options.require_protocol]
    * @param {boolean} [options.require_valid_protocol]
    * @param {boolean} [options.require_host]
@@ -290,7 +289,7 @@ class StringSchema extends TypeSchema {
   }
 
   /**
-   * @param {Object} [options]
+   * @param {object} [options]
    * @param {boolean} [options.require_tld=true]
    * @param {boolean} [options.allow_underscores=false]
    * @param {boolean} [options.allow_trailing_dot=false]
@@ -363,7 +362,6 @@ class StringSchema extends TypeSchema {
   }
 }
 
-/**
- * @type {() => StringSchema}
- */
-export default wrapSchema(StringSchema);
+export default function () {
+  return new StringSchema();
+}

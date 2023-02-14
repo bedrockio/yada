@@ -1,19 +1,9 @@
 import Schema from './Schema';
 import { ArrayError, ElementError, LocalizedError } from './errors';
-import { wrapSchema } from './utils';
 
 class ArraySchema extends Schema {
-  constructor(...args) {
-    let schemas, meta;
-
-    if (Array.isArray(args[0])) {
-      schemas = args[0];
-      meta = args[1];
-    } else {
-      schemas = args;
-    }
-
-    super({ message: 'Array failed validation.', ...meta, schemas });
+  constructor(schemas) {
+    super({ message: 'Array failed validation.', schemas });
     this.setup();
   }
 
@@ -144,9 +134,14 @@ class ArraySchema extends Schema {
 }
 
 /**
- * @type {{
- *   (...schemas: Schema[]) : ArraySchema;
- *   (schemas: Schema[]) : ArraySchema;
- * }}
+ * @param {...Schema} [schemas] Optional schemas to validate
+ * the different types of elements allowed in the array. If
+ * no arguments are passed elements may be of any type. Also
+ * accepts a single array argument.
  */
-export default wrapSchema(ArraySchema);
+export default function (...schemas) {
+  if (Array.isArray(schemas[0])) {
+    schemas = schemas[0];
+  }
+  return new ArraySchema(schemas);
+}

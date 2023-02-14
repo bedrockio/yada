@@ -1,9 +1,12 @@
 import TypeSchema from './TypeSchema';
 import { FieldError, LocalizedError } from './errors';
-import { wrapSchema } from './utils';
-import { isSchema } from './Schema';
+import Schema from './Schema';
 
 const BASE_ASSERTIONS = ['type', 'transform', 'field'];
+
+/**
+ * @typedef {{ [key: string]: Schema } | {}} SchemaMap
+ */
 
 class ObjectSchema extends TypeSchema {
   constructor(fields) {
@@ -80,14 +83,21 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
-   * @param {object|ObjectSchema} arg
-   * @returns Schema
+   * @private
    */
+  getFields() {
+    return this.meta.fields || {};
+  }
+
+  /**
+   * @param {SchemaMap|Schema} arg Object or schema to append.
+   */
+  // @ts-ignore
   append(arg) {
     let schema;
     if (arg instanceof ObjectSchema) {
       schema = arg;
-    } else if (isSchema(arg)) {
+    } else if (arg instanceof Schema) {
       // If the schema is of a different type then
       // simply append it and don't merge fields.
       return super.append(arg);
@@ -113,10 +123,6 @@ class ObjectSchema extends TypeSchema {
     return merged;
   }
 
-  getFields() {
-    return this.meta.fields || {};
-  }
-
   toOpenApi(extra) {
     const properties = {};
     for (let [key, schema] of Object.entries(this.getFields())) {
@@ -132,6 +138,10 @@ class ObjectSchema extends TypeSchema {
 }
 
 /**
- * @type {(arg: object) => ObjectSchema}
+ * @param {SchemaMap} [map] An map of keys to schemas.
+ * If not passed any object shape will be allowed. If an
+ * empty object is passed then no keys will be allowed.
  */
-export default wrapSchema(ObjectSchema);
+export default function (map) {
+  return new ObjectSchema(map);
+}

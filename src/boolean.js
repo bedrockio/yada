@@ -1,6 +1,5 @@
 import TypeSchema from './TypeSchema';
 import { LocalizedError } from './errors';
-import { wrapSchema } from './utils';
 
 class BooleanSchema extends TypeSchema {
   constructor() {
@@ -22,7 +21,6 @@ class BooleanSchema extends TypeSchema {
   }
 }
 
-/**
- * @type {function(): BooleanSchema}
- */
-export default wrapSchema(BooleanSchema);
+export default function () {
+  return new BooleanSchema();
+}

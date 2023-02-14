@@ -31,12 +31,6 @@
     "prettier": "^2.7.1",
     "typescript": "^4.9.5"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./dist/cjs/index.js"
-    }
-  },
   "prettier": "@bedrockio/prettier-config",
   "volta": {
     "node": "18.13.0",

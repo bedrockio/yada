@@ -1,5 +1,4 @@
 import validator from 'validator';
-import { wrapSchema } from './utils';
 import { LocalizedError } from './errors';
 
 import Schema from './Schema';
@@ -146,7 +145,6 @@ class DateSchema extends Schema {
   }
 }
 
-/**
- * @type {() => DateSchema}
- */
-export default wrapSchema(DateSchema);
+export default function () {
+  return new DateSchema();
+}

@@ -21,6 +21,7 @@ export default class Schema {
 
   // Public
 
+  /** @returns {this} */
   required() {
     return this.clone({ required: true }).assert('required', (val) => {
       if (val === undefined) {
@@ -29,6 +30,7 @@ export default class Schema {
     });
   }
 
+  /** @returns {this} */
   default(value) {
     return this.clone({ default: value }).assert('default', (val) => {
       if (val === undefined) {
@@ -39,6 +41,7 @@ export default class Schema {
 
   /**
    * @param {CustomSignature} args
+   * @returns {this}
    */
   custom(...args) {
     let type, fn;
@@ -59,22 +62,27 @@ export default class Schema {
     });
   }
 
+  /** @returns {this} */
   strip(strip) {
     return this.clone({ strip });
   }
 
+  /** @returns {this} */
   allow(...set) {
     return this.assertEnum(set, true);
   }
 
+  /** @returns {this} */
   reject(...set) {
     return this.assertEnum(set, false);
   }
 
+  /** @returns {this} */
   message(message) {
     return this.clone({ message });
   }
 
+  /** @returns {this} */
   tag(tags) {
     return this.clone({
       tags: {
@@ -84,12 +92,14 @@ export default class Schema {
     });
   }
 
+  /** @returns {this} */
   description(description) {
     return this.tag({
       description,
     });
   }
 
+  /** @returns {this} */
   options(options) {
     return this.clone({ ...options });
   }
@@ -133,9 +143,7 @@ export default class Schema {
     return value;
   }
 
-  /**
-   * @returns {this}
-   */
+  /** @returns {this} */
   clone(meta) {
     const clone = Object.create(this.constructor.prototype);
     clone.assertions = [...this.assertions];
@@ -143,9 +151,7 @@ export default class Schema {
     return clone;
   }
 
-  /**
-   * @returns {Schema}
-   */
+  /** @returns {this} */
   append(schema) {
     const merged = this.clone(schema.meta);
     merged.assertions = [...this.assertions, ...schema.assertions];
@@ -172,6 +178,7 @@ export default class Schema {
 
   // Private
 
+  /** @returns {this} */
   assertEnum(set, allow) {
     if (set.length === 1 && Array.isArray(set[0])) {
       set = set[0];
@@ -204,6 +211,7 @@ export default class Schema {
     });
   }
 
+  /** @returns {this} */
   assert(type, fn) {
     this.pushAssertion({
       halt: INITIAL_TYPES.includes(type),
@@ -221,6 +229,7 @@ export default class Schema {
     });
   }
 
+  /** @returns {this} */
   transform(fn) {
     this.assert('transform', (val, options) => {
       if (val !== undefined) {
