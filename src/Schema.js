@@ -21,7 +21,9 @@ export default class Schema {
 
   // Public
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   required() {
     return this.clone({ required: true }).assert('required', (val) => {
       if (val === undefined) {
@@ -30,7 +32,10 @@ export default class Schema {
     });
   }
 
-  /** @returns {this} */
+  /**
+   * Sets the schema default. [Link](https://github.com/bedrockio/yada#default)
+   * @returns {this}
+   */
   default(value) {
     return this.clone({ default: value }).assert('default', (val) => {
       if (val === undefined) {
@@ -40,6 +45,7 @@ export default class Schema {
   }
 
   /**
+   * Validate by a custom function. [Link](https://github.com/bedrockio/yada#custom)
    * @param {CustomSignature} args
    * @returns {this}
    */
@@ -62,27 +68,41 @@ export default class Schema {
     });
   }
 
-  /** @returns {this} */
+  /**
+   * Conditionally exclude fields inside an object schema.
+   * [Link](https://github.com/bedrockio/yada#strip)
+   * @returns {this}
+   */
   strip(strip) {
     return this.clone({ strip });
   }
 
-  /** @returns {this} */
+  /**
+   * Accept values or schemas. [Link](https://github.com/bedrockio/yada#allow)
+   * @returns {this}
+   */
   allow(...set) {
     return this.assertEnum(set, true);
   }
 
-  /** @returns {this} */
+  /**
+   * Reject values or schemas. [Link](https://github.com/bedrockio/yada#reject)
+   * @returns {this}
+   */
   reject(...set) {
     return this.assertEnum(set, false);
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   message(message) {
     return this.clone({ message });
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   tag(tags) {
     return this.clone({
       tags: {
@@ -92,14 +112,18 @@ export default class Schema {
     });
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   description(description) {
     return this.tag({
       description,
     });
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   options(options) {
     return this.clone({ ...options });
   }
@@ -143,7 +167,9 @@ export default class Schema {
     return value;
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   clone(meta) {
     const clone = Object.create(this.constructor.prototype);
     clone.assertions = [...this.assertions];
@@ -151,7 +177,10 @@ export default class Schema {
     return clone;
   }
 
-  /** @returns {this} */
+  /**
+   * Appends another schema. [Link](https://github.com/bedrockio/yada#append)
+   * @returns {this}
+   */
   append(schema) {
     const merged = this.clone(schema.meta);
     merged.assertions = [...this.assertions, ...schema.assertions];
@@ -178,7 +207,9 @@ export default class Schema {
 
   // Private
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   assertEnum(set, allow) {
     if (set.length === 1 && Array.isArray(set[0])) {
       set = set[0];
@@ -211,7 +242,9 @@ export default class Schema {
     });
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   assert(type, fn) {
     this.pushAssertion({
       halt: INITIAL_TYPES.includes(type),
@@ -229,7 +262,9 @@ export default class Schema {
     });
   }
 
-  /** @returns {this} */
+  /**
+   * @returns {this}
+   */
   transform(fn) {
     this.assert('transform', (val, options) => {
       if (val !== undefined) {

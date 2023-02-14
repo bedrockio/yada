@@ -145,6 +145,9 @@ class DateSchema extends Schema {
   }
 }
 
+/**
+ * Creates a [date schema](https://github.com/bedrockio/yada#date).
+ */
 export default function () {
   return new DateSchema();
 }

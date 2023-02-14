@@ -362,6 +362,9 @@ class StringSchema extends TypeSchema {
   }
 }
 
+/**
+ * Creates a [string schema](https://github.com/bedrockio/yada#string).
+ */
 export default function () {
   return new StringSchema();
 }

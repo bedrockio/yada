@@ -138,6 +138,8 @@ class ObjectSchema extends TypeSchema {
 }
 
 /**
+ * Creates an [object schema](https://github.com/bedrockio/yada#object).
+ *
  * @param {SchemaMap} [map] An map of keys to schemas.
  * If not passed any object shape will be allowed. If an
  * empty object is passed then no keys will be allowed.

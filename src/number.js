@@ -86,6 +86,9 @@ class NumberSchema extends TypeSchema {
   }
 }
 
+/**
+ * Creates a [number schema](https://github.com/bedrockio/yada#number).
+ */
 export default function () {
   return new NumberSchema();
 }

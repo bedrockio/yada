@@ -21,6 +21,9 @@ class BooleanSchema extends TypeSchema {
   }
 }
 
+/**
+ * Creates a [boolean schema](https://github.com/bedrockio/yada#boolean).
+ */
 export default function () {
   return new BooleanSchema();
 }

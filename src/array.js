@@ -134,6 +134,8 @@ class ArraySchema extends Schema {
 }
 
 /**
+ * Creates an [array schema](https://github.com/bedrockio/yada#array).
+ *
  * @param {...Schema} [schemas] Optional schemas to validate
  * the different types of elements allowed in the array. If
  * no arguments are passed elements may be of any type. Also

@@ -10,19 +10,29 @@ import { isSchema, isSchemaError } from './utils';
 import { useLocalizer, getLocalizedMessages } from './localization';
 import { LocalizedError } from './errors';
 
+/**
+ * Accepts anything.
+ */
 function any() {
   return new Schema();
 }
 
+/**
+ * Accept values or schemas. [Link](https://github.com/bedrockio/yada#allow)
+ */
 function allow(...args) {
   return new Schema().allow(...args);
 }
 
+/**
+ * Reject values or schemas. [Link](https://github.com/bedrockio/yada#reject)
+ */
 function reject(...args) {
   return new Schema().reject(...args);
 }
 
 /**
+ * Validate by a custom function. [Link](https://github.com/bedrockio/yada#custom)
  * @param {import("./Schema").CustomSignature} args
  */
 function custom(...args) {
