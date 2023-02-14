@@ -5,14 +5,47 @@ import number from './number';
 import object from './object';
 import string from './string';
 
-import { wrapArgs, wrapAny, isSchema, isSchemaError } from './utils';
-import { useLocalizer, getLocalizerTemplates } from './localization';
+import Schema from './Schema';
+import { isSchema, isSchemaError } from './utils';
+import { useLocalizer, getLocalizedMessages } from './localization';
 import { LocalizedError } from './errors';
 
-const allow = wrapArgs('allow');
-const reject = wrapArgs('reject');
-const custom = wrapArgs('custom');
-const any = wrapAny();
+function any() {
+  return new Schema();
+}
+
+function allow(...args) {
+  return new Schema().allow(...args);
+}
+
+function reject(...args) {
+  return new Schema().reject(...args);
+}
+
+/**
+ * @param {import("./Schema").CustomSignature} args
+ */
+function custom(...args) {
+  return new Schema().custom(...args);
+}
+
+export {
+  array,
+  boolean,
+  date,
+  number,
+  object,
+  string,
+  any,
+  allow,
+  reject,
+  custom,
+  isSchema,
+  isSchemaError,
+  useLocalizer,
+  getLocalizedMessages,
+  LocalizedError,
+};
 
 export default {
   array,
@@ -28,6 +61,6 @@ export default {
   isSchema,
   isSchemaError,
   useLocalizer,
-  getLocalizerTemplates,
+  getLocalizedMessages,
   LocalizedError,
 };

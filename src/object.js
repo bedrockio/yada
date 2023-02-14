@@ -11,6 +11,9 @@ class ObjectSchema extends TypeSchema {
     this.setup();
   }
 
+  /**
+   * @private
+   */
   setup() {
     this.assert('type', (val) => {
       if (val === null || typeof val !== 'object') {
@@ -76,6 +79,10 @@ class ObjectSchema extends TypeSchema {
     }
   }
 
+  /**
+   * @param {object|ObjectSchema} arg
+   * @returns Schema
+   */
   append(arg) {
     let schema;
     if (arg instanceof ObjectSchema) {
@@ -124,4 +131,7 @@ class ObjectSchema extends TypeSchema {
   }
 }
 
+/**
+ * @type {(arg: object) => ObjectSchema}
+ */
 export default wrapSchema(ObjectSchema);

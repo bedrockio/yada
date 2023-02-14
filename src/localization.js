@@ -1,38 +1,52 @@
 const TOKEN_REG = /{(.+?)}/g;
 
 let localizer;
-let templates = {};
 
+/**
+ * @type {{ [key: string]: string }}
+ */
+let messages = {};
+
+/**
+ * @param {{ [key: string]: string } | ((key: string) => string)} arg
+ * An object that maps messages to localized strings or a function that
+ * accepts a message and returns a localized string. Use "getLocalizedMessages"
+ * to see the messages that exist.
+ */
 export function useLocalizer(arg) {
-  const fn = typeof arg === 'function' ? arg : (template) => arg[template];
+  const fn = typeof arg === 'function' ? arg : (message) => arg[message];
   localizer = fn;
-  templates = {};
+  messages = {};
 }
 
-export function getLocalized(template) {
+export function getLocalized(message) {
   if (localizer) {
-    return localizer(template);
+    return localizer(message);
   }
 }
 
-export function localize(template, values = {}) {
-  let message = template;
-  if (localizer) {
-    let localized = getLocalized(template);
+export function localize(message, values = {}) {
+  let str = message;
+  if (str) {
+    let localized = getLocalized(message);
     if (typeof localized === 'function') {
       localized = localized(values);
     }
     if (localized) {
-      message = localized;
+      str = localized;
     }
   }
-  templates[template] = message;
+  messages[message] = str;
 
-  return message.replace(TOKEN_REG, (match, token) => {
+  return str.replace(TOKEN_REG, (match, token) => {
     return token in values ? values[token] : match;
   });
 }
 
-export function getLocalizerTemplates() {
-  return templates;
+/**
+ * Returns an object containing all encountered messages
+ * mapped to their localizations.
+ */
+export function getLocalizedMessages() {
+  return messages;
 }

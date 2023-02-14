@@ -9,6 +9,10 @@ import {
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform'];
 const REQUIRED_TYPES = ['default', 'required'];
 
+/**
+ * @typedef {[fn: Function] | [type: string, fn: Function]} CustomSignature
+ */
+
 export default class Schema {
   constructor(meta = {}) {
     this.assertions = [];
@@ -33,9 +37,18 @@ export default class Schema {
     });
   }
 
+  /**
+   * @param {CustomSignature} args
+   */
   custom(...args) {
-    const type = args.length > 1 ? args[0] : 'custom';
-    const fn = args.length > 1 ? args[1] : args[0];
+    let type, fn;
+    if (typeof args[0] === 'function') {
+      type = 'custom';
+      fn = args[0];
+    } else {
+      type = args[0];
+      fn = args[1];
+    }
     if (!type) {
       throw new Error('Assertion type required.');
     } else if (!fn) {
@@ -120,6 +133,9 @@ export default class Schema {
     return value;
   }
 
+  /**
+   * @returns {this}
+   */
   clone(meta) {
     const clone = Object.create(this.constructor.prototype);
     clone.assertions = [...this.assertions];
@@ -127,10 +143,31 @@ export default class Schema {
     return clone;
   }
 
+  /**
+   * @returns {Schema}
+   */
   append(schema) {
     const merged = this.clone(schema.meta);
     merged.assertions = [...this.assertions, ...schema.assertions];
     return merged;
+  }
+
+  toOpenApi(extra) {
+    const { required, format, tags, default: defaultValue } = this.meta;
+    return {
+      ...(required && {
+        required: true,
+      }),
+      ...(defaultValue && {
+        default: defaultValue,
+      }),
+      ...(format && {
+        format,
+      }),
+      ...this.enumToOpenApi(),
+      ...tags,
+      ...extra,
+    };
   }
 
   // Private
@@ -208,24 +245,6 @@ export default class Schema {
       }
       throw new AssertionError(error.message, error.type || type, error);
     }
-  }
-
-  toOpenApi(extra) {
-    const { required, format, tags, default: defaultValue } = this.meta;
-    return {
-      ...(required && {
-        required: true,
-      }),
-      ...(defaultValue && {
-        default: defaultValue,
-      }),
-      ...(format && {
-        format,
-      }),
-      ...this.enumToOpenApi(),
-      ...tags,
-      ...extra,
-    };
   }
 
   enumToOpenApi() {

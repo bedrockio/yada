@@ -607,7 +607,7 @@ yd.useLocalizer((template) => {
 Any validation message matching the keys passed to the map will result in the
 localized message instead. The curly braces allow for variable substitution.
 
-A special method `getLocalizerTemplates` will aggregte used error messages to
+A special method `getLocalizedMessages` will aggregte used error messages to
 allow quick discovery of strings that have not yet been localized:
 
 ```js
@@ -616,7 +616,7 @@ yd.useLocalizer({
   'Object failed validation.': '不正な入力がありました。',
 });
 // Error validation occuring here
-yd.getLocalizedTemplates();
+yd.getLocalizedMessages();
 // {
 //   'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
 //   'Object failed validation.': '不正な入力がありました。',
@@ -685,7 +685,7 @@ Basic utility methods:
 - `isSchema`: returns `true` if the object passed is a schema.
 - `isSchemaError`: returns `true` if the error object is a schema error.
 - `useLocalizer`: Allows [localization](#localization) of error messages.
-- `getLocalizerTemplates`: Allows discovery of messages for
+- `getLocalizedMessages`: Allows discovery of messages for
   [localization](#localization).
 - `LocalizedError`: An error object that can be thrown in custom validations to
   allow [localization](#localization).

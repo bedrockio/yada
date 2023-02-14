@@ -16,22 +16,28 @@ class NumberSchema extends TypeSchema {
     });
   }
 
-  min(min, msg) {
-    msg ||= 'Must be greater than {min}.';
+  /**
+   * @param {number} min
+   * @param {string} message
+   */
+  min(min, message = 'Must be greater than {min}.') {
     return this.clone({ min }).assert('min', (num) => {
       if (num < min) {
-        throw new LocalizedError(msg, {
+        throw new LocalizedError(message, {
           min,
         });
       }
     });
   }
 
-  max(max, msg) {
-    msg ||= 'Must be less than {max}.';
+  /**
+   * @param {number} max
+   * @param {string} message
+   */
+  max(max, message = 'Must be less than {max}.') {
     return this.clone({ max }).assert('max', (num) => {
       if (num > max) {
-        throw new LocalizedError(msg, {
+        throw new LocalizedError(message, {
           max,
         });
       }
@@ -81,4 +87,7 @@ class NumberSchema extends TypeSchema {
   }
 }
 
+/**
+ * @type {() => NumberSchema}
+ */
 export default wrapSchema(NumberSchema);

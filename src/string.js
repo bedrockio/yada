@@ -28,6 +28,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {number} length
+   */
   min(length) {
     return this.clone({ min: length }).assert('length', (str) => {
       if (str && str.length < length) {
@@ -38,6 +41,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {number} length
+   */
   max(length) {
     return this.clone({ max: length }).assert('length', (str) => {
       if (str && str.length > length) {
@@ -54,6 +60,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {boolean} [assert] Throws an error if not lowercase. Default: `false`.
+   */
   lowercase(assert = false) {
     return this.clone().transform((str) => {
       const lower = str.toLowerCase();
@@ -66,6 +75,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {boolean} [assert] Throws an error if not uppercase. Default: `false`.
+   */
   uppercase(assert = false) {
     return this.clone().transform((str) => {
       const upper = str.toUpperCase();
@@ -78,6 +90,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {RegExp} reg
+   */
   match(reg) {
     if (!(reg instanceof RegExp)) {
       throw new LocalizedError('Argument must be a regular expression');
@@ -139,6 +154,10 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.urlSafe]
+   */
   base64(options) {
     return this.format('base64', (str) => {
       if (!validator.isBase64(str, options)) {
@@ -204,6 +223,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {string} locale
+   */
   postalCode(locale = 'any') {
     return this.format('postal-code', (str) => {
       if (!validator.isPostalCode(str, locale)) {
@@ -212,8 +234,16 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {Object} [options]
+   * @param {number} [options.minLength]
+   * @param {number} [options.minNumbers]
+   * @param {number} [options.minSymbols]
+   * @param {number} [options.minLowercase]
+   * @param {number} [options.minUppercase]
+   */
   password(options = {}) {
-    const { minLength, minLowercase, minUppercase, minNumbers, minSymbols } = {
+    const { minLength, minNumbers, minSymbols, minLowercase, minUppercase } = {
       ...PASSWORD_DEFAULTS,
       ...options,
     };
@@ -239,6 +269,18 @@ class StringSchema extends TypeSchema {
     return schema;
   }
 
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.require_protocol]
+   * @param {boolean} [options.require_valid_protocol]
+   * @param {boolean} [options.require_host]
+   * @param {boolean} [options.require_port]
+   * @param {boolean} [options.allow_protocol_relative_urls]
+   * @param {boolean} [options.allow_fragments]
+   * @param {boolean} [options.allow_query_components]
+   * @param {boolean} [options.validate_length]
+   * @param {string[]} [options.protocols]
+   */
   url(options) {
     return this.format('url', (str) => {
       if (!validator.isURL(str, options)) {
@@ -247,6 +289,15 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.require_tld=true]
+   * @param {boolean} [options.allow_underscores=false]
+   * @param {boolean} [options.allow_trailing_dot=false]
+   * @param {boolean} [options.allow_numeric_tld=false]
+   * @param {boolean} [options.allow_wildcard=false]
+   * @param {boolean} [options.ignore_max_length=false]
+   */
   domain(options) {
     return this.format('domain', (str) => {
       if (!validator.isFQDN(str, options)) {
@@ -255,6 +306,9 @@ class StringSchema extends TypeSchema {
     });
   }
 
+  /**
+   * @param {1 | 2 | 3 | 4 | 5} [version] Version of UUID to check.
+   */
   uuid(version) {
     return this.format('uuid', (str) => {
       if (!validator.isUUID(str, version)) {
@@ -309,4 +363,7 @@ class StringSchema extends TypeSchema {
   }
 }
 
+/**
+ * @type {() => StringSchema}
+ */
 export default wrapSchema(StringSchema);

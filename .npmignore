@@ -1,6 +1,8 @@
 .vscode
 .eslintrc
-babel.config.json
-jest.config.json
+.eslintignore
+tsconfig.json
+babel.config.*
+jest.config.*
 scripts
-src/__tests__
+test

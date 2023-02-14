@@ -17,6 +17,9 @@ class ArraySchema extends Schema {
     this.setup();
   }
 
+  /**
+   * @private
+   */
   setup() {
     const { schemas } = this.meta;
     const schema =
@@ -140,4 +143,10 @@ class ArraySchema extends Schema {
   }
 }
 
+/**
+ * @type {{
+ *   (...schemas: Schema[]) : ArraySchema;
+ *   (schemas: Schema[]) : ArraySchema;
+ * }}
+ */
 export default wrapSchema(ArraySchema);

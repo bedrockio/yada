@@ -17,44 +17,60 @@ class DateSchema extends Schema {
     });
   }
 
+  /**
+   * @param {string|number|Date} min
+   */
   min(min) {
     min = new Date(min);
     return this.clone().assert('min', (date) => {
       if (date < min) {
         throw new LocalizedError('Must be after {date}.', {
+          // @ts-ignore
           date: min.toISOString(),
         });
       }
     });
   }
 
+  /**
+   * @param {string|number|Date} max
+   */
   max(max) {
     max = new Date(max);
     return this.clone().assert('max', (date) => {
       if (date > max) {
         throw new LocalizedError('Must be before {date}.', {
+          // @ts-ignore
           date: max.toISOString(),
         });
       }
     });
   }
 
+  /**
+   * @param {string|number|Date} max
+   */
   before(max) {
     max = new Date(max);
     return this.clone().assert('before', (date) => {
       if (date >= max) {
         throw new LocalizedError('Must be before {date}.', {
+          // @ts-ignore
           date: max.toISOString(),
         });
       }
     });
   }
 
+  /**
+   * @param {string|number|Date} min
+   */
   after(min) {
     min = new Date(min);
     return this.clone().assert('after', (date) => {
       if (date <= min) {
         throw new LocalizedError('Must be after {date}.', {
+          // @ts-ignore
           date: min.toISOString(),
         });
       }
@@ -79,6 +95,9 @@ class DateSchema extends Schema {
     });
   }
 
+  /**
+   * @param {"date" | "date-time"} format
+   */
   iso(format = 'date-time') {
     return this.clone({ format }).assert('format', (val, options) => {
       const { original } = options;
@@ -127,4 +146,7 @@ class DateSchema extends Schema {
   }
 }
 
+/**
+ * @type {() => DateSchema}
+ */
 export default wrapSchema(DateSchema);

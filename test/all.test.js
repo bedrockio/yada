@@ -1,6 +1,6 @@
 import yd from '../src';
 import { LocalizedError } from '../src/errors';
-import { useLocalizer, getLocalizerTemplates } from '../src/localization';
+import { useLocalizer, getLocalizedMessages } from '../src/localization';
 import { isSchema, isSchemaError } from '../src/utils';
 
 async function assertPass(schema, obj, expected, options) {
@@ -1857,8 +1857,8 @@ describe('localization', () => {
         '{length}文字以上入力して下さい。',
       'Object failed validation.': '不正な入力がありました。',
     };
-    useLocalizer((template) => {
-      return strings[template];
+    useLocalizer((message) => {
+      return strings[message];
     });
     const schema = yd.object({
       password: yd.string().password({
@@ -1888,8 +1888,8 @@ describe('localization', () => {
         return `Deve contenere almeno ${length} ${chars}.`;
       },
     };
-    useLocalizer((template) => {
-      return strings[template];
+    useLocalizer((message) => {
+      return strings[message];
     });
     const schema = yd.object({
       password: yd.string().password({
@@ -1908,7 +1908,7 @@ describe('localization', () => {
     expect(error.details[0].message).toBe('Deve contenere almeno 6 caratteri.');
   });
 
-  it('should be able to inspect localization templates', async () => {
+  it('should be able to inspect localization message', async () => {
     useLocalizer({
       'Input failed validation.': '不正な入力がありました。',
     });
@@ -1923,8 +1923,8 @@ describe('localization', () => {
         password: 'a',
       });
     } catch (err) {
-      const templates = getLocalizerTemplates();
-      expect(templates).toEqual({
+      const localized = getLocalizedMessages();
+      expect(localized).toEqual({
         'Must be at least {length} character{s}.':
           'Must be at least {length} character{s}.',
         'Must contain at least {length} number{s}.':
@@ -1954,7 +1954,7 @@ describe('localization', () => {
       expect(err.getFullMessage()).toBe(
         '"name": 文字列を入力してください。 "age": 数字を入力してください。'
       );
-      expect(getLocalizerTemplates()).toMatchObject({
+      expect(getLocalizedMessages()).toMatchObject({
         '{field} must be a number.': '{field}: 数字を入力してください。',
         '{field} must be a string.': '{field}: 文字列を入力してください。',
       });

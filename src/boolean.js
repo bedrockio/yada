@@ -22,4 +22,7 @@ class BooleanSchema extends TypeSchema {
   }
 }
 
+/**
+ * @type {function(): BooleanSchema}
+ */
 export default wrapSchema(BooleanSchema);
