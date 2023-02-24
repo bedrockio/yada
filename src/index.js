@@ -1,9 +1,10 @@
-import array from './array';
+import string from './string';
+import number from './number';
 import boolean from './boolean';
 import date from './date';
-import number from './number';
 import object from './object';
-import string from './string';
+import array from './array';
+import tuple from './tuple';
 
 import Schema from './Schema';
 import { isSchema, isSchemaError } from './utils';
@@ -46,6 +47,7 @@ export {
   number,
   object,
   string,
+  tuple,
   any,
   allow,
   reject,
@@ -64,6 +66,7 @@ export default {
   number,
   object,
   string,
+  tuple,
   any,
   allow,
   reject,

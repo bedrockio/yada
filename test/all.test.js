@@ -834,6 +834,47 @@ describe('array', () => {
   });
 });
 
+describe('tuple', () => {
+  it('should validate a tuple of same types', async () => {
+    const schema = yd.tuple(yd.number(), yd.number());
+    await assertPass(schema, [1, 1]);
+    await assertFail(schema, [], ['Tuple must be exactly 2 elements.']);
+    await assertFail(schema, [1], ['Tuple must be exactly 2 elements.']);
+    await assertFail(schema, [1, 1, 1], ['Tuple must be exactly 2 elements.']);
+    await assertFail(schema, [1, '1'], ['Must be a number.']);
+    await assertFail(
+      schema,
+      ['1', '1'],
+      ['Must be a number.', 'Must be a number.']
+    );
+  });
+
+  it('should accept an array', async () => {
+    const schema = yd.tuple([yd.number(), yd.number()]);
+    await assertPass(schema, [1, 1]);
+    await assertFail(schema, [], ['Tuple must be exactly 2 elements.']);
+    await assertFail(schema, [1], ['Tuple must be exactly 2 elements.']);
+    await assertFail(schema, [1, 1, 1], ['Tuple must be exactly 2 elements.']);
+    await assertFail(schema, [1, '1'], ['Must be a number.']);
+    await assertFail(
+      schema,
+      ['1', '1'],
+      ['Must be a number.', 'Must be a number.']
+    );
+  });
+
+  it('should validate a tuple of different types', async () => {
+    const schema = yd.tuple(yd.string(), yd.number());
+    await assertPass(schema, ['str', 1]);
+    await assertFail(schema, [1, 1], ['Must be a string.']);
+    await assertFail(
+      schema,
+      [1, 'str'],
+      ['Must be a string.', 'Must be a number.']
+    );
+  });
+});
+
 describe('date', () => {
   it('should validate an optional date', async () => {
     const schema = yd.date();
@@ -1285,6 +1326,19 @@ describe('toOpenApi', () => {
     expect(schema.toOpenApi()).toEqual({
       type: 'number',
       format: 'unix timestamp',
+    });
+  });
+
+  it('should convert a tuple schema', async () => {
+    const schema = yd.tuple(yd.string(), yd.number());
+    expect(schema.toOpenApi()).toEqual({
+      type: 'array',
+      prefixItems: [
+        {
+          type: 'string',
+        },
+        { type: 'number' },
+      ],
     });
   });
 

@@ -15,6 +15,7 @@ Concepts
   - [Number](#number)
   - [Boolean](#boolean)
   - [Array](#array)
+  - [Tuple](#tuple)
   - [Object](#object)
   - [Date](#date)
 - [Common Methods](#common-methods)
@@ -254,11 +255,27 @@ const schema = yd.array([schemas]);
 
 #### Methods:
 
-- `max` - Length must be less than equal to `n` characters, passed as an
-  argument.
-- `min` - Length must be more than or equal to `n` characters, passed as an
+- `max` - Length must be less than equal to `n` elements.
+- `min` - Length must be more than or equal to `n` elements.
+- `length` - Length must be exactly `n` elements.
 - `latlng` - Must be a 2 element array of numbers that represent latitude (`-90`
   to `90`) and longitude(`-180` to `180`) coordinates.
+
+### Tuple
+
+Tuple schemas are similar to arrays, however they validate the exact length as
+well as types for a given position. Compare the following:
+
+```js
+// Accepts any length of either strings or numbers.
+const schema1 = yd.array(yd.string(), yd.number());
+// Accepts exactly 2 elements. The first MUST be a
+// string and the second MUST be a number.
+const schema2 = yd.tuple(yd.string(), yd.number());
+```
+
+Tuples are appropriate for strictly structured arrays, for example an array of
+coordinates as latitude and longitude.
 
 ## Object
 
