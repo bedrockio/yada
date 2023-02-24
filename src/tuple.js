@@ -23,24 +23,33 @@ class TupleSchema extends Schema {
       return val;
     });
 
-    this.assert('length', (val) => {
+    this.assert('length', (arr, options) => {
+      const { loose } = options;
       const { length } = schemas;
-      if (val.length !== length) {
+      if (loose && arr.length === 0) {
+        // Empty arrays allowed with loose option so take no action.
+      } else if (arr.length !== length) {
         throw new LocalizedError('Tuple must be exactly {length} elements.', {
           length: schemas.length,
         });
       }
-      return val;
+      return arr;
     });
 
     this.assert('elements', async (arr, options) => {
       const errors = [];
       const result = [];
+      const min = Math.min(arr.length, schemas.length);
 
-      for (let i = 0; i < schemas.length; i++) {
+      for (let i = 0; i < min; i++) {
+        let el = arr[i];
         const schema = schemas[i];
-        const el = arr[i];
         try {
+          if (el === undefined) {
+            // Coerce undefined to null to make sure validation
+            // is run but keep the same error message.
+            el = null;
+          }
           result.push(await schema.validate(el, options));
         } catch (error) {
           if (error.details?.length === 1) {
@@ -58,6 +67,10 @@ class TupleSchema extends Schema {
         return result;
       }
     });
+  }
+
+  loose() {
+    return this.clone({ loose: true });
   }
 
   toString() {
