@@ -30,6 +30,19 @@ class StringSchema extends TypeSchema {
   /**
    * @param {number} length
    */
+  length(length) {
+    return this.clone({ length }).assert('length', (str) => {
+      if (str && str.length !== length) {
+        throw new LocalizedError('Must be exactly {length} characters.', {
+          length,
+        });
+      }
+    });
+  }
+
+  /**
+   * @param {number} length
+   */
   min(length) {
     return this.clone({ min: length }).assert('length', (str) => {
       if (str && str.length < length) {

@@ -64,6 +64,13 @@ describe('string', () => {
     await assertFail(schema, 1, ['Must be a string.']);
   });
 
+  it('should validate an exact length', async () => {
+    const schema = yd.string().length(4);
+    await assertPass(schema, 'abcd');
+    await assertFail(schema, 'abc', ['Must be exactly 4 characters.']);
+    await assertFail(schema, 'abcde', ['Must be exactly 4 characters.']);
+  });
+
   it('should validate a minimum length', async () => {
     const schema = yd.string().min(4);
     await assertPass(schema, 'abcd');
