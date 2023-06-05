@@ -1487,6 +1487,21 @@ describe('toOpenApi', () => {
       description: 'My Schema!',
     });
   });
+
+  it('should output a description for passwords', async () => {
+    const schema = yd.string().password({
+      minLength: 12,
+      minNumbers: 3,
+      minSymbols: 2,
+      minLowercase: 1,
+      minUppercase: 0,
+    });
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      description:
+        'A password of at least 12 characters containing 1 lowercase, 3 numbers, and 2 symbols.',
+    });
+  });
 });
 
 describe('options', () => {

@@ -5,13 +5,24 @@ const UPPER_REG = /[A-Z]/g;
 const NUMBER_REG = /[0-9]/g;
 const SYMBOL_REG = /[!@#$%^&*]/g;
 
-export const PASSWORD_DEFAULTS = {
+const PASSWORD_DEFAULTS = {
   minLength: 12,
   minLowercase: 0,
   minUppercase: 0,
   minNumbers: 0,
   minSymbols: 0,
 };
+
+export function getPasswordOptions(options) {
+  options = {
+    ...PASSWORD_DEFAULTS,
+    ...options,
+  };
+  return {
+    ...options,
+    description: generatePasswordDescription(options),
+  };
+}
 
 export function validateLength(expected) {
   return (str = '') => {
@@ -58,4 +69,52 @@ function validateRegex(reg, message) {
       }
     };
   };
+}
+
+function generatePasswordDescription(options) {
+  const { minLength } = options;
+  const contains = generatePasswordContains(options);
+  if (minLength) {
+    const plural = pluralize(minLength, 'character');
+    return `A password of at least ${plural}${contains}.`;
+  } else {
+    return `A password${contains}.`;
+  }
+}
+
+function generatePasswordContains(options) {
+  const { minLowercase, minUppercase, minNumbers, minSymbols } = options;
+  const arr = [];
+  if (minLowercase) {
+    arr.push(`${minLowercase} lowercase`);
+  }
+  if (minUppercase) {
+    arr.push(`${minUppercase} uppercase`);
+  }
+  if (minNumbers) {
+    arr.push(`${pluralize(minNumbers, 'number')}`);
+  }
+  if (minSymbols) {
+    arr.push(`${pluralize(minSymbols, 'symbol')}`);
+  }
+  if (arr.length) {
+    return ` containing ${and(arr)}`;
+  } else {
+    return '';
+  }
+}
+
+function pluralize(n, str) {
+  const s = n === 1 ? '' : 's';
+  return `${n} ${str}${s}`;
+}
+
+function and(arr) {
+  if (arr.length <= 2) {
+    return arr.join(' and ');
+  } else {
+    const last = arr.pop();
+    const joined = arr.join(', ');
+    return `${joined}, and ${last}`;
+  }
 }

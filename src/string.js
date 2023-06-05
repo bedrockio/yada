@@ -2,16 +2,19 @@ import validator from 'validator';
 import TypeSchema from './TypeSchema';
 import { LocalizedError } from './errors';
 import {
-  PASSWORD_DEFAULTS,
   validateLength,
   validateLowercase,
   validateUppercase,
   validateNumbers,
   validateSymbols,
+  getPasswordOptions,
 } from './password';
 
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PHONE_REG = /^\+?[1-9]\d{1,14}$/;
+
+const PHONE_DESCRIPTION =
+  'A phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format.';
 
 class StringSchema extends TypeSchema {
   constructor() {
@@ -131,7 +134,7 @@ class StringSchema extends TypeSchema {
       if (!PHONE_REG.test(str)) {
         throw new LocalizedError('Must be a valid phone number.');
       }
-    });
+    }).description(PHONE_DESCRIPTION);
   }
 
   hex() {
@@ -255,12 +258,16 @@ class StringSchema extends TypeSchema {
    * @param {number} [options.minUppercase]
    */
   password(options = {}) {
-    const { minLength, minNumbers, minSymbols, minLowercase, minUppercase } = {
-      ...PASSWORD_DEFAULTS,
-      ...options,
-    };
+    const {
+      description,
+      minLength,
+      minNumbers,
+      minSymbols,
+      minLowercase,
+      minUppercase,
+    } = getPasswordOptions(options);
 
-    const schema = this.clone();
+    const schema = this.clone().description(description);
 
     if (minLength) {
       schema.assert('password', validateLength(minLength));
