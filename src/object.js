@@ -9,8 +9,12 @@ const BASE_ASSERTIONS = ['type', 'transform', 'field'];
  */
 
 class ObjectSchema extends TypeSchema {
-  constructor(fields) {
-    super(Object, { message: 'Object failed validation.', fields });
+  constructor(fields, meta) {
+    super(Object, {
+      ...meta,
+      fields,
+      message: 'Object failed validation.',
+    });
     this.setup();
   }
 
@@ -24,9 +28,12 @@ class ObjectSchema extends TypeSchema {
       }
     });
     this.transform((obj, options) => {
-      const { fields, stripUnknown } = options;
+      const { fields, stripUnknown, expandDotSyntax } = options;
       if (obj) {
         const result = {};
+        if (expandDotSyntax) {
+          obj = expandDotProperties(obj);
+        }
         for (let key of Object.keys(obj)) {
           if (!fields || key in fields) {
             result[key] = obj[key];
@@ -110,7 +117,10 @@ class ObjectSchema extends TypeSchema {
       ...schema.meta.fields,
     };
 
-    const merged = new ObjectSchema(fields);
+    const merged = new ObjectSchema(fields, {
+      ...this.meta,
+      ...schema.meta,
+    });
 
     const assertions = [...this.assertions, ...schema.assertions];
     for (let assertion of assertions) {
@@ -135,6 +145,28 @@ class ObjectSchema extends TypeSchema {
       }),
     };
   }
+}
+
+function expandDotProperties(obj) {
+  const result = {};
+  for (let [key, val] of Object.entries(obj || {})) {
+    const split = key.split('.');
+    if (split.length > 1) {
+      let node = result;
+      for (let i = 0; i < split.length; i++) {
+        const token = split[i];
+        if (i === split.length - 1) {
+          node[token] = val;
+        } else {
+          node[token] = {};
+        }
+        node = node[token];
+      }
+    } else {
+      result[key] = val;
+    }
+  }
+  return result;
 }
 
 /**

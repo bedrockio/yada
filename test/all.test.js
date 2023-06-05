@@ -583,6 +583,21 @@ describe('object', () => {
     await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
   });
 
+  it('should keep options when appending', async () => {
+    const schema1 = yd
+      .object({
+        foo: yd.string().required(),
+      })
+      .options({
+        stripUnknown: true,
+      });
+    const schema2 = {
+      bar: yd.string().required(),
+    };
+    const schema = schema1.append(schema2);
+    await assertPass(schema, { foo: 'foo', bar: 'bar', baz: 'baz' });
+  });
+
   it('should not merge default values', async () => {
     const schema = yd
       .object({
@@ -1712,6 +1727,33 @@ describe('options', () => {
           b: 'b',
         },
         ['Must be a number.']
+      );
+    });
+  });
+
+  describe('expandDotSyntax', () => {
+    it('should blajdfalksj', async () => {
+      const schema = yd.object({
+        profile: yd.object({
+          name: yd.string(),
+        }),
+      });
+
+      const options = {
+        expandDotSyntax: true,
+      };
+
+      await assertPass(
+        schema,
+        {
+          'profile.name': 'foo',
+        },
+        {
+          profile: {
+            name: 'foo',
+          },
+        },
+        options
       );
     });
   });
