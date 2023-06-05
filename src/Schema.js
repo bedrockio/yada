@@ -190,15 +190,9 @@ export default class Schema {
   toOpenApi(extra) {
     const { required, format, tags, default: defaultValue } = this.meta;
     return {
-      ...(required && {
-        required: true,
-      }),
-      ...(defaultValue && {
-        default: defaultValue,
-      }),
-      ...(format && {
-        format,
-      }),
+      required,
+      default: defaultValue,
+      format,
       ...this.enumToOpenApi(),
       ...tags,
       ...extra,
