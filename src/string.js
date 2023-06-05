@@ -11,7 +11,7 @@ import {
 } from './password';
 
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const PHONE_REG = /^\+?[1-9]\d{1,14}$/;
+const PHONE_REG = /^\+\d{1,3}\d{3,14}$/;
 
 const PHONE_DESCRIPTION =
   'A phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format.';

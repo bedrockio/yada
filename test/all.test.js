@@ -94,6 +94,7 @@ describe('string', () => {
     const schema = yd.string().phone();
     await assertPass(schema, undefined);
     await assertPass(schema, '+16175551212');
+    await assertFail(schema, '6175551212', ['Must be a valid phone number.']);
     await assertFail(schema, '+1', ['Must be a valid phone number.']);
     await assertFail(schema, 'foo', ['Must be a valid phone number.']);
   });
