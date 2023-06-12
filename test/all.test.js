@@ -1503,6 +1503,13 @@ describe('toOpenApi', () => {
         'A password of at least 12 characters containing 1 lowercase, 3 numbers, and 2 symbols.',
     });
   });
+
+  it('should not fail on date with no format', async () => {
+    expect(yd.date().toOpenApi()).toEqual({
+      type: 'string',
+      format: 'date-time',
+    });
+  });
 });
 
 describe('options', () => {
