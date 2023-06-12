@@ -136,7 +136,7 @@ class ObjectSchema extends TypeSchema {
   toOpenApi(extra) {
     const properties = {};
     for (let [key, schema] of Object.entries(this.getFields())) {
-      properties[key] = schema.toOpenApi();
+      properties[key] = schema.toOpenApi(extra);
     }
     return {
       ...super.toOpenApi(extra),

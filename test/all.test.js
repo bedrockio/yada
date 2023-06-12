@@ -1510,6 +1510,32 @@ describe('toOpenApi', () => {
       format: 'date-time',
     });
   });
+
+  it('should allow a recursive function to tag inner fields', async () => {
+    const schema = yd.object({
+      start: yd.date().iso(),
+    });
+
+    const result = schema.toOpenApi({
+      tag: (meta) => {
+        if (meta.format === 'date-time') {
+          return {
+            'x-schema': 'DateTime',
+          };
+        }
+      },
+    });
+    expect(result).toEqual({
+      type: 'object',
+      properties: {
+        start: {
+          type: 'string',
+          format: 'date-time',
+          'x-schema': 'DateTime',
+        },
+      },
+    });
+  });
 });
 
 describe('options', () => {

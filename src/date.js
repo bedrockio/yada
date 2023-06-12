@@ -5,7 +5,7 @@ import Schema from './Schema';
 
 class DateSchema extends Schema {
   constructor() {
-    super({ format: 'date-time' });
+    super({ type: 'string', format: 'date-time' });
     this.assert('type', (val) => {
       const date = new Date(val);
       if ((!val && val !== 0) || isNaN(date.getTime())) {

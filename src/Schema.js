@@ -193,10 +193,18 @@ export default class Schema {
       required,
       default: defaultValue,
       format,
-      ...this.enumToOpenApi(),
       ...tags,
-      ...extra,
+      ...this.enumToOpenApi(),
+      ...this.expandExtra(extra),
     };
+  }
+
+  expandExtra(extra = {}) {
+    const { tag, ...rest } = extra;
+    if (typeof extra?.tag === 'function') {
+      Object.assign(rest, extra.tag(this.meta));
+    }
+    return rest;
   }
 
   // Private
