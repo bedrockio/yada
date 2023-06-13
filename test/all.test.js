@@ -558,66 +558,6 @@ describe('object', () => {
     });
   });
 
-  it('should allow appending an object schema', async () => {
-    const schema1 = yd.object({
-      foo: yd.string().required(),
-    });
-    const schema2 = yd.object({
-      bar: yd.string().required(),
-    });
-    const schema = schema1.append(schema2);
-    await assertPass(schema, { foo: 'foo', bar: 'bar' });
-    await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
-    await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
-  });
-
-  it('should allow appending a plain object', async () => {
-    const schema1 = yd.object({
-      foo: yd.string().required(),
-    });
-    const schema2 = {
-      bar: yd.string().required(),
-    };
-    const schema = schema1.append(schema2);
-    await assertPass(schema, { foo: 'foo', bar: 'bar' });
-    await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
-    await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
-  });
-
-  it('should keep options when appending', async () => {
-    const schema1 = yd
-      .object({
-        foo: yd.string().required(),
-      })
-      .options({
-        stripUnknown: true,
-      });
-    const schema2 = {
-      bar: yd.string().required(),
-    };
-    const schema = schema1.append(schema2);
-    await assertPass(schema, { foo: 'foo', bar: 'bar', baz: 'baz' });
-  });
-
-  it('should not merge default values', async () => {
-    const schema = yd
-      .object({
-        a: yd.string(),
-      })
-      .append(
-        yd.object({
-          nested: yd
-            .object({
-              b: yd.string(),
-            })
-            .default({
-              b: 'c',
-            }),
-        })
-      );
-    await assertPass(schema, { a: 'a' });
-  });
-
   it('should pass through all options to nested schemas', async () => {
     let foo;
     const schema = yd.object({
@@ -650,6 +590,174 @@ describe('object', () => {
   it('should not allow unknown fields for empty objects', async () => {
     const schema = yd.object({});
     await assertFail(schema, { foo: 'bar' }, ['Unknown field "foo".']);
+  });
+
+  describe('append', () => {
+    it('should allow appending an object schema', async () => {
+      const schema1 = yd.object({
+        foo: yd.string().required(),
+      });
+      const schema2 = yd.object({
+        bar: yd.string().required(),
+      });
+      const schema = schema1.append(schema2);
+      await assertPass(schema, { foo: 'foo', bar: 'bar' });
+      await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
+      await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
+    });
+
+    it('should allow appending a plain object', async () => {
+      const schema1 = yd.object({
+        foo: yd.string().required(),
+      });
+      const schema2 = {
+        bar: yd.string().required(),
+      };
+      const schema = schema1.append(schema2);
+      await assertPass(schema, { foo: 'foo', bar: 'bar' });
+      await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
+      await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
+    });
+
+    it('should keep options when appending', async () => {
+      const schema1 = yd
+        .object({
+          foo: yd.string().required(),
+        })
+        .options({
+          stripUnknown: true,
+        });
+      const schema2 = {
+        bar: yd.string().required(),
+      };
+      const schema = schema1.append(schema2);
+      await assertPass(schema, { foo: 'foo', bar: 'bar', baz: 'baz' });
+    });
+
+    it('should not merge default values', async () => {
+      const schema = yd
+        .object({
+          a: yd.string(),
+        })
+        .append(
+          yd.object({
+            nested: yd
+              .object({
+                b: yd.string(),
+              })
+              .default({
+                b: 'c',
+              }),
+          })
+        );
+      await assertPass(schema, { a: 'a' });
+    });
+  });
+
+  describe('pick', () => {
+    it('should be able to pick fields with arguments', async () => {
+      const schema = yd
+        .object({
+          firstName: yd.string(),
+          lastName: yd.string(),
+        })
+        .pick('firstName');
+      await assertPass(schema, { firstName: 'Foo' });
+      await assertFail(
+        schema,
+        {
+          firstName: 'Foo',
+          lastName: 'Bar',
+        },
+        ['Unknown field "lastName".']
+      );
+      await assertFail(schema, { lastName: 'Bar' }, [
+        'Unknown field "lastName".',
+      ]);
+    });
+
+    it('should be able to pick fields with array', async () => {
+      const schema = yd
+        .object({
+          age: yd.number().required(),
+          firstName: yd.string().required(),
+          lastName: yd.string().required(),
+        })
+        .pick(['firstName', 'lastName']);
+      await assertPass(schema, {
+        firstName: 'Foo',
+        lastName: 'Bar',
+      });
+      await assertFail(
+        schema,
+        {
+          age: 25,
+        },
+        ['Unknown field "age".']
+      );
+      await assertFail(
+        schema,
+        {
+          firstName: 'Foo',
+          lastName: 'Bar',
+          age: 25,
+        },
+        ['Unknown field "age".']
+      );
+    });
+  });
+
+  describe('omit', () => {
+    it('should be able to omit fields with arguments', async () => {
+      const schema = yd
+        .object({
+          firstName: yd.string(),
+          lastName: yd.string(),
+        })
+        .omit('firstName');
+      await assertPass(schema, { lastName: 'Bar' });
+      await assertFail(
+        schema,
+        {
+          firstName: 'Foo',
+          lastName: 'Bar',
+        },
+        ['Unknown field "firstName".']
+      );
+      await assertFail(schema, { firstName: 'Bar' }, [
+        'Unknown field "firstName".',
+      ]);
+    });
+
+    it('should be able to omit fields with array', async () => {
+      const schema = yd
+        .object({
+          age: yd.number().required(),
+          firstName: yd.string().required(),
+          lastName: yd.string().required(),
+        })
+        .omit(['firstName', 'lastName']);
+      await assertPass(schema, {
+        age: 25,
+      });
+      await assertFail(
+        schema,
+        {
+          age: 25,
+          firstName: 'Foo',
+        },
+        ['Unknown field "firstName".']
+      );
+      await assertFail(
+        schema,
+        {
+          age: 25,
+          firstName: 'Foo',
+          lastName: 'Bar',
+        },
+        ['Unknown field "firstName".']
+      );
+    });
   });
 });
 

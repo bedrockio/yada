@@ -21,6 +21,7 @@ Concepts
 - [Common Methods](#common-methods)
   - [Allow](#allow)
   - [Reject](#reject)
+  - [Append](#append)
   - [Custom](#custom)
   - [Default](#default)
   - [Strip](#strip)
@@ -316,6 +317,25 @@ const schema = yd
     // ...
   })
   .required();
+```
+
+### Choosing Fields
+
+Object schemas also have a `pick` and `omit` method that allows custom field
+selection. These methods accept an array of field names or enumerated arguments:
+
+```js
+const schema = yd.object({
+  firstName: yd.string().required(),
+  lastName: yd.string().required(),
+  dob: yd.date(),
+});
+
+// Includes "firstName" and "lastName" but omits "dob".
+schema.pick(['firstName', 'lastName']);
+
+// Excludes "firstName" and "lastName" but keeps "dob".
+schema.omit('firstName', 'lastName');
 ```
 
 ## Date

@@ -133,6 +133,34 @@ class ObjectSchema extends TypeSchema {
     return merged;
   }
 
+  /**
+   * @param {...string} [names] Names to include.
+   */
+  pick(...names) {
+    if (Array.isArray(names[0])) {
+      names = names[0];
+    }
+    const fields = pick(this.meta.fields, names);
+
+    return new ObjectSchema(fields, {
+      ...this.meta,
+    });
+  }
+
+  /**
+   * @param {...string} [names] Names to exclude.
+   */
+  omit(...names) {
+    if (Array.isArray(names[0])) {
+      names = names[0];
+    }
+    const fields = omit(this.meta.fields, names);
+
+    return new ObjectSchema(fields, {
+      ...this.meta,
+    });
+  }
+
   toOpenApi(extra) {
     const properties = {};
     for (let [key, schema] of Object.entries(this.getFields())) {
@@ -164,6 +192,24 @@ function expandDotProperties(obj) {
       }
     } else {
       result[key] = val;
+    }
+  }
+  return result;
+}
+
+function pick(obj, keys) {
+  const result = {};
+  for (let key of keys) {
+    result[key] = obj[key];
+  }
+  return result;
+}
+
+function omit(obj, keys) {
+  const result = {};
+  for (let key of Object.keys(obj || {})) {
+    if (!keys.includes(key)) {
+      result[key] = obj[key];
     }
   }
   return result;
