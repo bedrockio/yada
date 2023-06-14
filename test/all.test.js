@@ -2022,6 +2022,34 @@ describe('other', () => {
       });
     }
   });
+
+  it('should be able to inspect a schema', async () => {
+    const schema = yd.object({
+      profile: yd.object({
+        firstName: yd.string(),
+        lastName: yd.string(),
+      }),
+    });
+    const expected = `
+{
+  "type": "object",
+  "properties": {
+    "profile": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+    `;
+    expect(schema.inspect()).toBe(expected.trim());
+  });
 });
 
 describe('getFullMessage', () => {

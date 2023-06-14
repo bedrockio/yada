@@ -199,6 +199,10 @@ export default class Schema {
     };
   }
 
+  inspect() {
+    return JSON.stringify(this.toOpenApi(), null, 2);
+  }
+
   expandExtra(extra = {}) {
     const { tag, ...rest } = extra;
     if (typeof extra?.tag === 'function') {
