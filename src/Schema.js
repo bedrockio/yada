@@ -232,8 +232,7 @@ export default class Schema {
         for (let el of set) {
           if (isSchema(el)) {
             try {
-              await el.validate(val, options);
-              return;
+              return await el.validate(val, options);
             } catch (error) {
               continue;
             }

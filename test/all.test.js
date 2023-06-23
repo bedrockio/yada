@@ -2050,6 +2050,23 @@ describe('other', () => {
     `;
     expect(schema.inspect()).toBe(expected.trim());
   });
+
+  it('should be able to coerce an object inside allow', async () => {
+    const schema = yd.allow(
+      yd.string(),
+      yd
+        .object({
+          id: yd.string(),
+        })
+        .custom((obj) => {
+          return obj.id;
+        })
+    );
+    const result = await schema.validate({
+      id: 'fake id',
+    });
+    expect(result).toBe('fake id');
+  });
 });
 
 describe('getFullMessage', () => {
