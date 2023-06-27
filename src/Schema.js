@@ -5,6 +5,7 @@ import {
   LocalizedError,
   ArrayError,
 } from './errors';
+import { omit } from './utils';
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform'];
 const REQUIRED_TYPES = ['default', 'required'];
@@ -232,6 +233,10 @@ export default class Schema {
         for (let el of set) {
           if (isSchema(el)) {
             try {
+              // Must not pass cast option down when allowing
+              // other schema types as they may be allowed, for
+              // example allowing a string or array of strings.
+              options = omit(options, 'cast');
               return await el.validate(val, options);
             } catch (error) {
               continue;

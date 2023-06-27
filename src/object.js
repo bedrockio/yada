@@ -1,5 +1,6 @@
 import TypeSchema from './TypeSchema';
 import { FieldError, LocalizedError } from './errors';
+import { pick, omit } from './utils';
 import Schema from './Schema';
 
 const BASE_ASSERTIONS = ['type', 'transform', 'field'];
@@ -192,24 +193,6 @@ function expandDotProperties(obj) {
       }
     } else {
       result[key] = val;
-    }
-  }
-  return result;
-}
-
-function pick(obj, keys) {
-  const result = {};
-  for (let key of keys) {
-    result[key] = obj[key];
-  }
-  return result;
-}
-
-function omit(obj, keys) {
-  const result = {};
-  for (let key of Object.keys(obj || {})) {
-    if (!keys.includes(key)) {
-      result[key] = obj[key];
     }
   }
   return result;

@@ -1851,6 +1851,24 @@ describe('options', () => {
       await assertPass(schema, '1', '1', options);
       await assertPass(schema, 1, '1', options);
     });
+
+    it('should not cast when multiple are allowed', async () => {
+      const schema = yd.object({
+        include: yd.allow(yd.string(), yd.array(yd.string())),
+      });
+
+      const result = await schema.validate(
+        {
+          include: ['foo', 'bar'],
+        },
+        {
+          cast: true,
+        }
+      );
+      expect(result).toEqual({
+        include: ['foo', 'bar'],
+      });
+    });
   });
 
   describe('chaining', () => {
