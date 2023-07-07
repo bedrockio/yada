@@ -397,6 +397,11 @@ describe('allow', () => {
     await assertFail(schema, true, ['Must be one of [string, number].']);
     await assertFail(schema, null, ['Must be one of [string, number].']);
   });
+
+  it('should be able to pass custom message', async () => {
+    const schema = yd.allow('one', 'two').message('Must be one or two.');
+    await assertFail(schema, 'three', ['Must be one or two.']);
+  });
 });
 
 describe('reject', () => {

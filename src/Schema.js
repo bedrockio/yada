@@ -245,7 +245,7 @@ export default class Schema {
             return;
           }
         }
-        throw new LocalizedError(msg, {
+        throw new LocalizedError(options.message || msg, {
           types: types.join(', '),
         });
       }

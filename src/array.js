@@ -1,5 +1,6 @@
 import Schema from './Schema';
 import { ArrayError, ElementError, LocalizedError } from './errors';
+import { omit } from './utils';
 
 class ArraySchema extends Schema {
   constructor(schemas) {
@@ -11,7 +12,7 @@ class ArraySchema extends Schema {
    * @private
    */
   setup() {
-    const { schemas } = this.meta;
+    const { schemas, message } = this.meta;
     const schema =
       schemas.length > 1 ? new Schema().allow(schemas) : schemas[0];
 
@@ -32,6 +33,9 @@ class ArraySchema extends Schema {
         for (let i = 0; i < arr.length; i++) {
           const el = arr[i];
           try {
+            // Allow enum message to take
+            // precedence over generic array message.
+            options = omit(options, 'message');
             result.push(await schema.validate(el, options));
           } catch (error) {
             if (error.details?.length === 1) {
@@ -44,7 +48,7 @@ class ArraySchema extends Schema {
           }
         }
         if (errors.length) {
-          throw new ArrayError(this.meta.message, errors);
+          throw new ArrayError(message, errors);
         } else {
           return result;
         }
