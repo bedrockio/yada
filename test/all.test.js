@@ -52,6 +52,7 @@ describe('string', () => {
   it('should validate an optional string', async () => {
     const schema = yd.string();
     await assertPass(schema, 'a');
+    await assertPass(schema, '');
     await assertPass(schema, undefined);
     await assertFail(schema, null, ['Must be a string.']);
     await assertFail(schema, 1, ['Must be a string.']);
@@ -60,6 +61,7 @@ describe('string', () => {
   it('should validate a required string', async () => {
     const schema = yd.string().required();
     await assertPass(schema, 'a');
+    await assertFail(schema, '', ['String may not be empty.']);
     await assertFail(schema, undefined, ['Value is required.']);
     await assertFail(schema, 1, ['Must be a string.']);
   });
