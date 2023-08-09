@@ -766,6 +766,14 @@ describe('object', () => {
       );
     });
   });
+
+  it('should explicitly fail keys are not schemas', async () => {
+    expect(() => {
+      yd.object({
+        name: 'foo',
+      });
+    }).toThrow('Key "name" must be a schema');
+  });
 });
 
 describe('custom', () => {

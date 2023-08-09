@@ -1,7 +1,7 @@
 import TypeSchema from './TypeSchema';
 import { FieldError, LocalizedError } from './errors';
 import { pick, omit } from './utils';
-import Schema from './Schema';
+import Schema, { isSchema } from './Schema';
 
 const BASE_ASSERTIONS = ['type', 'transform', 'field'];
 
@@ -49,6 +49,9 @@ class ObjectSchema extends TypeSchema {
       }
     });
     for (let [key, schema] of Object.entries(this.getFields())) {
+      if (!isSchema(schema)) {
+        throw new Error(`Key "${key}" must be a schema`);
+      }
       this.assert('field', async (obj, options) => {
         if (obj) {
           const { path = [] } = options;
