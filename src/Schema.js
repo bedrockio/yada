@@ -37,10 +37,11 @@ export default class Schema {
    * Sets the schema default. [Link](https://github.com/bedrockio/yada#default)
    * @returns {this}
    */
-  default(value) {
-    return this.clone({ default: value }).assert('default', (val) => {
+  default(arg) {
+    const getDefaultValue = typeof arg === 'function' ? arg : () => arg;
+    return this.clone({ default: arg }).assert('default', (val) => {
       if (val === undefined) {
-        return value;
+        return getDefaultValue();
       }
     });
   }

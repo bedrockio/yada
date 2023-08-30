@@ -1193,6 +1193,16 @@ describe('default', () => {
     expect(await schema.validate({ a: 'b' })).toEqual({ a: 'b' });
     expect(await schema.validate({ b: 'b' })).toEqual({ a: 'a', b: 'b' });
   });
+
+  it('should allow passing a function for a default', async () => {
+    const schema = yd.any().default(() => {
+      return 'a';
+    });
+    expect(await schema.validate()).toBe('a');
+    expect(await schema.validate(undefined)).toBe('a');
+    expect(await schema.validate(null)).toBe(null);
+    expect(await schema.validate('b')).toBe('b');
+  });
 });
 
 describe('append', () => {

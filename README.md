@@ -527,6 +527,13 @@ console.log(await schema.validate()); // "hi!"
 console.log(await schema.validate('hello!')); // "hello!"
 ```
 
+Note that the argument passed to default may also be a function:
+
+```js
+const schema = yd.string().default(Date.now);
+console.log(await schema.validate()); // Returns current timestamp
+```
+
 ### Strip
 
 The `strip` method serves as a way to conditionally exclude fields when the
