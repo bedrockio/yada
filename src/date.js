@@ -101,7 +101,9 @@ class DateSchema extends Schema {
     return this.clone({ format }).assert('format', (val, options) => {
       const { original } = options;
       if (typeof original !== 'string') {
-        throw new LocalizedError('Must be a string.');
+        if (!options.default) {
+          throw new LocalizedError('Must be a string.');
+        }
       } else if (!validator.isISO8601(original)) {
         throw new LocalizedError('Must be in ISO 8601 format.');
       }
@@ -111,8 +113,9 @@ class DateSchema extends Schema {
   timestamp() {
     return this.clone({ format: 'timestamp' }).assert(
       'format',
-      (date, { original }) => {
-        if (typeof original !== 'number') {
+      (date, options) => {
+        const { original } = options;
+        if (typeof original !== 'number' && !options.default) {
           throw new LocalizedError('Must be a timestamp in milliseconds.');
         }
       }
@@ -122,9 +125,12 @@ class DateSchema extends Schema {
   unix() {
     return this.clone({ format: 'unix timestamp' }).assert(
       'format',
-      (date, { original }) => {
+      (date, options) => {
+        const { original } = options;
         if (typeof original !== 'number') {
-          throw new LocalizedError('Must be a timestamp in seconds.');
+          if (!options.default) {
+            throw new LocalizedError('Must be a timestamp in seconds.');
+          }
         } else {
           return new Date(original * 1000);
         }

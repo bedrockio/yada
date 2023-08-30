@@ -1170,6 +1170,19 @@ describe('date', () => {
     const val = await schema.validate(now.getTime() / 1000);
     expect(val).toEqual(now);
   });
+
+  it('should not imply formatting constraints on a default value', async () => {
+    let schema;
+
+    schema = yd.date().iso().default(Date.now);
+    expect(await schema.validate()).toBeInstanceOf(Date);
+
+    schema = yd.date().timestamp().default(Date.now);
+    expect(await schema.validate()).toBeInstanceOf(Date);
+
+    schema = yd.date().unix().default(Date.now);
+    expect(await schema.validate()).toBeInstanceOf(Date);
+  });
 });
 
 describe('default', () => {
@@ -1202,6 +1215,15 @@ describe('default', () => {
     expect(await schema.validate(undefined)).toBe('a');
     expect(await schema.validate(null)).toBe(null);
     expect(await schema.validate('b')).toBe('b');
+  });
+
+  it('should allow passing Date.now', async () => {
+    const schema = yd.date().default(Date.now);
+    expect(await schema.validate()).toBeInstanceOf(Date);
+    expect(await schema.validate(undefined)).toBeInstanceOf(Date);
+    expect(await schema.validate('2020-01-01T00:00:00.000Z')).toEqual(
+      new Date('2020-01-01T00:00:00.000Z')
+    );
   });
 });
 

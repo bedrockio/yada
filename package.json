@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/yada",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "description": "Validation library inspired by Joi.",
   "scripts": {
     "test": "jest",
