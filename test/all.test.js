@@ -1691,6 +1691,27 @@ describe('toOpenApi', () => {
       },
     });
   });
+
+  it('should make a best effort to describe custom date defaults', async () => {
+    expect(yd.date().default(Date.now).toOpenApi()).toEqual({
+      type: 'string',
+      format: 'date-time',
+      default: 'now',
+    });
+
+    expect(
+      yd
+        .date()
+        .default(() => {
+          return new Date();
+        })
+        .toOpenApi()
+    ).toEqual({
+      type: 'string',
+      format: 'date-time',
+      default: 'custom',
+    });
+  });
 });
 
 describe('options', () => {

@@ -190,15 +190,24 @@ export default class Schema {
   }
 
   toOpenApi(extra) {
-    const { required, format, tags, default: defaultValue } = this.meta;
+    const { required, format, tags } = this.meta;
     return {
       required,
-      default: defaultValue,
       format,
       ...tags,
+      ...this.getDefault(),
       ...this.enumToOpenApi(),
       ...this.expandExtra(extra),
     };
+  }
+
+  getDefault() {
+    const { default: defaultValue } = this.meta;
+    if (typeof defaultValue === 'function') {
+      return {};
+    } else {
+      return { default: defaultValue };
+    }
   }
 
   inspect() {

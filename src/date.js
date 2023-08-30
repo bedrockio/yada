@@ -149,6 +149,17 @@ class DateSchema extends Schema {
       ...super.toOpenApi(extra),
     };
   }
+
+  getDefault() {
+    const { default: defaultValue } = this.meta;
+    if (defaultValue === Date.now) {
+      return { default: 'now' };
+    } else if (typeof defaultValue === 'function') {
+      return { default: 'custom' };
+    } else {
+      return super.getDefault();
+    }
+  }
 }
 
 /**
