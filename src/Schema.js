@@ -205,8 +205,10 @@ export default class Schema {
     const { default: defaultValue } = this.meta;
     if (typeof defaultValue === 'function') {
       return {};
-    } else {
-      return { default: defaultValue };
+    } else if (defaultValue != null) {
+      return {
+        default: defaultValue,
+      };
     }
   }
 
