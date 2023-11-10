@@ -1465,6 +1465,32 @@ describe('toOpenApi', () => {
     });
   });
 
+  it('should convert a mixed type schema', async () => {
+    expect(yd.any().toOpenApi()).toEqual({
+      type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+    });
+    expect(yd.array(yd.any()).toOpenApi()).toEqual({
+      type: 'array',
+      items: {
+        type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+      },
+    });
+    expect(
+      yd
+        .object({
+          any: yd.any(),
+        })
+        .toOpenApi()
+    ).toEqual({
+      type: 'object',
+      properties: {
+        any: {
+          type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+        },
+      },
+    });
+  });
+
   it('should convert enum types', async () => {
     const schema = yd.allow(yd.string(), yd.array(yd.string()));
     expect(schema.toOpenApi()).toEqual({

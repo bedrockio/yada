@@ -80,8 +80,8 @@ class TupleSchema extends Schema {
   toOpenApi(extra) {
     const { schemas } = this.meta;
     return {
-      type: 'array',
       ...super.toOpenApi(extra),
+      type: 'array',
       prefixItems: schemas.map((schema) => {
         return schema.toOpenApi();
       }),

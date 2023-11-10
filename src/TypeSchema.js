@@ -16,8 +16,8 @@ export default class TypeSchema extends Schema {
 
   toOpenApi(extra) {
     return {
-      type: this.meta.type,
       ...super.toOpenApi(extra),
+      type: this.meta.type,
     };
   }
 }

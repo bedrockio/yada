@@ -145,8 +145,8 @@ class DateSchema extends Schema {
   toOpenApi(extra) {
     const { format } = this.meta;
     return {
-      type: format.includes('timestamp') ? 'number' : 'string',
       ...super.toOpenApi(extra),
+      type: format.includes('timestamp') ? 'number' : 'string',
     };
   }
 

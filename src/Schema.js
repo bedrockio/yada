@@ -195,10 +195,20 @@ export default class Schema {
       required,
       format,
       ...tags,
+      ...this.getAnyType(),
       ...this.getDefault(),
       ...this.enumToOpenApi(),
       ...this.expandExtra(extra),
     };
+  }
+
+  getAnyType() {
+    const { type, enum: set } = this.meta;
+    if (!type && !set) {
+      return {
+        type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+      };
+    }
   }
 
   getDefault() {
