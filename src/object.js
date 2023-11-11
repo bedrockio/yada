@@ -76,17 +76,12 @@ class ObjectSchema extends TypeSchema {
               };
             }
           } catch (error) {
-            if (error.details?.length === 1) {
-              const { message, original } = error.details[0];
-              throw new FieldError(message, key, original);
-            } else {
-              throw new FieldError(
-                'Field failed validation.',
-                key,
-                error.original,
-                error.details
-              );
-            }
+            throw new FieldError(
+              'Field failed validation.',
+              key,
+              error.original,
+              error.details
+            );
           }
         }
       });

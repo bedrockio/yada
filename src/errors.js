@@ -20,11 +20,34 @@ export class ValidationError extends Error {
   }
 
   toJSON() {
-    return {
-      type: this.type,
-      message: this.message,
-      details: this.details,
-    };
+    if (this.canRollup()) {
+      const [first] = this.details;
+      return {
+        type: this.type,
+        message: first.message,
+      };
+    } else {
+      return {
+        type: this.type,
+        message: this.message,
+        details: this.details.map((error) => {
+          return error.toJSON();
+        }),
+      };
+    }
+  }
+
+  canRollup() {
+    const { details } = this;
+    if (this.isFieldType() && details.length === 1) {
+      return !details[0].isFieldType?.();
+    } else {
+      return false;
+    }
+  }
+
+  isFieldType() {
+    return this.type === 'field' || this.type === 'element';
   }
 
   getFullMessage(options) {
@@ -45,23 +68,24 @@ export class FieldError extends ValidationError {
 
   toJSON() {
     return {
-      field: this.field,
       ...super.toJSON(),
+      field: this.field,
     };
   }
 }
 
 export class ElementError extends ValidationError {
-  constructor(message, index, details) {
+  constructor(message, index, original, details) {
     super(message, details, 'element');
     this.index = index;
+    this.original = original;
     this.details = details;
   }
 
   toJSON() {
     return {
-      index: this.index,
       ...super.toJSON(),
+      index: this.index,
     };
   }
 }

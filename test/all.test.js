@@ -907,10 +907,22 @@ describe('array', () => {
     try {
       await schema.validate([1, 2]);
     } catch (error) {
-      expect(error.details).toEqual([
-        new Error('Must be a string.'),
-        new Error('Must be a string.'),
-      ]);
+      expect(error.toJSON()).toEqual({
+        type: 'validation',
+        message: 'Array failed validation.',
+        details: [
+          {
+            type: 'element',
+            message: 'Must be a string.',
+            index: 0,
+          },
+          {
+            type: 'element',
+            message: 'Must be a string.',
+            index: 1,
+          },
+        ],
+      });
     }
   });
 
@@ -1291,7 +1303,7 @@ describe('serialization', () => {
     } catch (err) {
       error = err;
     }
-    expect(JSON.parse(JSON.stringify(error))).toEqual({
+    expect(error.toJSON()).toEqual({
       type: 'validation',
       message: 'Object failed validation.',
       details: [
@@ -2028,7 +2040,7 @@ describe('options', () => {
   });
 });
 
-describe('other', () => {
+describe('errors', () => {
   it('should provide a default error message', async () => {
     await assertErrorMessage(yd.string(), 3, 'Input failed validation.');
     await assertErrorMessage(yd.object(), 3, 'Object failed validation.');
@@ -2039,6 +2051,111 @@ describe('other', () => {
     await assertErrorMessage(schema, 3, 'Needs a string');
   });
 
+  it('should expose original error', async () => {
+    const err = new Error('Bad!');
+    const schema = yd.custom(() => {
+      throw err;
+    });
+    try {
+      await schema.validate('test');
+    } catch (error) {
+      expect(error.details[0].original).toBe(err);
+      expect(error.toJSON()).toEqual({
+        type: 'validation',
+        message: 'Input failed validation.',
+        details: [
+          {
+            message: 'Bad!',
+            type: 'custom',
+          },
+        ],
+      });
+    }
+  });
+
+  it('should expose original error on field', async () => {
+    const err = new Error('Bad!');
+    const schema = yd.object({
+      a: yd.custom(() => {
+        throw err;
+      }),
+    });
+    try {
+      await schema.validate({
+        a: 'test',
+      });
+    } catch (error) {
+      expect(error.details[0].details[0].original).toBe(err);
+      expect(error.toJSON()).toEqual({
+        type: 'validation',
+        message: 'Object failed validation.',
+        details: [
+          {
+            type: 'field',
+            field: 'a',
+            message: 'Bad!',
+          },
+        ],
+      });
+    }
+  });
+
+  it('should have correct error messages for complex nested schema', async () => {
+    const schema = yd.object({
+      fields: yd.array(
+        yd.object({
+          images: yd.array(
+            yd.object({
+              name: yd.string(),
+            })
+          ),
+        })
+      ),
+    });
+    try {
+      await schema.validate({
+        fields: [
+          {
+            images: {
+              name: 'foo',
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      expect(error.getFullMessage()).toBe(
+        '"fields.0.images" must be an array.'
+      );
+      expect(error.toJSON()).toEqual({
+        type: 'validation',
+        message: 'Object failed validation.',
+        details: [
+          {
+            type: 'field',
+            message: 'Field failed validation.',
+            field: 'fields',
+            details: [
+              {
+                type: 'element',
+                index: 0,
+                message: 'Element failed validation.',
+                details: [
+                  {
+                    type: 'field',
+                    message: 'Must be an array.',
+                    field: 'images',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    }
+  });
+});
+
+describe('other', () => {
   it('should have access to root object', async () => {
     const schema = yd.object({
       a: yd.array(yd.number()),
@@ -2084,55 +2201,6 @@ describe('other', () => {
     await assertPass(schema, undefined, 'foo@bar.com');
     await assertPass(schema, 'bar@foo.com', 'bar@foo.com');
     await assertPass(schema, 'BAR@foo.com', 'BAR@foo.com');
-  });
-
-  it('should expose original error', async () => {
-    const err = new Error('Bad!');
-    const schema = yd.custom(() => {
-      throw err;
-    });
-    try {
-      await schema.validate('test');
-    } catch (error) {
-      expect(error.details[0].original).toBe(err);
-      expect(JSON.parse(JSON.stringify(error))).toEqual({
-        type: 'validation',
-        message: 'Input failed validation.',
-        details: [
-          {
-            message: 'Bad!',
-            type: 'custom',
-          },
-        ],
-      });
-    }
-  });
-
-  it('should expose original error on field', async () => {
-    const err = new Error('Bad!');
-    const schema = yd.object({
-      a: yd.custom(() => {
-        throw err;
-      }),
-    });
-    try {
-      await schema.validate({
-        a: 'test',
-      });
-    } catch (error) {
-      expect(error.details[0].original).toBe(err);
-      expect(JSON.parse(JSON.stringify(error))).toEqual({
-        type: 'validation',
-        message: 'Object failed validation.',
-        details: [
-          {
-            type: 'field',
-            field: 'a',
-            message: 'Bad!',
-          },
-        ],
-      });
-    }
   });
 
   it('should be able to inspect a schema', async () => {
@@ -2347,7 +2415,9 @@ describe('localization', () => {
     } catch (err) {
       error = err;
     }
-    expect(error.details[0].message).toBe('Deve contenere almeno 6 caratteri.');
+    expect(error.details[0].details[0].message).toBe(
+      'Deve contenere almeno 6 caratteri.'
+    );
   });
 
   it('should be able to inspect localization message', async () => {

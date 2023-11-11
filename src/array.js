@@ -38,13 +38,14 @@ class ArraySchema extends Schema {
             options = omit(options, 'message');
             result.push(await schema.validate(el, options));
           } catch (error) {
-            if (error.details?.length === 1) {
-              errors.push(new ElementError(error.details[0].message, i));
-            } else {
-              errors.push(
-                new ElementError('Element failed validation.', i, error.details)
-              );
-            }
+            errors.push(
+              new ElementError(
+                'Element failed validation.',
+                i,
+                error.original,
+                error.details
+              )
+            );
           }
         }
         if (errors.length) {

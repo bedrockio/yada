@@ -8,9 +8,8 @@ export function getFullMessage(error, options) {
       .map((error) => {
         if (isSchemaError(error)) {
           return getFullMessage(error, {
-            field: error.field,
-            index: error.index,
             ...options,
+            path: getInnerPath(error, options),
           });
         } else {
           return error.message;
@@ -22,30 +21,37 @@ export function getFullMessage(error, options) {
   }
 }
 
+function getInnerPath(error, options) {
+  const { type } = error;
+  const { path = [] } = options;
+  if (type === 'field') {
+    return [...path, error.field];
+  } else if (type === 'element') {
+    return [...path, error.index];
+  } else {
+    return path;
+  }
+}
+
 function getLabeledMessage(error, options) {
-  const { field, index } = options;
+  const { path = [] } = options;
   const base = getBase(error.message);
-  if (field) {
+  if (path.length) {
     const msg = `{field} ${downcase(base)}`;
     return localize(msg, {
-      field: getFieldLabel(field, options),
-    });
-  } else if (index != null) {
-    const msg = `Element at index "{index}" ${downcase(base)}`;
-    return localize(msg, {
-      index,
+      field: getFieldLabel(options),
     });
   } else {
     return localize(base);
   }
 }
 
-function getFieldLabel(field, options) {
-  const { natural } = options;
+function getFieldLabel(options) {
+  const { path = [], natural } = options;
   if (natural) {
-    return naturalize(field);
+    return naturalize(path[path.length - 1]);
   } else {
-    return `"${field}"`;
+    return `"${path.join('.')}"`;
   }
 }
 
