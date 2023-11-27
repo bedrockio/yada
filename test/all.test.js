@@ -2345,6 +2345,24 @@ describe('getFullMessage', () => {
       expect(error.getFullMessage()).toBe('Must {not} be.');
     }
   });
+
+  it('should not modify a custom error message', async () => {
+    const schema = yd.object({
+      email: yd.string().custom(() => {
+        throw new Error('Email already exists.');
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        email: 'foo@bar.com',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('Email already exists.');
+  });
 });
 
 describe('localization', () => {

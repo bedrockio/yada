@@ -2,7 +2,7 @@ import { isSchemaError } from './errors';
 import { localize } from './localization';
 
 export function getFullMessage(error, options) {
-  const { delimiter } = options;
+  const { delimiter = '\n' } = options;
   if (error.details) {
     return error.details
       .map((error) => {
@@ -34,9 +34,10 @@ function getInnerPath(error, options) {
 }
 
 function getLabeledMessage(error, options) {
+  const { type } = error;
   const { path = [] } = options;
   const base = getBase(error.message);
-  if (path.length) {
+  if (type !== 'custom' && path.length) {
     const msg = `{field} ${downcase(base)}`;
     return localize(msg, {
       field: getFieldLabel(options),
