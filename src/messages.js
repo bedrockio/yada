@@ -24,7 +24,7 @@ export function getFullMessage(error, options) {
 function getInnerPath(error, options) {
   const { type } = error;
   const { path = [] } = options;
-  if (type === 'field') {
+  if (type === 'field' && error.field) {
     return [...path, error.field];
   } else if (type === 'element') {
     return [...path, error.index];

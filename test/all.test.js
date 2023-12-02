@@ -2292,6 +2292,20 @@ describe('getFullMessage', () => {
     ).toBe('"a" must be a string.\n"b" must be a number.');
   });
 
+  it('should return correct message for unknown fields', async () => {
+    const schema = yd.object({});
+
+    let error;
+    try {
+      await schema.validate({
+        foo: 'bar',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('Unknown field "foo".');
+  });
+
   it('should get full error message for password fields', async () => {
     const schema = yd.object({
       password: yd.string().password({
