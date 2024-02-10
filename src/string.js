@@ -257,11 +257,15 @@ class StringSchema extends TypeSchema {
   postalCode(locale = 'any') {
     return this.format('postal-code', (str) => {
       if (!validator.isPostalCode(str, locale)) {
-        if (locale === 'US') {
-          throw new LocalizedError('Must be a valid zipcode.');
-        } else {
-          throw new LocalizedError('Must be a valid postal code.');
-        }
+        throw new LocalizedError('Must be a valid postal code.');
+      }
+    });
+  }
+
+  zipcode() {
+    return this.format('zipcode', (str) => {
+      if (!validator.isPostalCode(str, 'US')) {
+        throw new LocalizedError('Must be a valid zipcode.');
       }
     });
   }
