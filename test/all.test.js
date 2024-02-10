@@ -231,7 +231,14 @@ describe('string', () => {
   it('should validate a postal code', async () => {
     const schema = yd.string().postalCode();
     await assertPass(schema, '80906');
+    await assertPass(schema, '153-0062');
     await assertFail(schema, '80906z', ['Must be a valid postal code.']);
+  });
+
+  it('should have zipcode specific message for US', async () => {
+    const schema = yd.string().postalCode('US');
+    await assertPass(schema, '80906');
+    await assertFail(schema, '153-0062', ['Must be a valid zipcode.']);
   });
 
   it('should validate a slug', async () => {
