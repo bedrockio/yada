@@ -20,11 +20,14 @@ class StringSchema extends TypeSchema {
   constructor() {
     super(String);
     this.assert('type', (val, options) => {
-      if (typeof val !== 'string' && options.cast) {
+      const { cast, allowEmpty } = options;
+      if (cast && typeof val !== 'string') {
         val = String(val);
       }
       if (typeof val !== 'string') {
         throw new LocalizedError('Must be a string.');
+      } else if (!allowEmpty && val === '') {
+        throw new LocalizedError('String may not be empty.');
       }
       return val;
     });
@@ -37,10 +40,15 @@ class StringSchema extends TypeSchema {
     return this.clone({ required: true }).assert('required', (val) => {
       if (val == null) {
         throw new LocalizedError('Value is required.');
-      } else if (val === '') {
-        throw new LocalizedError('String may not be empty.');
       }
     });
+  }
+
+  /**
+   * @returns {this}
+   */
+  allowEmpty() {
+    return this.options({ allowEmpty: true });
   }
 
   /**
