@@ -23,8 +23,8 @@ export class ValidationError extends Error {
     if (this.canRollup()) {
       const [first] = this.details;
       return {
+        ...first.toJSON(),
         type: this.type,
-        message: first.message,
       };
     } else {
       return {
@@ -39,11 +39,14 @@ export class ValidationError extends Error {
 
   canRollup() {
     const { details } = this;
-    if (this.isFieldType() && details.length === 1) {
-      return !details[0].isFieldType?.();
-    } else {
+    if (details.length !== 1) {
       return false;
     }
+    const [first] = details;
+
+    // Roll up field types as long as they are not
+    // referencing nested fields.
+    return this.isFieldType() && !first.isFieldType?.();
   }
 
   isFieldType() {

@@ -252,6 +252,7 @@ export default class Schema {
     const msg = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
+        let error;
         for (let el of set) {
           if (isSchema(el)) {
             try {
@@ -260,16 +261,33 @@ export default class Schema {
               // example allowing a string or array of strings.
               options = omit(options, 'cast');
               return await el.validate(val, options);
-            } catch (error) {
+            } catch (err) {
+              const [first] = err.details;
+              const isTypeError = first?.type === 'type';
+              if (!isTypeError) {
+                // Capture the first error object only if it is not
+                // a simple type error to surface error messages on
+                // more complex schemas. Otherwise allow this to fall
+                // through to show more meaningful messages for simple
+                // enums.
+                error ||= err;
+              }
               continue;
             }
           } else if ((el === val) === allow) {
             return;
           }
         }
-        throw new LocalizedError(options.message || msg, {
-          types: types.join(', '),
-        });
+        if (error) {
+          throw new ValidationError(
+            options.message || error.message,
+            error.details
+          );
+        } else {
+          throw new LocalizedError(options.message || msg, {
+            types: types.join(', '),
+          });
+        }
       }
     });
   }

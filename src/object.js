@@ -68,6 +68,9 @@ class ObjectSchema extends TypeSchema {
             return;
           }
           try {
+            // Do not pass down message into validators
+            // to allow custom messages to take precedence.
+            options = omit(options, 'message');
             const result = await schema.validate(val, options);
             if (result !== undefined) {
               return {

@@ -411,6 +411,135 @@ describe('allow', () => {
     const schema = yd.allow('one', 'two').message('Must be one or two.');
     await assertFail(schema, 'three', ['Must be one or two.']);
   });
+
+  it('should fail with error message of failed schema', async () => {
+    const schema = yd.object({
+      shop: yd.allow(
+        null,
+        yd.object({
+          id: yd.string().mongo(),
+        })
+      ),
+    });
+
+    await assertFail(
+      schema,
+      {
+        shop: {
+          id: 'bad-id',
+        },
+      },
+      ['Must be a valid ObjectId.']
+    );
+  });
+
+  it('should fail with custom error message of failed schema', async () => {
+    const schema = yd.object({
+      shop: yd.allow(
+        null,
+        yd
+          .object({
+            id: yd.string().mongo(),
+          })
+          .message('Custom message')
+      ),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        shop: {
+          id: 'bad-id',
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.toJSON()).toEqual({
+      type: 'validation',
+      message: 'Object failed validation.',
+      details: [
+        {
+          type: 'field',
+          field: 'shop',
+          message: 'Custom message',
+          details: [
+            {
+              type: 'field',
+              field: 'id',
+              message: 'Must be a valid ObjectId.',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('should correctly rollup enum error', async () => {
+    const schema = yd.object({
+      id: yd.allow(null, yd.string().mongo()),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        id: 'bad-id',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.toJSON()).toEqual({
+      type: 'validation',
+      message: 'Object failed validation.',
+      details: [
+        {
+          type: 'field',
+          field: 'id',
+          message: 'Input failed validation.',
+          details: [
+            {
+              type: 'format',
+              message: 'Must be a valid ObjectId.',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('should display custom enum message', async () => {
+    const schema = yd.object({
+      id: yd
+        .allow(null, yd.string().mongo())
+        .message('Must be an ObjectId or null.'),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        id: 'bad-id',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.toJSON()).toEqual({
+      type: 'validation',
+      message: 'Object failed validation.',
+      details: [
+        {
+          type: 'field',
+          field: 'id',
+          message: 'Must be an ObjectId or null.',
+          details: [
+            {
+              type: 'format',
+              message: 'Must be a valid ObjectId.',
+            },
+          ],
+        },
+      ],
+    });
+  });
 });
 
 describe('reject', () => {
@@ -827,7 +956,7 @@ describe('custom', () => {
     } catch (err) {
       error = err;
     }
-    expect(JSON.parse(JSON.stringify(error))).toEqual({
+    expect(error.toJSON()).toEqual({
       type: 'validation',
       message: 'Input failed validation.',
       details: [
@@ -1336,7 +1465,7 @@ describe('serialization', () => {
     } catch (err) {
       error = err;
     }
-    expect(JSON.parse(JSON.stringify(error))).toEqual({
+    expect(error.toJSON()).toEqual({
       type: 'validation',
       message: 'Array failed validation.',
       details: [
@@ -1369,7 +1498,7 @@ describe('serialization', () => {
     } catch (err) {
       error = err;
     }
-    expect(JSON.parse(JSON.stringify(error))).toEqual({
+    expect(error.toJSON()).toEqual({
       type: 'validation',
       message: 'Input failed validation.',
       details: [
@@ -2524,7 +2653,7 @@ describe('localization', () => {
         coords: 'coords',
       });
     } catch (err) {
-      expect(JSON.parse(JSON.stringify(err))).toEqual({
+      expect(err.toJSON()).toEqual({
         type: 'validation',
         message: 'Input failed validation.',
         details: [
