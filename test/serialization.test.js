@@ -299,4 +299,67 @@ describe('getFullMessage', () => {
     }
     expect(error.getFullMessage()).toBe('Email already exists.');
   });
+
+  it('should return custom message if one exists', async () => {
+    const schema = yd.object({
+      token: yd.string().required().message('Please verify you are human.'),
+    });
+
+    let error;
+    try {
+      await schema.validate({});
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('Please verify you are human.');
+  });
+
+  it('should allow field interpolation in a custom message', async () => {
+    const schema = yd.object({
+      profile: yd.object({
+        name: yd
+          .string()
+          .match(/^[A-Z]/)
+          .message('{field} must start with an uppercase letter.'),
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        profile: {
+          name: 'frank',
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe(
+      '"profile.name" must start with an uppercase letter.'
+    );
+  });
+
+  it('should allow field interpolation in a thrown error', async () => {
+    const schema = yd.object({
+      profile: yd.object({
+        name: yd.custom((value) => {
+          if (value !== 'Frank') {
+            throw new Error('{field} must be "Frank".');
+          }
+        }),
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        profile: {
+          name: 'Bob',
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('"profile.name" must be "Frank".');
+  });
 });

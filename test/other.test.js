@@ -381,7 +381,7 @@ describe('options', () => {
   });
 
   describe('expandDotSyntax', () => {
-    it('should blajdfalksj', async () => {
+    it('should expand dot syntax', async () => {
       const schema = yd.object({
         profile: yd.object({
           name: yd.string(),

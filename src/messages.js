@@ -2,7 +2,9 @@ import { localize } from './localization';
 
 export function getFullMessage(error, options) {
   const { delimiter = '\n' } = options;
-  if (error.details?.length) {
+  if (error.message) {
+    return getLabeledMessage(error, options);
+  } else if (error.details?.length) {
     return error.details
       .map((error) => {
         return getFullMessage(error, {
@@ -11,8 +13,6 @@ export function getFullMessage(error, options) {
         });
       })
       .join(delimiter);
-  } else {
-    return getLabeledMessage(error, options);
   }
 }
 
@@ -31,14 +31,30 @@ function getLabeledMessage(error, options) {
   const { type } = error;
   const { path = [] } = options;
   const base = getBase(error.message);
-  if (type !== 'custom' && path.length) {
-    const msg = `{field} ${downcase(base)}`;
-    return localize(msg, {
+
+  let template;
+  if (base.includes('{field}')) {
+    template = base;
+  } else if (canAutoAddField(type, path)) {
+    template = `{field} ${downcase(base)}`;
+  }
+
+  if (template) {
+    return localize(template, {
       field: getFieldLabel(options),
     });
   } else {
     return localize(base);
   }
+}
+
+const DISALLOWED_TYPES = ['field', 'element', 'array', 'custom'];
+
+// Error types that have custom messages should not add the field
+// names automatically. Instead the custom messages can include
+// the {field} token to allow it to be interpolated if required.
+function canAutoAddField(type, path) {
+  return path.length && !DISALLOWED_TYPES.includes(type);
 }
 
 function getFieldLabel(options) {

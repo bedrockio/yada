@@ -19,12 +19,13 @@ Concepts
   - [Object](#object)
   - [Date](#date)
 - [Common Methods](#common-methods)
-  - [Allow](#allow)
-  - [Reject](#reject)
-  - [Append](#append)
-  - [Custom](#custom)
-  - [Default](#default)
-  - [Strip](#strip)
+  - [allow](#allow)
+  - [reject](#reject)
+  - [append](#append)
+  - [custom](#custom)
+  - [default](#default)
+  - [strip](#strip)
+  - [message](#message)
 - [Validation Options](#validation-options)
 - [Error Messages](#error-messages)
 - [Localization](#localization)
@@ -551,6 +552,65 @@ const schema = yd.object({
 
 Arguments are identical to those passed to [custom](#custom). The field will be
 stripped out if the function returns a truthy value.
+
+### Message
+
+The `message` method allows adding a custom message to schema or field. Note
+that when using with [`getFullMessage`](#error-messages) the custom message will
+not include the nested field name by default:
+
+```js
+const schema = yd.object({
+  name: yd.string().required().message('Please provide your full name.'),
+});
+try {
+  await schema.validate({});
+} catch (error) {
+  console.log(error.getFullMessage());
+  // -> Please provide your full name.
+}
+```
+
+To include the field name, the `{field}` token may be used in the message:
+
+```js
+const schema = yd.object({
+  name: yd
+    .string()
+    .match(/^[A-Z]/)
+    .message('{field} must start with an uppercase letter.'),
+});
+try {
+  await schema.validate({
+    name: 'frank',
+  });
+} catch (error) {
+  console.log(error.getFullMessage());
+  // -> "name" must start with an uppercase letter.
+}
+```
+
+The `{field}` token may also be used when throwing custom errors:
+
+```js
+const schema = yd.object({
+  profile: yd.object({
+    name: yd.custom((value) => {
+      if (value !== 'Frank') {
+        throw new Error('{field} must be "Frank".');
+      }
+    }),
+  }),
+});
+try {
+  await schema.validate({
+    name: 'Bob',
+  });
+} catch (error) {
+  console.log(error.getFullMessage());
+  // -> "name" must be "Frank".
+}
+```
 
 ## Validation Options
 
