@@ -409,63 +409,9 @@ describe('options', () => {
 });
 
 describe('errors', () => {
-  it('should provide a default error message', async () => {
-    await assertErrorMessage(yd.string(), 3, 'Input failed validation.');
-    await assertErrorMessage(yd.object(), 3, 'Object failed validation.');
-  });
-
   it('should allow a custom message', async () => {
     const schema = yd.string().message('Needs a string');
     await assertErrorMessage(schema, 3, 'Needs a string');
-  });
-
-  it('should expose original error', async () => {
-    const err = new Error('Bad!');
-    const schema = yd.custom(() => {
-      throw err;
-    });
-    try {
-      await schema.validate('test');
-    } catch (error) {
-      expect(error.details[0].original).toBe(err);
-      expect(error.toJSON()).toEqual({
-        type: 'validation',
-        message: 'Input failed validation.',
-        details: [
-          {
-            message: 'Bad!',
-            type: 'custom',
-          },
-        ],
-      });
-    }
-  });
-
-  it('should expose original error on field', async () => {
-    const err = new Error('Bad!');
-    const schema = yd.object({
-      a: yd.custom(() => {
-        throw err;
-      }),
-    });
-    try {
-      await schema.validate({
-        a: 'test',
-      });
-    } catch (error) {
-      expect(error.details[0].details[0].original).toBe(err);
-      expect(error.toJSON()).toEqual({
-        type: 'validation',
-        message: 'Object failed validation.',
-        details: [
-          {
-            type: 'field',
-            field: 'a',
-            message: 'Bad!',
-          },
-        ],
-      });
-    }
   });
 
   it('should have correct error messages for complex nested schema', async () => {
@@ -496,22 +442,30 @@ describe('errors', () => {
       );
       expect(error.toJSON()).toEqual({
         type: 'validation',
-        message: 'Object failed validation.',
         details: [
           {
             type: 'field',
-            message: 'Field failed validation.',
             field: 'fields',
             details: [
               {
-                type: 'element',
-                index: 0,
-                message: 'Element failed validation.',
+                type: 'array',
                 details: [
                   {
-                    type: 'field',
-                    message: 'Must be an array.',
-                    field: 'images',
+                    type: 'element',
+                    index: 0,
+                    details: [
+                      {
+                        type: 'field',
+                        field: 'images',
+                        details: [
+                          {
+                            type: 'type',
+                            kind: 'array',
+                            message: 'Must be an array.',
+                          },
+                        ],
+                      },
+                    ],
                   },
                 ],
               },

@@ -47,7 +47,6 @@ describe('custom', () => {
     }
     expect(error.toJSON()).toEqual({
       type: 'validation',
-      message: 'Input failed validation.',
       details: [
         {
           type: 'permissions',

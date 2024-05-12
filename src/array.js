@@ -1,10 +1,11 @@
 import Schema from './Schema';
+import TypeSchema from './TypeSchema';
 import { ArrayError, ElementError, LocalizedError } from './errors';
 import { omit } from './utils';
 
-class ArraySchema extends Schema {
+class ArraySchema extends TypeSchema {
   constructor(schemas) {
-    super({ message: 'Array failed validation.', schemas });
+    super(Array, { schemas });
     this.setup();
   }
 
@@ -12,7 +13,7 @@ class ArraySchema extends Schema {
    * @private
    */
   setup() {
-    const { schemas, message } = this.meta;
+    const { schemas } = this.meta;
     const schema =
       schemas.length > 1 ? new Schema().allow(schemas) : schemas[0];
 
@@ -27,6 +28,7 @@ class ArraySchema extends Schema {
     });
 
     if (schema) {
+      const { message } = schema.meta;
       this.assert('elements', async (arr, options) => {
         const errors = [];
         const result = [];
@@ -38,14 +40,7 @@ class ArraySchema extends Schema {
             options = omit(options, 'message');
             result.push(await schema.validate(el, options));
           } catch (error) {
-            errors.push(
-              new ElementError(
-                'Element failed validation.',
-                i,
-                error.original,
-                error.details
-              )
-            );
+            errors.push(new ElementError(message, i, error.details));
           }
         }
         if (errors.length) {

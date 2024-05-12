@@ -1,9 +1,9 @@
 import {
-  isSchemaError,
-  ValidationError,
+  TypeError,
+  FormatError,
   AssertionError,
   LocalizedError,
-  ArrayError,
+  ValidationError,
 } from './errors';
 import { omit } from './utils';
 
@@ -13,7 +13,6 @@ const REQUIRED_TYPES = ['default', 'required'];
 /**
  * @typedef {[fn: Function] | [type: string, fn: Function]} CustomSignature
  */
-
 export default class Schema {
   constructor(meta = {}) {
     this.assertions = [];
@@ -150,8 +149,14 @@ export default class Schema {
           value = result;
         }
       } catch (error) {
-        if (error instanceof ArrayError) {
-          details = [...details, ...error.details];
+        const { type } = assertion;
+
+        if (type === 'type') {
+          details.push(new TypeError(error, this.meta.type));
+        } else if (type === 'format') {
+          details.push(new FormatError(error, this.meta.format));
+        } else if (!error.type) {
+          details.push(new AssertionError(error, type));
         } else {
           details.push(error);
         }
@@ -162,8 +167,7 @@ export default class Schema {
     }
 
     if (details.length) {
-      const { message = 'Input failed validation.' } = this.meta;
-      throw new ValidationError(message, details);
+      throw new ValidationError(this.meta.message, details);
     }
 
     return value;
@@ -249,10 +253,9 @@ export default class Schema {
       }
       return el;
     });
-    const msg = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
+    const message = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
-        let error;
         for (let el of set) {
           if (isSchema(el)) {
             try {
@@ -263,31 +266,23 @@ export default class Schema {
               return await el.validate(val, options);
             } catch (err) {
               const [first] = err.details;
-              const isTypeError = first?.type === 'type';
-              if (!isTypeError) {
-                // Capture the first error object only if it is not
-                // a simple type error to surface error messages on
-                // more complex schemas. Otherwise allow this to fall
-                // through to show more meaningful messages for simple
-                // enums.
-                error ||= err;
+              if (first instanceof TypeError) {
+                // If the error is a simple type error then continue
+                // to show more meaningful messages for simple enums.
+                continue;
+              } else {
+                // Otherwise throw the error to surface messages on
+                // more complex schemas.
+                throw err;
               }
-              continue;
             }
           } else if ((el === val) === allow) {
             return;
           }
         }
-        if (error) {
-          throw new ValidationError(
-            options.message || error.message,
-            error.details
-          );
-        } else {
-          throw new LocalizedError(options.message || msg, {
-            types: types.join(', '),
-          });
-        }
+        throw new LocalizedError(message, {
+          types: types.join(', '),
+        });
       }
     });
   }
@@ -330,15 +325,8 @@ export default class Schema {
   }
 
   async runAssertion(assertion, value, options = {}) {
-    const { type, fn } = assertion;
-    try {
-      return await fn(value, options);
-    } catch (error) {
-      if (isSchemaError(error)) {
-        throw error;
-      }
-      throw new AssertionError(error.message, error.type || type, error);
-    }
+    const { fn } = assertion;
+    return await fn(value, options);
   }
 
   enumToOpenApi() {

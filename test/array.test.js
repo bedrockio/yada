@@ -43,17 +43,33 @@ describe('array', () => {
     } catch (error) {
       expect(error.toJSON()).toEqual({
         type: 'validation',
-        message: 'Array failed validation.',
         details: [
           {
-            type: 'element',
-            message: 'Must be a string.',
-            index: 0,
-          },
-          {
-            type: 'element',
-            message: 'Must be a string.',
-            index: 1,
+            type: 'array',
+            details: [
+              {
+                type: 'element',
+                index: 0,
+                details: [
+                  {
+                    type: 'type',
+                    kind: 'string',
+                    message: 'Must be a string.',
+                  },
+                ],
+              },
+              {
+                type: 'element',
+                index: 1,
+                details: [
+                  {
+                    type: 'type',
+                    kind: 'string',
+                    message: 'Must be a string.',
+                  },
+                ],
+              },
+            ],
           },
         ],
       });

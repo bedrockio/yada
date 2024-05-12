@@ -20,7 +20,6 @@ describe('localization', () => {
     const strings = {
       'Must be at least {length} character{s}.':
         '{length}文字以上入力して下さい。',
-      'Object failed validation.': '不正な入力がありました。',
     };
     useLocalizer((message) => {
       return strings[message];
@@ -40,7 +39,6 @@ describe('localization', () => {
     } catch (err) {
       error = err;
     }
-    expect(error.message).toBe('不正な入力がありました。');
     expect(error.details[0].details[0].message).toBe(
       '6文字以上入力して下さい。'
     );
@@ -77,7 +75,8 @@ describe('localization', () => {
 
   it('should be able to inspect localization message', async () => {
     useLocalizer({
-      'Input failed validation.': '不正な入力がありました。',
+      'Must be at least {length} character{s}.':
+        '{length}文字以上入力して下さい。',
     });
     const schema = yd.object({
       password: yd.string().password({
@@ -93,12 +92,9 @@ describe('localization', () => {
       const localized = getLocalizedMessages();
       expect(localized).toEqual({
         'Must be at least {length} character{s}.':
-          'Must be at least {length} character{s}.',
+          '{length}文字以上入力して下さい。',
         'Must contain at least {length} number{s}.':
           'Must contain at least {length} number{s}.',
-        'Input failed validation.': '不正な入力がありました。',
-        'Field failed validation.': 'Field failed validation.',
-        'Object failed validation.': 'Object failed validation.',
       });
     }
   });
@@ -130,27 +126,28 @@ describe('localization', () => {
 
   it('should allow a custom localized error to be thrown', async () => {
     useLocalizer({
-      'Invalid coordinates': '座標に不正な入力がありました。',
+      'Value must be greater than {max}.': '{max}以上入力してください。',
     });
-    const schema = yd.custom(() => {
-      throw new LocalizedError('Invalid coordinates');
+    const schema = yd.custom((value) => {
+      if (value < 10) {
+        throw new LocalizedError('Value must be greater than {max}.', {
+          max: 10,
+        });
+      }
     });
     try {
-      await schema.validate({
-        coords: 'coords',
-      });
+      await schema.validate(5);
     } catch (err) {
       expect(err.toJSON()).toEqual({
         type: 'validation',
-        message: 'Input failed validation.',
         details: [
           {
             type: 'custom',
-            message: '座標に不正な入力がありました。',
+            message: '10以上入力してください。',
           },
         ],
       });
-      expect(err.getFullMessage()).toBe('座標に不正な入力がありました。');
+      expect(err.getFullMessage()).toBe('10以上入力してください。');
     }
   });
 });

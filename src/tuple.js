@@ -3,7 +3,7 @@ import { ArrayError, ElementError, LocalizedError } from './errors';
 
 class TupleSchema extends Schema {
   constructor(schemas) {
-    super({ message: 'Tuple failed validation.', schemas });
+    super({ schemas });
     this.setup();
   }
 
@@ -11,7 +11,7 @@ class TupleSchema extends Schema {
    * @private
    */
   setup() {
-    const { schemas } = this.meta;
+    const { schemas, message } = this.meta;
 
     this.assert('type', (val, options) => {
       if (typeof val === 'string' && options.cast) {
@@ -52,13 +52,8 @@ class TupleSchema extends Schema {
           }
           result.push(await schema.validate(el, options));
         } catch (error) {
-          if (error.details?.length === 1) {
-            errors.push(new ElementError(error.details[0].message, i));
-          } else {
-            errors.push(
-              new ElementError('Element failed validation.', i, error.details)
-            );
-          }
+          const { message } = schema.meta;
+          errors.push(new ElementError(message, i, error.details));
         }
       }
       if (errors.length) {

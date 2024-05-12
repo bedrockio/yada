@@ -634,7 +634,6 @@ which returns that map:
 ```js
 yd.useLocalizer({
   'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
-  'Object failed validation.': '不正な入力がありました。',
 });
 ```
 
@@ -657,13 +656,11 @@ allow quick discovery of strings that have not yet been localized:
 ```js
 yd.useLocalizer({
   'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
-  'Object failed validation.': '不正な入力がありました。',
 });
 // Error validation occuring here
 yd.getLocalizedMessages();
 // {
 //   'Must be at least {length} character{s}.': '{length}文字以上入力して下さい。',
-//   'Object failed validation.': '不正な入力がありました。',
 //   'Value must be a string.': 'Value must be a string.',
 //   ...etc
 // }

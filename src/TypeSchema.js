@@ -3,7 +3,7 @@ import Schema from './Schema';
 export default class TypeSchema extends Schema {
   constructor(Class, meta) {
     const type = Class.name.toLowerCase();
-    super({ type, ...meta });
+    super({ ...meta, type });
   }
 
   format(name, fn) {

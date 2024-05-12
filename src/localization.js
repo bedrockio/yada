@@ -26,6 +26,9 @@ export function getLocalized(message) {
 }
 
 export function localize(message, values = {}) {
+  if (!message) {
+    return;
+  }
   let str = message;
   if (str) {
     let localized = getLocalized(message);

@@ -26,7 +26,10 @@ describe('allow', () => {
 
   it('should be able to pass custom message', async () => {
     const schema = yd.allow('one', 'two').message('Must be one or two.');
-    await assertFail(schema, 'three', ['Must be one or two.']);
+    await assertFail(schema, 'three', [
+      'Must be one or two.',
+      'Must be one of ["one", "two"].',
+    ]);
   });
 
   it('should fail with error message of failed schema', async () => {
@@ -74,49 +77,27 @@ describe('allow', () => {
     }
     expect(error.toJSON()).toEqual({
       type: 'validation',
-      message: 'Object failed validation.',
       details: [
         {
           type: 'field',
           field: 'shop',
-          message: 'Custom message',
           details: [
             {
-              type: 'field',
-              field: 'id',
-              message: 'Must be a valid ObjectId.',
-            },
-          ],
-        },
-      ],
-    });
-  });
-
-  it('should correctly rollup enum error', async () => {
-    const schema = yd.object({
-      id: yd.allow(null, yd.string().mongo()),
-    });
-
-    let error;
-    try {
-      await schema.validate({
-        id: 'bad-id',
-      });
-    } catch (err) {
-      error = err;
-    }
-    expect(error.toJSON()).toEqual({
-      type: 'validation',
-      message: 'Object failed validation.',
-      details: [
-        {
-          type: 'field',
-          field: 'id',
-          message: 'Input failed validation.',
-          details: [
-            {
-              type: 'format',
-              message: 'Must be a valid ObjectId.',
+              type: 'validation',
+              message: 'Custom message',
+              details: [
+                {
+                  type: 'field',
+                  field: 'id',
+                  details: [
+                    {
+                      type: 'format',
+                      format: 'mongo-object-id',
+                      message: 'Must be a valid ObjectId.',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -141,7 +122,6 @@ describe('allow', () => {
     }
     expect(error.toJSON()).toEqual({
       type: 'validation',
-      message: 'Object failed validation.',
       details: [
         {
           type: 'field',
@@ -149,8 +129,14 @@ describe('allow', () => {
           message: 'Must be an ObjectId or null.',
           details: [
             {
-              type: 'format',
-              message: 'Must be a valid ObjectId.',
+              type: 'validation',
+              details: [
+                {
+                  type: 'format',
+                  format: 'mongo-object-id',
+                  message: 'Must be a valid ObjectId.',
+                },
+              ],
             },
           ],
         },

@@ -164,17 +164,6 @@ describe('object', () => {
     expect(foo).toBe('bar');
   });
 
-  it('should have field type on unknown field', async () => {
-    const schema = yd.object({
-      foo: yd.string().required(),
-    });
-    try {
-      await schema.validate({ bar: 'bar' });
-    } catch (error) {
-      expect(error.details[0].type).toBe('field');
-    }
-  });
-
   it('should not allow unknown fields for empty objects', async () => {
     const schema = yd.object({});
     await assertFail(schema, { foo: 'bar' }, ['Unknown field "foo".']);

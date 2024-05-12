@@ -16,17 +16,27 @@ describe('serialization', () => {
     }
     expect(error.toJSON()).toEqual({
       type: 'validation',
-      message: 'Object failed validation.',
       details: [
         {
           type: 'field',
           field: 'a',
-          message: 'Value is required.',
+          details: [
+            {
+              type: 'required',
+              message: 'Value is required.',
+            },
+          ],
         },
         {
           type: 'field',
           field: 'b',
-          message: 'Must be a string.',
+          details: [
+            {
+              type: 'type',
+              kind: 'string',
+              message: 'Must be a string.',
+            },
+          ],
         },
       ],
     });
@@ -42,17 +52,33 @@ describe('serialization', () => {
     }
     expect(error.toJSON()).toEqual({
       type: 'validation',
-      message: 'Array failed validation.',
       details: [
         {
-          type: 'element',
-          index: 0,
-          message: 'Must be a string.',
-        },
-        {
-          type: 'element',
-          index: 1,
-          message: 'Must be a string.',
+          type: 'array',
+          details: [
+            {
+              type: 'element',
+              index: 0,
+              details: [
+                {
+                  type: 'type',
+                  kind: 'string',
+                  message: 'Must be a string.',
+                },
+              ],
+            },
+            {
+              type: 'element',
+              index: 1,
+              details: [
+                {
+                  type: 'type',
+                  kind: 'string',
+                  message: 'Must be a string.',
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -75,7 +101,6 @@ describe('serialization', () => {
     }
     expect(error.toJSON()).toEqual({
       type: 'validation',
-      message: 'Input failed validation.',
       details: [
         {
           type: 'password',
@@ -95,6 +120,54 @@ describe('serialization', () => {
         },
       ],
     });
+  });
+
+  it('should serialize custom error', async () => {
+    const schema = yd.custom(() => {
+      throw new Error('Bad!');
+    });
+    try {
+      await schema.validate('test');
+    } catch (error) {
+      expect(error.toJSON()).toEqual({
+        type: 'validation',
+        details: [
+          {
+            message: 'Bad!',
+            type: 'custom',
+          },
+        ],
+      });
+    }
+  });
+
+  it('should serialize custom error on field', async () => {
+    const schema = yd.object({
+      a: yd.custom(() => {
+        throw new Error('Bad!');
+      }),
+    });
+    try {
+      await schema.validate({
+        a: 'test',
+      });
+    } catch (error) {
+      expect(error.toJSON()).toEqual({
+        type: 'validation',
+        details: [
+          {
+            type: 'field',
+            field: 'a',
+            details: [
+              {
+                type: 'custom',
+                message: 'Bad!',
+              },
+            ],
+          },
+        ],
+      });
+    }
   });
 });
 

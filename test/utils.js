@@ -26,11 +26,8 @@ export async function assertFail(schema, obj, errors) {
 }
 
 function mapErrorMessages(error) {
-  if (error.details) {
-    return error.details.flatMap(mapErrorMessages);
-  } else {
-    return [error.message];
-  }
+  const { message, details = [] } = error;
+  return [message, ...details.flatMap(mapErrorMessages)].filter(Boolean);
 }
 
 export async function assertErrorMessage(schema, obj, message) {

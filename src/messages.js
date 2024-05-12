@@ -1,19 +1,14 @@
-import { isSchemaError } from './errors';
 import { localize } from './localization';
 
 export function getFullMessage(error, options) {
   const { delimiter = '\n' } = options;
-  if (error.details) {
+  if (error.details?.length) {
     return error.details
       .map((error) => {
-        if (isSchemaError(error)) {
-          return getFullMessage(error, {
-            ...options,
-            path: getInnerPath(error, options),
-          });
-        } else {
-          return error.message;
-        }
+        return getFullMessage(error, {
+          ...options,
+          path: getInnerPath(error, options),
+        });
       })
       .join(delimiter);
   } else {
@@ -22,11 +17,10 @@ export function getFullMessage(error, options) {
 }
 
 function getInnerPath(error, options) {
-  const { type } = error;
   const { path = [] } = options;
-  if (type === 'field' && error.field) {
+  if (error.field) {
     return [...path, error.field];
-  } else if (type === 'element') {
+  } else if (error.index != null) {
     return [...path, error.index];
   } else {
     return path;

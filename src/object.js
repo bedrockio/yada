@@ -11,11 +11,7 @@ const BASE_ASSERTIONS = ['type', 'transform', 'field'];
 
 class ObjectSchema extends TypeSchema {
   constructor(fields, meta) {
-    super(Object, {
-      ...meta,
-      fields,
-      message: 'Object failed validation.',
-    });
+    super(Object, { ...meta, fields });
     this.setup();
   }
 
@@ -79,12 +75,8 @@ class ObjectSchema extends TypeSchema {
               };
             }
           } catch (error) {
-            throw new FieldError(
-              'Field failed validation.',
-              key,
-              error.original,
-              error.details
-            );
+            const { message } = schema.meta;
+            throw new FieldError(message, key, error.details);
           }
         }
       });
