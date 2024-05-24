@@ -34,10 +34,10 @@ function reject(...args) {
 
 /**
  * Validate by a custom function. [Link](https://github.com/bedrockio/yada#custom)
- * @param {import("./Schema").CustomSignature} args
+ * @param {Function} fn
  */
-function custom(...args) {
-  return new Schema().custom(...args);
+function custom(fn) {
+  return new Schema().custom(fn);
 }
 
 export {
