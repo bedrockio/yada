@@ -10,9 +10,6 @@ import { omit } from './utils';
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform'];
 const REQUIRED_TYPES = ['default', 'required'];
 
-/**
- * @typedef {[fn: Function] | [type: string, fn: Function]} CustomSignature
- */
 export default class Schema {
   constructor(meta = {}) {
     this.assertions = [];
@@ -47,24 +44,14 @@ export default class Schema {
 
   /**
    * Validate by a custom function. [Link](https://github.com/bedrockio/yada#custom)
-   * @param {CustomSignature} args
+   * @param {Function} fn
    * @returns {this}
    */
-  custom(...args) {
-    let type, fn;
-    if (typeof args[0] === 'function') {
-      type = 'custom';
-      fn = args[0];
-    } else {
-      type = args[0];
-      fn = args[1];
-    }
-    if (!type) {
-      throw new Error('Assertion type required.');
-    } else if (!fn) {
+  custom(fn) {
+    if (!fn) {
       throw new Error('Assertion function required.');
     }
-    return this.clone().assert(type, async (val, options) => {
+    return this.clone().assert('custom', async (val, options) => {
       return await fn(val, options);
     });
   }
@@ -155,7 +142,7 @@ export default class Schema {
           details.push(new TypeError(error, this.meta.type));
         } else if (type === 'format') {
           details.push(new FormatError(error, this.meta.format));
-        } else if (!error.type) {
+        } else if (error instanceof LocalizedError) {
           details.push(new AssertionError(error, type));
         } else {
           details.push(error);

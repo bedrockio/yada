@@ -23,7 +23,7 @@ export class ValidationError extends Error {
       }),
       ...(details.length && {
         details: details.map((error) => {
-          return error.toJSON();
+          return serializeError(error);
         }),
       }),
     };
@@ -123,5 +123,16 @@ function getLocalizedMessage(arg) {
     return localize(arg.message);
   } else {
     return localize(arg);
+  }
+}
+
+function serializeError(error) {
+  if (error.toJSON) {
+    return error.toJSON();
+  } else {
+    return {
+      ...error,
+      message: error.message,
+    };
   }
 }

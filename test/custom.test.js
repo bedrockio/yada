@@ -35,9 +35,30 @@ describe('custom', () => {
     expect(await schema.validate('hello')).toBe('goodbye');
   });
 
-  it('should allow a custom assertion type', async () => {
-    const schema = yd.custom('permissions', () => {
-      throw new Error('Not enough permissions!');
+  it('should retain custom error object', async () => {
+    class PermissionsError extends Error {}
+    const schema = yd.custom(() => {
+      throw new PermissionsError('Not enough permissions!');
+    });
+    let error;
+    try {
+      await schema.validate('foo');
+    } catch (err) {
+      error = err;
+    }
+    expect(error.details[0]).toBeInstanceOf(PermissionsError);
+  });
+
+  it('should correctly serialize a custom error type', async () => {
+    class PermissionsError extends Error {
+      constructor(message) {
+        super(message);
+        this.type = 'permissions';
+        this.status = 401;
+      }
+    }
+    const schema = yd.custom(() => {
+      throw new PermissionsError('Not enough permissions!');
     });
     let error;
     try {
@@ -50,6 +71,7 @@ describe('custom', () => {
       details: [
         {
           type: 'permissions',
+          status: 401,
           message: 'Not enough permissions!',
         },
       ],

@@ -54,7 +54,7 @@ const DISALLOWED_TYPES = ['field', 'element', 'array', 'custom'];
 // names automatically. Instead the custom messages can include
 // the {field} token to allow it to be interpolated if required.
 function canAutoAddField(type, path) {
-  return path.length && !DISALLOWED_TYPES.includes(type);
+  return type && path.length && !DISALLOWED_TYPES.includes(type);
 }
 
 function getFieldLabel(options) {

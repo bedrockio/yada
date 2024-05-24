@@ -134,7 +134,6 @@ describe('serialization', () => {
         details: [
           {
             message: 'Bad!',
-            type: 'custom',
           },
         ],
       });
@@ -160,7 +159,6 @@ describe('serialization', () => {
             field: 'a',
             details: [
               {
-                type: 'custom',
                 message: 'Bad!',
               },
             ],
