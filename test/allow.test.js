@@ -83,17 +83,22 @@ describe('allow', () => {
           field: 'shop',
           details: [
             {
-              type: 'validation',
-              message: 'Custom message',
+              type: 'allowed',
               details: [
                 {
-                  type: 'field',
-                  field: 'id',
+                  type: 'validation',
+                  message: 'Custom message',
                   details: [
                     {
-                      type: 'format',
-                      format: 'mongo-object-id',
-                      message: 'Must be a valid ObjectId.',
+                      type: 'field',
+                      field: 'id',
+                      details: [
+                        {
+                          type: 'format',
+                          format: 'mongo-object-id',
+                          message: 'Must be a valid ObjectId.',
+                        },
+                      ],
                     },
                   ],
                 },
@@ -129,12 +134,17 @@ describe('allow', () => {
           message: 'Must be an ObjectId or null.',
           details: [
             {
-              type: 'validation',
+              type: 'allowed',
               details: [
                 {
-                  type: 'format',
-                  format: 'mongo-object-id',
-                  message: 'Must be a valid ObjectId.',
+                  type: 'validation',
+                  details: [
+                    {
+                      type: 'format',
+                      format: 'mongo-object-id',
+                      message: 'Must be a valid ObjectId.',
+                    },
+                  ],
                 },
               ],
             },
@@ -142,5 +152,81 @@ describe('allow', () => {
         },
       ],
     });
+  });
+
+  it('should allow a string or array of strings', async () => {
+    const schema = yd.allow(yd.string(), yd.array(yd.string()));
+    await assertPass(schema, 'foo');
+    await assertPass(schema, []);
+    await assertPass(schema, ['foo']);
+    await assertPass(schema, ['foo', 'bar']);
+    await assertFail(schema, [1], ['Must be a string.']);
+  });
+
+  it('should allow an array of strings or a string', async () => {
+    const schema = yd.allow(yd.array(yd.string()), yd.string());
+    await assertPass(schema, 'foo');
+    await assertPass(schema, []);
+    await assertPass(schema, ['foo']);
+    await assertPass(schema, ['foo', 'bar']);
+    await assertFail(schema, [1], ['Must be a string.']);
+  });
+
+  it('should allow an array of strings or an array of numbers', async () => {
+    const schema = yd.allow(yd.array(yd.string()), yd.array(yd.number()));
+    await assertFail(schema, 'foo', ['Must be an array.', 'Must be an array.']);
+    await assertFail(schema, 1, ['Must be an array.', 'Must be an array.']);
+    await assertPass(schema, []);
+    await assertPass(schema, ['foo']);
+    await assertPass(schema, ['foo', 'bar']);
+    await assertPass(schema, [1]);
+    await assertPass(schema, [1, 2]);
+  });
+
+  it('should allow complex alternate sort schema', async () => {
+    const sortSchema = yd.object({
+      field: yd.string().required(),
+      order: yd.string().allow('desc', 'asc').required(),
+    });
+    const schema = yd.allow(sortSchema, yd.array(sortSchema)).default({
+      field: 'createdAt',
+      order: 'desc',
+    });
+    await assertPass(schema, {
+      field: 'field',
+      order: 'asc',
+    });
+    await assertPass(schema, [
+      {
+        field: 'field1',
+        order: 'asc',
+      },
+      {
+        field: 'field2',
+        order: 'desc',
+      },
+    ]);
+    await assertFail(
+      schema,
+      {
+        field: 'field',
+        order: 'bad',
+      },
+      ['Must be one of ["desc", "asc"].', 'Must be an array.']
+    );
+    await assertFail(
+      schema,
+      [
+        {
+          field: 'field1',
+          order: 'asc',
+        },
+        {
+          field: 'field2',
+          order: 'bad',
+        },
+      ],
+      ['Unknown field "0".', 'Must be one of ["desc", "asc"].']
+    );
   });
 });

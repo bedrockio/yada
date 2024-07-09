@@ -1,6 +1,7 @@
 import {
   TypeError,
   FormatError,
+  AllowedError,
   AssertionError,
   LocalizedError,
   ValidationError,
@@ -243,6 +244,7 @@ export default class Schema {
     const message = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
+        const captured = [];
         for (let el of set) {
           if (isSchema(el)) {
             try {
@@ -253,23 +255,27 @@ export default class Schema {
               return await el.validate(val, options);
             } catch (err) {
               const [first] = err.details;
-              if (first instanceof TypeError) {
-                // If the error is a simple type error then continue
-                // to show more meaningful messages for simple enums.
+              if (first instanceof TypeError && first.isPrimitiveKind()) {
+                // If the error is a simple primitive type error then
+                // continue to show more meaningful messages for simple enums.
                 continue;
               } else {
-                // Otherwise throw the error to surface messages on
+                // Otherwise capture the error to surface messages on
                 // more complex schemas.
-                throw err;
+                captured.push(err);
               }
             }
           } else if ((el === val) === allow) {
             return;
           }
         }
-        throw new LocalizedError(message, {
-          types: types.join(', '),
-        });
+        if (captured.length) {
+          throw new AllowedError(this.meta.message, captured);
+        } else {
+          throw new LocalizedError(message, {
+            types: types.join(', '),
+          });
+        }
       }
     });
   }

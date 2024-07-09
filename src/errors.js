@@ -51,6 +51,10 @@ export class TypeError extends ValidationError {
     this.kind = kind;
   }
 
+  isPrimitiveKind() {
+    return this.kind !== 'array' && this.kind !== 'object';
+  }
+
   toJSON() {
     return {
       ...super.toJSON(),
@@ -106,9 +110,15 @@ export class ElementError extends ValidationError {
 
 export class ArrayError extends ValidationError {
   constructor(message, details) {
-    super(message);
+    super(message, details);
     this.type = 'array';
-    this.details = details;
+  }
+}
+
+export class AllowedError extends ValidationError {
+  constructor(message, details) {
+    super(message, details);
+    this.type = 'allowed';
   }
 }
 
