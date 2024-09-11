@@ -25,6 +25,7 @@ Concepts
   - [custom](#custom)
   - [default](#default)
   - [strip](#strip)
+  - [nullable](#nullable)
   - [message](#message)
 - [Validation Options](#validation-options)
 - [Error Messages](#error-messages)
@@ -552,6 +553,29 @@ const schema = yd.object({
 
 Arguments are identical to those passed to [custom](#custom). The field will be
 stripped out if the function returns a truthy value.
+
+### Nullable
+
+The `nullable` field allows `null` to be passed for any value:
+
+```js
+const schema = yd.string().nullable();
+await schema.validate(null); // Allowed
+```
+
+This is the equivalent of:
+
+```js
+schema = yd.allow(schema, null);
+```
+
+However it has two advantages. First it will correctly describe its
+[OpenApi](#openapi) schema as `nullable`. It will also return the same type
+schema, allowing chaining:
+
+```js
+const schema = yd.string().nullable().trim();
+```
 
 ### Message
 

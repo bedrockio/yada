@@ -83,6 +83,14 @@ export default class Schema {
   }
 
   /**
+   * Allow null. [Link](https://github.com/bedrockio/yada#nullable)
+   * @returns {this}
+   */
+  nullable() {
+    return this.clone({ nullable: true });
+  }
+
+  /**
    * @returns {this}
    */
   message(message) {
@@ -128,9 +136,12 @@ export default class Schema {
     };
 
     for (let assertion of this.assertions) {
-      if (!assertion.required && value === undefined) {
+      if (value === undefined && !assertion.required) {
+        break;
+      } else if (value === null && options.nullable) {
         break;
       }
+
       try {
         const result = await this.runAssertion(assertion, value, options);
         if (result !== undefined) {
@@ -189,6 +200,7 @@ export default class Schema {
       ...tags,
       ...this.getAnyType(),
       ...this.getDefault(),
+      ...this.getNullable(),
       ...this.enumToOpenApi(),
       ...this.expandExtra(extra),
     };
@@ -214,8 +226,13 @@ export default class Schema {
     }
   }
 
-  inspect() {
-    return JSON.stringify(this.toOpenApi(), null, 2);
+  getNullable() {
+    const { nullable } = this.meta;
+    if (nullable) {
+      return {
+        nullable: true,
+      };
+    }
   }
 
   expandExtra(extra = {}) {
@@ -224,6 +241,10 @@ export default class Schema {
       Object.assign(rest, extra.tag(this.meta));
     }
     return rest;
+  }
+
+  inspect() {
+    return JSON.stringify(this.toOpenApi(), null, 2);
   }
 
   // Private

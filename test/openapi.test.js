@@ -1,7 +1,7 @@
 import yd from '../src';
 
 describe('toOpenApi', () => {
-  it('should convert a string schema', async () => {
+  it('should describe a string schema', async () => {
     expect(yd.string().toOpenApi()).toEqual({
       type: 'string',
     });
@@ -23,7 +23,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert an object schema', async () => {
+  it('should describe an object schema', async () => {
     expect(yd.object().toOpenApi()).toEqual({
       type: 'object',
     });
@@ -37,7 +37,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert an array schema', async () => {
+  it('should describe an array schema', async () => {
     expect(yd.array().toOpenApi()).toEqual({
       type: 'array',
     });
@@ -60,7 +60,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert a mixed type schema', async () => {
+  it('should describe a mixed type schema', async () => {
     expect(yd.any().toOpenApi()).toEqual({
       type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
     });
@@ -86,7 +86,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert enum types', async () => {
+  it('should describe enum types', async () => {
     const schema = yd.allow(yd.string(), yd.array(yd.string()));
     expect(schema.toOpenApi()).toEqual({
       oneOf: [
@@ -104,7 +104,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert string enum types', async () => {
+  it('should describe string enum types', async () => {
     const schema = yd.string().allow('foo', 'bar');
     expect(schema.toOpenApi()).toEqual({
       type: 'string',
@@ -112,7 +112,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert mixed enum types', async () => {
+  it('should describe mixed enum types', async () => {
     const schema = yd.allow(1, 2, yd.string());
     expect(schema.toOpenApi()).toEqual({
       oneOf: [
@@ -127,7 +127,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert date formats', async () => {
+  it('should describe date formats', async () => {
     let schema = yd.date().iso();
     expect(schema.toOpenApi()).toEqual({
       type: 'string',
@@ -153,7 +153,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert a tuple schema', async () => {
+  it('should describe a tuple schema', async () => {
     const schema = yd.tuple(yd.string(), yd.number());
     expect(schema.toOpenApi()).toEqual({
       type: 'array',
@@ -166,7 +166,7 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert number min/max', async () => {
+  it('should describe number min/max', async () => {
     let schema = yd.number().min(5).max(50);
     expect(schema.toOpenApi()).toEqual({
       type: 'number',
@@ -181,12 +181,20 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should convert string minLength/maxLength', async () => {
+  it('should describe string minLength/maxLength', async () => {
     const schema = yd.string().min(5).max(50);
     expect(schema.toOpenApi()).toEqual({
       type: 'string',
       minLength: 5,
       maxLength: 50,
+    });
+  });
+
+  it('should describe nullable', async () => {
+    const schema = yd.string().nullable();
+    expect(schema.toOpenApi()).toEqual({
+      type: 'string',
+      nullable: true,
     });
   });
 
