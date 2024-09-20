@@ -45,13 +45,37 @@ describe('string', () => {
     await assertFail(schema, 'foo@bar', ['Must be an email address.']);
   });
 
-  it('should validate an E.164 phone number', async () => {
+  it('should validate any E.164 phone number by default', async () => {
     const schema = yd.string().phone();
     await assertPass(schema, undefined);
     await assertPass(schema, '+16175551212');
     await assertFail(schema, '6175551212', ['Must be a valid phone number.']);
     await assertFail(schema, '+1', ['Must be a valid phone number.']);
     await assertFail(schema, 'foo', ['Must be a valid phone number.']);
+  });
+
+  it('should validate a NANP phone number by specifying a country code', async () => {
+    const schema = yd.string().phone('US');
+    await assertPass(schema, undefined);
+    await assertPass(schema, '+16175551212');
+    await assertPass(schema, '+12125550100');
+    await assertFail(schema, '+122125550100', [
+      'Must be a valid phone number.',
+    ]);
+    await assertFail(schema, '+1125550100', ['Must be a valid phone number.']);
+    await assertFail(schema, '+12121550100', ['Must be a valid phone number.']);
+  });
+
+  it('should validate a NANP phone number by name', async () => {
+    const schema = yd.string().phone('NANP');
+    await assertPass(schema, undefined);
+    await assertPass(schema, '+16175551212');
+    await assertPass(schema, '+12125550100');
+    await assertFail(schema, '+122125550100', [
+      'Must be a valid phone number.',
+    ]);
+    await assertFail(schema, '+1125550100', ['Must be a valid phone number.']);
+    await assertFail(schema, '+12121550100', ['Must be a valid phone number.']);
   });
 
   it('should validate a regex pattern', async () => {

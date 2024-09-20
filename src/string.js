@@ -12,9 +12,13 @@ import {
 
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PHONE_REG = /^\+\d{1,3}\d{3,14}$/;
+const NANP_REG = /^\+1[2-9]\d{2}[2-9]\d{6}$/;
 
-const PHONE_DESCRIPTION =
+const E164_DESCRIPTION =
   'A phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format.';
+
+const NANP_DESCRIPTION =
+  'A phone number in [NANP](https://en.wikipedia.org/wiki/North_American_Numbering_Plan) format.';
 
 class StringSchema extends TypeSchema {
   constructor() {
@@ -149,12 +153,15 @@ class StringSchema extends TypeSchema {
     });
   }
 
-  phone() {
+  phone(code) {
+    const isNANP = code === 'US' || code === 'NANP';
+    const reg = isNANP ? NANP_REG : PHONE_REG;
+    const description = isNANP ? NANP_DESCRIPTION : E164_DESCRIPTION;
     return this.format('phone', (str) => {
-      if (!PHONE_REG.test(str)) {
+      if (!reg.test(str)) {
         throw new LocalizedError('Must be a valid phone number.');
       }
-    }).description(PHONE_DESCRIPTION);
+    }).description(description);
   }
 
   hex() {
