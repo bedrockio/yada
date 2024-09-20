@@ -25,20 +25,25 @@ class ObjectSchema extends TypeSchema {
       }
     });
     this.transform((obj, options) => {
-      const { fields, stripUnknown, expandDotSyntax } = options;
+      const { fields, stripUnknown, stripEmpty, expandDotSyntax } = options;
       if (obj) {
         const result = {};
         if (expandDotSyntax) {
           obj = expandDotProperties(obj);
         }
         for (let key of Object.keys(obj)) {
-          if (!fields || key in fields) {
-            result[key] = obj[key];
-          } else if (!stripUnknown) {
+          const value = obj[key];
+          const isUnknown = !!fields && !(key in fields);
+
+          if ((value === '' && stripEmpty) || (isUnknown && stripUnknown)) {
+            continue;
+          } else if (isUnknown) {
             throw new LocalizedError('Unknown field "{key}".', {
               key,
               type: 'field',
             });
+          } else {
+            result[key] = obj[key];
           }
         }
         return result;
@@ -51,11 +56,12 @@ class ObjectSchema extends TypeSchema {
       this.assert('field', async (obj, options) => {
         if (obj) {
           const { path = [] } = options;
-          const { strip } = schema.meta;
+          const { strip, required } = schema.meta;
           const val = obj[key];
 
           options = {
             ...options,
+            required,
             path: [...path, key],
           };
 

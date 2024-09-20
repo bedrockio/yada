@@ -18,15 +18,15 @@ const PHONE_DESCRIPTION =
 
 class StringSchema extends TypeSchema {
   constructor() {
-    super(String);
+    super(String, { allowEmpty: true });
     this.assert('type', (val, options) => {
-      const { cast, allowEmpty } = options;
+      const { cast, required, allowEmpty } = options;
       if (cast && typeof val !== 'string') {
         val = String(val);
       }
       if (typeof val !== 'string') {
         throw new LocalizedError('Must be a string.');
-      } else if (!allowEmpty && val === '') {
+      } else if ((required || !allowEmpty) && val === '') {
         throw new LocalizedError('String may not be empty.');
       }
       return val;
@@ -42,13 +42,6 @@ class StringSchema extends TypeSchema {
         throw new LocalizedError('Value is required.');
       }
     });
-  }
-
-  /**
-   * @returns {this}
-   */
-  allowEmpty() {
-    return this.options({ allowEmpty: true });
   }
 
   /**
@@ -401,10 +394,10 @@ class StringSchema extends TypeSchema {
     const { min, max } = this.meta;
     return {
       ...super.toOpenApi(extra),
-      ...(min != null && {
+      ...(min && {
         minLength: min,
       }),
-      ...(max != null && {
+      ...(max && {
         maxLength: max,
       }),
     };

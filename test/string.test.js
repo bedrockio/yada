@@ -6,7 +6,7 @@ describe('string', () => {
     const schema = yd.string();
     await assertPass(schema, 'a');
     await assertPass(schema, undefined);
-    await assertFail(schema, '', ['String may not be empty.']);
+    await assertPass(schema, '');
     await assertFail(schema, null, ['Must be a string.']);
     await assertFail(schema, 1, ['Must be a string.']);
   });
@@ -16,15 +16,6 @@ describe('string', () => {
     await assertPass(schema, 'a');
     await assertFail(schema, '', ['String may not be empty.']);
     await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 1, ['Must be a string.']);
-  });
-
-  it('should allow an empty string', async () => {
-    const schema = yd.string().allowEmpty();
-    await assertPass(schema, 'a');
-    await assertPass(schema, undefined);
-    await assertPass(schema, '');
-    await assertFail(schema, null, ['Must be a string.']);
     await assertFail(schema, 1, ['Must be a string.']);
   });
 
@@ -270,5 +261,83 @@ describe('string', () => {
     const schema = yd.string().mongo();
     await assertPass(schema, '61b8b032cac265007c34ce09');
     await assertFail(schema, 'foo', ['Must be a valid ObjectId.']);
+  });
+
+  it('should correctly validate an optional nested string', async () => {
+    const schema = yd
+      .object({
+        firstName: yd.string(),
+        lastName: yd.string().required(),
+      })
+      .required();
+
+    await assertPass(schema, {
+      firstName: 'Foo',
+      lastName: 'Bar',
+    });
+
+    await assertPass(schema, {
+      firstName: '',
+      lastName: 'Bar',
+    });
+
+    await assertFail(
+      schema,
+      {
+        firstName: 'Foo',
+        lastName: '',
+      },
+      ['String may not be empty.']
+    );
+  });
+
+  it('should be able to define an optional string field that may not be empty', async () => {
+    const schema = yd
+      .object({
+        firstName: yd.string(),
+        lastName: yd.string().options({
+          allowEmpty: false,
+        }),
+      })
+      .required();
+    await assertPass(schema, {});
+    await assertPass(schema, {
+      firstName: 'Foo',
+      lastName: 'Bar',
+    });
+    await assertPass(schema, {
+      lastName: 'Bar',
+    });
+    await assertPass(schema, {
+      firstName: '',
+      lastName: 'Bar',
+    });
+    await assertPass(schema, {
+      firstName: 'Foo',
+    });
+    await assertPass(schema, {
+      firstName: 'Foo',
+    });
+    await assertFail(schema, undefined, ['Value is required.']);
+    await assertFail(
+      schema,
+      {
+        firstName: 'Foo',
+        lastName: '',
+      },
+      ['String may not be empty.']
+    );
+  });
+
+  it('should not run validations on an empty string when allowed', async () => {
+    const schema = yd.string().phone();
+    await assertPass(schema, '');
+  });
+
+  it('should run validations on an empty string when allowed', async () => {
+    const schema = yd.string().phone().options({
+      allowEmpty: false,
+    });
+    await assertFail(schema, '', ['String may not be empty.']);
   });
 });

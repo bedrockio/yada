@@ -26,6 +26,9 @@ export async function assertFail(schema, obj, errors) {
 }
 
 function mapErrorMessages(error) {
+  if (error.toJSON) {
+    error = error.toJSON();
+  }
   const { message, details = [] } = error;
   return [message, ...details.flatMap(mapErrorMessages)].filter(Boolean);
 }

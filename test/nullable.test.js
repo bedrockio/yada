@@ -16,20 +16,19 @@ describe('nullable', () => {
 
   it('should allow a nullable string', async () => {
     const schema = yd.string().nullable();
-    await assertFail(schema, '', ['String may not be empty.']);
-    await assertPass(schema, null);
-  });
-
-  it('should allow an empty nullable string', async () => {
-    const schema = yd.string().allowEmpty().nullable();
     await assertPass(schema, '');
     await assertPass(schema, null);
   });
 
-  it('should allow an empty nullable string with options', async () => {
+  it('should allow null for a required string', async () => {
+    const schema = yd.string().required().nullable();
+    await assertFail(schema, '', ['String may not be empty.']);
+    await assertPass(schema, null);
+  });
+
+  it('should allow a nullable string with options', async () => {
     const schema = yd.string().options({
       nullable: true,
-      allowEmpty: true,
     });
     await assertPass(schema, '');
     await assertPass(schema, null);

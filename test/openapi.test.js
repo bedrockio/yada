@@ -127,6 +127,17 @@ describe('toOpenApi', () => {
     });
   });
 
+  it('should describe mixed enum of same type', async () => {
+    const schema = yd.allow(yd.string(), '');
+    expect(schema.toOpenApi()).toEqual({
+      oneOf: [
+        {
+          type: 'string',
+        },
+      ],
+    });
+  });
+
   it('should describe date formats', async () => {
     let schema = yd.date().iso();
     expect(schema.toOpenApi()).toEqual({

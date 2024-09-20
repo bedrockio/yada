@@ -367,4 +367,41 @@ describe('object', () => {
       });
     });
   });
+
+  describe('stripEmpty', () => {
+    it('should conditionally strip out fields', async () => {
+      const schema = yd
+        .object({
+          firstName: yd.string(),
+          lastName: yd.string(),
+        })
+        .options({
+          stripEmpty: true,
+        });
+      expect(
+        await schema.validate({
+          firstName: 'Foo',
+          lastName: '',
+        })
+      ).toEqual({
+        firstName: 'Foo',
+      });
+
+      expect(
+        await schema.validate({
+          firstName: '',
+          lastName: 'Bar',
+        })
+      ).toEqual({
+        lastName: 'Bar',
+      });
+
+      expect(
+        await schema.validate({
+          firstName: '',
+          lastName: '',
+        })
+      ).toEqual({});
+    });
+  });
 });

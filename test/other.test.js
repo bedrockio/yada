@@ -409,6 +409,11 @@ describe('options', () => {
 });
 
 describe('errors', () => {
+  it('should have a default error message', async () => {
+    const schema = yd.string();
+    await assertErrorMessage(schema, 3, 'Validation failed.');
+  });
+
   it('should allow a custom message', async () => {
     const schema = yd.string().message('Needs a string');
     await assertErrorMessage(schema, 3, 'Needs a string');

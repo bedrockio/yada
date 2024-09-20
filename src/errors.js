@@ -8,14 +8,17 @@ export class LocalizedError extends Error {
 }
 
 export class ValidationError extends Error {
+  static DEFAULT_MESSAGE = 'Validation failed.';
+
   constructor(arg, details = []) {
-    super(getLocalizedMessage(arg));
+    super(getLocalizedMessage(arg) || ValidationError.DEFAULT_MESSAGE);
     this.type = 'validation';
     this.details = details;
   }
 
   toJSON() {
-    const { message, details } = this;
+    const { details } = this;
+    const message = this.getMessage();
     return {
       type: this.type,
       ...(message && {
@@ -27,6 +30,15 @@ export class ValidationError extends Error {
         }),
       }),
     };
+  }
+
+  getMessage() {
+    const { message } = this;
+    // @ts-ignore
+    const { DEFAULT_MESSAGE } = this.constructor;
+    if (message && message !== DEFAULT_MESSAGE) {
+      return message;
+    }
   }
 
   getFullMessage(options) {

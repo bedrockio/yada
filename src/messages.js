@@ -2,7 +2,7 @@ import { localize } from './localization';
 
 export function getFullMessage(error, options) {
   const { delimiter = '\n' } = options;
-  if (error.message) {
+  if (hasMessage(error)) {
     return getLabeledMessage(error, options);
   } else if (error.details?.length) {
     return error.details
@@ -14,6 +14,16 @@ export function getFullMessage(error, options) {
       })
       .join(delimiter);
   }
+}
+
+function hasMessage(error) {
+  let message;
+  if (error.getMessage) {
+    message = error.getMessage();
+  } else {
+    message = error.message;
+  }
+  return !!message;
 }
 
 function getInnerPath(error, options) {

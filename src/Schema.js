@@ -140,6 +140,8 @@ export default class Schema {
         break;
       } else if (value === null && options.nullable) {
         break;
+      } else if (value === '' && !options.required && options.allowEmpty) {
+        break;
       }
 
       try {
@@ -373,7 +375,9 @@ export default class Schema {
               };
               oneOf.push(forType);
             }
-            forType.enum.push(entry);
+            if (forType.enum) {
+              forType.enum.push(entry);
+            }
           }
         }
         return { oneOf };
