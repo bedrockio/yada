@@ -140,8 +140,6 @@ export default class Schema {
         break;
       } else if (value === null && options.nullable) {
         break;
-      } else if (value === '' && !options.required && options.allowEmpty) {
-        break;
       }
 
       try {

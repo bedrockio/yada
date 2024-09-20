@@ -329,11 +329,6 @@ describe('string', () => {
     );
   });
 
-  it('should not run validations on an empty string when allowed', async () => {
-    const schema = yd.string().phone();
-    await assertPass(schema, '');
-  });
-
   it('should run validations on an empty string when allowed', async () => {
     const schema = yd.string().phone().options({
       allowEmpty: false,
