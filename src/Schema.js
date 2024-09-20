@@ -8,7 +8,7 @@ import {
 } from './errors';
 import { omit } from './utils';
 
-const INITIAL_TYPES = ['default', 'required', 'type', 'transform'];
+const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
 const REQUIRED_TYPES = ['default', 'required'];
 
 export default class Schema {
@@ -149,13 +149,14 @@ export default class Schema {
         }
       } catch (error) {
         const { type } = assertion;
+        const { message } = error;
 
         if (type === 'type') {
-          details.push(new TypeError(error, this.meta.type));
+          details.push(new TypeError(message, this.meta.type));
         } else if (type === 'format') {
-          details.push(new FormatError(error, this.meta.format));
+          details.push(new FormatError(message, this.meta.format));
         } else if (error instanceof LocalizedError) {
-          details.push(new AssertionError(error, type));
+          details.push(new AssertionError(message, type));
         } else {
           details.push(error);
         }

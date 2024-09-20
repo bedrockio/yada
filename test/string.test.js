@@ -329,10 +329,32 @@ describe('string', () => {
     );
   });
 
+  it('should not run validations on an empty string by default', async () => {
+    const schema = yd.string().phone();
+    await assertPass(schema, '');
+  });
+
   it('should run validations on an empty string when allowed', async () => {
     const schema = yd.string().phone().options({
       allowEmpty: false,
     });
     await assertFail(schema, '', ['String may not be empty.']);
+  });
+
+  it('should not allow empty in multi-type schema', async () => {
+    const schema = yd
+      .allow(
+        yd.string().mongo(),
+        yd.object({
+          id: yd.string().mongo(),
+        })
+      )
+      .options({
+        allowEmpty: false,
+      });
+    await assertFail(schema, '', [
+      'String may not be empty.',
+      'Must be an object.',
+    ]);
   });
 });

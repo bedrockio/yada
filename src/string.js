@@ -18,15 +18,21 @@ const PHONE_DESCRIPTION =
 
 class StringSchema extends TypeSchema {
   constructor() {
-    super(String, { allowEmpty: true });
+    super(String);
     this.assert('type', (val, options) => {
-      const { cast, required, allowEmpty } = options;
+      const { cast } = options;
+
       if (cast && typeof val !== 'string') {
         val = String(val);
       }
       if (typeof val !== 'string') {
         throw new LocalizedError('Must be a string.');
-      } else if ((required || !allowEmpty) && val === '') {
+      }
+      return val;
+    });
+    this.assert('empty', (val, options) => {
+      const { required, allowEmpty } = options;
+      if (val === '' && (required || allowEmpty === false)) {
         throw new LocalizedError('String may not be empty.');
       }
       return val;
@@ -388,6 +394,19 @@ class StringSchema extends TypeSchema {
         throw new LocalizedError('Must be a valid ObjectId.');
       }
     });
+  }
+
+  format(name, fn) {
+    return this.clone({ format: name }).assert(
+      'format',
+      function (val, options) {
+        const { allowEmpty } = options;
+        if (val === '' && allowEmpty !== false) {
+          return;
+        }
+        fn(val, options);
+      }
+    );
   }
 
   toOpenApi(extra) {

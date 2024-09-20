@@ -16,14 +16,16 @@ export function getFullMessage(error, options) {
   }
 }
 
-function hasMessage(error) {
-  let message;
+export function getErrorMessage(error) {
   if (error.getMessage) {
-    message = error.getMessage();
+    return error.getMessage();
   } else {
-    message = error.message;
+    return error.message;
   }
-  return !!message;
+}
+
+function hasMessage(error) {
+  return !!getErrorMessage(error);
 }
 
 function getInnerPath(error, options) {

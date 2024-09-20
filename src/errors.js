@@ -10,20 +10,17 @@ export class LocalizedError extends Error {
 export class ValidationError extends Error {
   static DEFAULT_MESSAGE = 'Validation failed.';
 
-  constructor(arg, details = []) {
-    super(getLocalizedMessage(arg) || ValidationError.DEFAULT_MESSAGE);
+  constructor(message = ValidationError.DEFAULT_MESSAGE, details = []) {
+    super(message);
     this.type = 'validation';
     this.details = details;
   }
 
   toJSON() {
     const { details } = this;
-    const message = this.getMessage();
     return {
       type: this.type,
-      ...(message && {
-        message,
-      }),
+      message: this.getMessage(),
       ...(details.length && {
         details: details.map((error) => {
           return serializeError(error);
@@ -37,7 +34,7 @@ export class ValidationError extends Error {
     // @ts-ignore
     const { DEFAULT_MESSAGE } = this.constructor;
     if (message && message !== DEFAULT_MESSAGE) {
-      return message;
+      return getLocalizedMessage(message);
     }
   }
 
@@ -91,7 +88,9 @@ export class FormatError extends ValidationError {
 }
 
 export class FieldError extends ValidationError {
-  constructor(message, field, details) {
+  static DEFAULT_MESSAGE = 'Field failed validation.';
+
+  constructor(message = FieldError.DEFAULT_MESSAGE, field, details) {
     super(message, details);
     this.type = 'field';
     this.field = field;
@@ -106,7 +105,9 @@ export class FieldError extends ValidationError {
 }
 
 export class ElementError extends ValidationError {
-  constructor(message, index, details) {
+  static DEFAULT_MESSAGE = 'Element failed validation.';
+
+  constructor(message = ElementError.DEFAULT_MESSAGE, index, details) {
     super(message, details);
     this.type = 'element';
     this.index = index;
