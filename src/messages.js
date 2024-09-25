@@ -49,6 +49,8 @@ function getLabeledMessage(error, options) {
     template = base;
   } else if (canAutoAddField(type, path)) {
     template = `{field} ${downcase(base)}`;
+  } else {
+    template = error.message;
   }
 
   if (template) {

@@ -360,4 +360,16 @@ describe('getFullMessage', () => {
     }
     expect(error.getFullMessage()).toBe('"profile.name" must be "Frank".');
   });
+
+  it('should not return truncated message for required', async () => {
+    const schema = yd.string().required();
+
+    let error;
+    try {
+      await schema.validate(undefined);
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('Value is required.');
+  });
 });
