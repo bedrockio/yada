@@ -24,7 +24,6 @@
     "@babel/core": "^7.20.12",
     "@babel/preset-env": "^7.20.2",
     "@bedrockio/prettier-config": "^1.0.2",
-    "@types/node": "^22.10.2",
     "babel-plugin-add-module-exports": "^1.0.4",
     "eslint": "^8.26.0",
     "eslint-plugin-bedrock": "^1.0.24",
