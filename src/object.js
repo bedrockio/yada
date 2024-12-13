@@ -15,9 +15,6 @@ class ObjectSchema extends TypeSchema {
     this.setup();
   }
 
-  /**
-   * @private
-   */
   setup() {
     this.assert('type', (val) => {
       if (val === null || typeof val !== 'object') {
@@ -89,9 +86,6 @@ class ObjectSchema extends TypeSchema {
     }
   }
 
-  /**
-   * @private
-   */
   getFields() {
     return this.meta.fields || {};
   }

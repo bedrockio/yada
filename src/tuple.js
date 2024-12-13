@@ -7,11 +7,8 @@ class TupleSchema extends Schema {
     this.setup();
   }
 
-  /**
-   * @private
-   */
   setup() {
-    const { schemas, message } = this.meta;
+    const { schemas } = this.meta;
 
     this.assert('type', (val, options) => {
       if (typeof val === 'string' && options.cast) {

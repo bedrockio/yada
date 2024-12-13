@@ -9,9 +9,6 @@ class ArraySchema extends TypeSchema {
     this.setup();
   }
 
-  /**
-   * @private
-   */
   setup() {
     const { schemas } = this.meta;
     const schema =
