@@ -40,14 +40,13 @@ function getInnerPath(error, options) {
 }
 
 function getLabeledMessage(error, options) {
-  const { type } = error;
   const { path = [] } = options;
   const base = getBase(error.message);
 
   let template;
   if (base.includes('{field}')) {
     template = base;
-  } else if (canAutoAddField(type, path)) {
+  } else if (canAutoAddField(path, base)) {
     template = `{field} ${downcase(base)}`;
   } else {
     template = error.message;
@@ -62,13 +61,14 @@ function getLabeledMessage(error, options) {
   }
 }
 
-const DISALLOWED_TYPES = ['field', 'element', 'array', 'custom'];
+const GENERIC_MESSAGE_REG = /^Must|is required\.?$/;
 
-// Error types that have custom messages should not add the field
-// names automatically. Instead the custom messages can include
-// the {field} token to allow it to be interpolated if required.
-function canAutoAddField(type, path) {
-  return type && path.length && !DISALLOWED_TYPES.includes(type);
+// Only "generic" error messages should automatically add the field.
+// A custom error message may be "Please verify you are human" which
+// is intended to be understood in context and does not benefit from
+// the inclusion of the field name.
+function canAutoAddField(path, base) {
+  return path.length && GENERIC_MESSAGE_REG.test(base);
 }
 
 function getFieldLabel(options) {
