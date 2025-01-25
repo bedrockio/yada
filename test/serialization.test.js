@@ -298,6 +298,22 @@ describe('getFullMessage', () => {
     expect(error.getFullMessage()).toBe('Email already exists.');
   });
 
+  it('should not modify a missing message', async () => {
+    const schema = yd.object({
+      email: yd.string().missing(() => {
+        throw new Error('Email is required.');
+      }),
+    });
+
+    let error;
+    try {
+      await schema.validate({});
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('Email is required.');
+  });
+
   it('should return custom message if one exists', async () => {
     const schema = yd.object({
       token: yd.string().required().message('Please verify you are human.'),

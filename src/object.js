@@ -70,7 +70,12 @@ class ObjectSchema extends TypeSchema {
             // Do not pass down message into validators
             // to allow custom messages to take precedence.
             options = omit(options, 'message');
-            const result = await schema.validate(val, options);
+            const result = await schema.validate(val, {
+              ...options,
+              // Re-pass the object as root here as its fields
+              // may have been transformed by defaults.
+              root: obj,
+            });
             if (result !== undefined) {
               return {
                 ...obj,

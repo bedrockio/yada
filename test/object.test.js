@@ -345,6 +345,22 @@ describe('object', () => {
     }).toThrow('Key "name" must be a schema');
   });
 
+  it('should pass defaults along to custom validators in other fields', async () => {
+    const schema = yd.object({
+      type: yd.string().default('email'),
+      phone: yd.custom((val, { root }) => {
+        if (root.type === 'email') {
+          throw new Error('Phone cannot be passed when "type" is "email".');
+        }
+      }),
+    });
+    await assertPass(schema, {});
+    await assertPass(schema, { type: 'phone', phone: 'phone' });
+    await assertFail(schema, { phone: 'phone' }, [
+      'Phone cannot be passed when "type" is "email".',
+    ]);
+  });
+
   describe('strip', () => {
     it('should conditionally strip out fields', async () => {
       const schema = yd.object({

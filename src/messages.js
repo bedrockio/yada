@@ -40,14 +40,18 @@ function getInnerPath(error, options) {
 }
 
 function getLabeledMessage(error, options) {
+  const { message } = error;
   const { path = [] } = options;
-  const base = getBase(error.message);
 
   let template;
-  if (base.includes('{field}')) {
-    template = base;
-  } else if (canAutoAddField(path, base)) {
-    template = `{field} ${downcase(base)}`;
+  if (message.includes('{field}')) {
+    template = message;
+  } else if (canAutoAddField(path, message)) {
+    if (message === 'Value is required.') {
+      template = '{field} is required.';
+    } else {
+      template = `{field} ${downcase(message)}`;
+    }
   } else {
     template = error.message;
   }
@@ -57,11 +61,11 @@ function getLabeledMessage(error, options) {
       field: getFieldLabel(options),
     });
   } else {
-    return localize(base);
+    return localize(message);
   }
 }
 
-const GENERIC_MESSAGE_REG = /^Must|is required\.?$/;
+const GENERIC_MESSAGE_REG = /^(Must|Value is required\.)/;
 
 // Only "generic" error messages should automatically add the field.
 // A custom error message may be "Please verify you are human" which
@@ -77,14 +81,6 @@ function getFieldLabel(options) {
     return naturalize(path[path.length - 1]);
   } else {
     return `"${path.join('.')}"`;
-  }
-}
-
-function getBase(str) {
-  if (str === 'Value is required.') {
-    return 'is required.';
-  } else {
-    return str;
   }
 }
 

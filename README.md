@@ -27,6 +27,7 @@ Concepts
   - [strip](#strip)
   - [nullable](#nullable)
   - [message](#message)
+  - [missing](#missing)
 - [Validation Options](#validation-options)
 - [Error Messages](#error-messages)
 - [Localization](#localization)
@@ -60,9 +61,9 @@ The schema will now validate input with `validate`:
 ```js
 await schema.validate({
   name: 'Jules',
-  email: 'jules@gmail.com
+  email: 'jules@gmail.com',
   age: 25,
-})
+});
 ```
 
 Note that the `validate` method is asynchronous so must be awaited with `await`
@@ -219,6 +220,15 @@ There are also transform methods that will transform input:
   argument will instead error if input is not lower case.
 - `uppercase` - Transforms input into upper case. Passing `true` as the first
   argument will instead error if input is not upper case.
+
+Note that empty strings are allowed by default unless `required`. If you need an
+optional string field that may not be empty, then use `options`:
+
+```js
+const schema = yd.string().options({
+  allowEmpty: false,
+});
+```
 
 ### Number
 
@@ -444,6 +454,10 @@ The `custom` schema allows for custom validations expressed in code. A custom
 schema may either throw an error or transform the input by returning a value
 that is not `undefined`.
 
+> [!WARNING] Note that `custom` will only be run if a value is passed other than
+> `undefined`. To run more complex validations on optional fields, use the
+> [`missing`](#missing) method.
+
 ```js
 const schema = yd.custom((val) => {
   if (val === 'foo') {
@@ -634,6 +648,29 @@ try {
   console.log(error.getFullMessage());
   // -> "name" must be "Frank".
 }
+```
+
+### Missing
+
+Allows custom validations when no value is passed:
+
+```js
+const schema = yd.object({
+  type: yd.string().allow('email', 'phone'),
+  email: yd.string.email(),
+  phone: yd
+    .string()
+    .phone()
+    .missing(({ root }) => {
+      // Run this assertion when "phone" is undefined.
+      // Contrast this with "custom" which will never be run
+      // here as it is part of the valiation chain and bails
+      // after the string validation cannot be fulfilled.
+      if (root.type === 'phone') {
+        throw new Error('"phone" must be passed when "type" is "phone"');
+      }
+    }),
+});
 ```
 
 ## Validation Options

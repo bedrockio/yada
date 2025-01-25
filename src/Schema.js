@@ -9,7 +9,7 @@ import {
 import { omit } from './utils';
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
-const REQUIRED_TYPES = ['default', 'required'];
+const REQUIRED_TYPES = ['default', 'required', 'missing'];
 
 export default class Schema {
   constructor(meta = {}) {
@@ -53,6 +53,20 @@ export default class Schema {
       throw new Error('Assertion function required.');
     }
     return this.clone().assert('custom', async (val, options) => {
+      return await fn(val, options);
+    });
+  }
+
+  /**
+   * Validate by a custom function when no value passed. [Link](https://github.com/bedrockio/yada#missing)
+   * @param {Function} fn
+   * @returns {this}
+   */
+  missing(fn) {
+    if (!fn) {
+      throw new Error('Assertion function required.');
+    }
+    return this.clone().assert('missing', async (val, options) => {
       return await fn(val, options);
     });
   }
@@ -136,17 +150,12 @@ export default class Schema {
     };
 
     for (let assertion of this.assertions) {
-      if (value === undefined && !assertion.required) {
-        break;
-      } else if (value === null && options.nullable) {
-        break;
+      if (this.canSkipAssertion(value, assertion, options)) {
+        continue;
       }
 
       try {
-        const result = await this.runAssertion(assertion, value, options);
-        if (result !== undefined) {
-          value = result;
-        }
+        value = await this.runAssertion(value, assertion, options);
       } catch (error) {
         const { type } = assertion;
         const { message } = error;
@@ -322,6 +331,16 @@ export default class Schema {
     });
   }
 
+  canSkipAssertion(value, assertion, options) {
+    if (value === undefined) {
+      return !assertion.required;
+    } else if (value === null) {
+      return options.nullable;
+    } else {
+      return assertion.type === 'missing';
+    }
+  }
+
   /**
    * @returns {this}
    */
@@ -339,9 +358,18 @@ export default class Schema {
     return index === -1 ? INITIAL_TYPES.length : index;
   }
 
-  async runAssertion(assertion, value, options = {}) {
-    const { fn } = assertion;
-    return await fn(value, options);
+  async runAssertion(value, assertion, options = {}) {
+    const { type, fn } = assertion;
+    let result;
+    if (type === 'missing') {
+      result = await fn(options);
+    } else {
+      result = await fn(value, options);
+    }
+    if (result !== undefined) {
+      return result;
+    }
+    return value;
   }
 
   enumToOpenApi() {
