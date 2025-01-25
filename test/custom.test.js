@@ -11,7 +11,7 @@ describe('custom', () => {
     await assertPass(schema, undefined);
     await assertPass(schema, '');
     await assertPass(schema, 'hello');
-    await assertFail(schema, 'goodbye', ['Must not be goodbye.']);
+    await assertFail(schema, 'goodbye', 'Must not be goodbye.');
   });
 
   it('should allow a required root validator', async () => {
@@ -24,8 +24,8 @@ describe('custom', () => {
       .required();
     await assertPass(schema, '');
     await assertPass(schema, 'hello');
-    await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, 'goodbye', ['Must not be goodbye.']);
+    await assertFail(schema, undefined, 'Value is required.');
+    await assertFail(schema, 'goodbye', 'Must not be goodbye.');
   });
 
   it('should convert result', async () => {

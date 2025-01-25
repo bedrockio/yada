@@ -14,6 +14,7 @@ export async function assertPass(schema, obj, expected, options) {
 }
 
 export async function assertFail(schema, obj, errors) {
+  errors = Array.isArray(errors) ? errors : [errors];
   try {
     await schema.validate(obj);
     throw new Error('Expected failure but passed.');

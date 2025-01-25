@@ -6,7 +6,7 @@ describe('missing', () => {
     const schema = yd.string().missing(() => {
       throw new Error('Bad!');
     });
-    await assertFail(schema, undefined, ['Bad!']);
+    await assertFail(schema, undefined, 'Bad!');
   });
 
   it('should work on optional fields for complex schemas', async () => {
@@ -27,9 +27,11 @@ describe('missing', () => {
       email: 'foo@bar.com',
       phone: '+15551234567',
     });
-    await assertFail(schema, { email: 'foo@bar.com' }, [
-      '"phone" is required when "email" is passed.',
-    ]);
+    await assertFail(
+      schema,
+      { email: 'foo@bar.com' },
+      '"phone" is required when "email" is passed.'
+    );
   });
 
   it('should pass defaults along to custom validators in other fields', async () => {
@@ -44,12 +46,16 @@ describe('missing', () => {
           }
         }),
     });
-    await assertFail(schema, {}, [
-      'Email must be passed when "type" is "email".',
-    ]);
-    await assertFail(schema, { type: 'email' }, [
-      'Email must be passed when "type" is "email".',
-    ]);
+    await assertFail(
+      schema,
+      {},
+      'Email must be passed when "type" is "email".'
+    );
+    await assertFail(
+      schema,
+      { type: 'email' },
+      'Email must be passed when "type" is "email".'
+    );
     await assertPass(schema, { type: 'phone' });
   });
 });

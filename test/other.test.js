@@ -55,7 +55,7 @@ describe('append', () => {
     const schema = yd.string().append(custom);
 
     await assertPass(schema, 'foo');
-    await assertFail(schema, 'fop', ['You misspelled foo!']);
+    await assertFail(schema, 'fop', 'You misspelled foo!');
   });
 
   it('should append a custom schema to an object schema', async () => {
@@ -72,7 +72,7 @@ describe('append', () => {
       .append(custom);
 
     await assertPass(schema, { foo: 'foo' });
-    await assertFail(schema, { foo: 'fop' }, ['You misspelled foo!']);
+    await assertFail(schema, { foo: 'fop' }, 'You misspelled foo!');
   });
 
   it('should preserve defaults', async () => {
@@ -85,12 +85,16 @@ describe('append', () => {
 
     await assertPass(schema.default('foo').append(custom));
     await assertPass(schema.append(custom).default('foo'));
-    await assertFail(schema.default('fop').append(custom), undefined, [
-      'You misspelled foo!',
-    ]);
-    await assertFail(schema.append(custom).default('fop'), undefined, [
-      'You misspelled foo!',
-    ]);
+    await assertFail(
+      schema.default('fop').append(custom),
+      undefined,
+      'You misspelled foo!'
+    );
+    await assertFail(
+      schema.append(custom).default('fop'),
+      undefined,
+      'You misspelled foo!'
+    );
   });
 });
 
@@ -177,7 +181,7 @@ describe('options', () => {
         },
         options
       );
-      await assertFail(schema, {}, ['Object must not be empty.']);
+      await assertFail(schema, {}, 'Object must not be empty.');
     });
 
     it('should respect following append and custom validations', async () => {
@@ -214,7 +218,7 @@ describe('options', () => {
         },
         options
       );
-      await assertFail(schema, {}, ['Object must not be empty.']);
+      await assertFail(schema, {}, 'Object must not be empty.');
     });
   });
 
@@ -230,7 +234,7 @@ describe('options', () => {
       await assertPass(schema, 'False', false, options);
       await assertPass(schema, '0', false, options);
       await assertPass(schema, '1', true, options);
-      await assertFail(schema, 'foo', ['Must be a boolean.']);
+      await assertFail(schema, 'foo', 'Must be a boolean.');
     });
 
     it('should cast a nested boolean', async () => {
@@ -244,12 +248,12 @@ describe('options', () => {
       await assertPass(schema, { a: 'True' }, { a: true }, options);
       await assertPass(schema, { a: 'false' }, { a: false }, options);
       await assertPass(schema, { a: 'False' }, { a: false }, options);
-      await assertFail(schema, { a: 'foo' }, ['Must be a boolean.']);
+      await assertFail(schema, { a: 'foo' }, 'Must be a boolean.');
     });
 
     it('should not cast a boolean without flag', async () => {
       const schema = yd.boolean();
-      await assertFail(schema, 'true', ['Must be a boolean.']);
+      await assertFail(schema, 'true', 'Must be a boolean.');
     });
 
     it('should cast a number', async () => {
@@ -260,8 +264,8 @@ describe('options', () => {
       await assertPass(schema, '0', 0, options);
       await assertPass(schema, '1', 1, options);
       await assertPass(schema, '1.1', 1.1, options);
-      await assertFail(schema, 'foo', ['Must be a number.']);
-      await assertFail(schema, 'null', ['Must be a number.']);
+      await assertFail(schema, 'foo', 'Must be a number.');
+      await assertFail(schema, 'null', 'Must be a number.');
     });
 
     it('should cast a nested number', async () => {
@@ -274,13 +278,13 @@ describe('options', () => {
       await assertPass(schema, { a: '0' }, { a: 0 }, options);
       await assertPass(schema, { a: '1' }, { a: 1 }, options);
       await assertPass(schema, { a: '1.1' }, { a: 1.1 }, options);
-      await assertFail(schema, { a: 'foo' }, ['Must be a number.']);
-      await assertFail(schema, { a: 'null' }, ['Must be a number.']);
+      await assertFail(schema, { a: 'foo' }, 'Must be a number.');
+      await assertFail(schema, { a: 'null' }, 'Must be a number.');
     });
 
     it('should not cast a number without flag', async () => {
       const schema = yd.number();
-      await assertFail(schema, '0', ['Must be a number.']);
+      await assertFail(schema, '0', 'Must be a number.');
     });
 
     it('should cast to an array from commas', async () => {
@@ -314,7 +318,7 @@ describe('options', () => {
         a: yd.array(yd.number()),
         b: yd.string(),
       });
-      await assertFail(schema, { a: '1,2,3', b: 'b' }, ['Must be an array.']);
+      await assertFail(schema, { a: '1,2,3', b: 'b' }, 'Must be an array.');
     });
 
     it('should cast a string', async () => {
@@ -375,7 +379,7 @@ describe('options', () => {
         {
           b: 'b',
         },
-        ['Must be a number.']
+        'Must be a number.'
       );
     });
   });
@@ -493,7 +497,7 @@ describe('misc', () => {
       }),
     });
     await assertPass(schema, { a: [1, 2, 3], b: 1 });
-    await assertFail(schema, { a: [1, 2, 3], b: 4 }, ['"a" must include "b"']);
+    await assertFail(schema, { a: [1, 2, 3], b: 4 }, '"a" must include "b"');
   });
 
   it('should have access to current path', async () => {

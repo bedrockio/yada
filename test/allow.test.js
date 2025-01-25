@@ -6,22 +6,22 @@ describe('allow', () => {
     const schema = yd.allow('one', 'two');
     await assertPass(schema, 'one');
     await assertPass(schema, 'two');
-    await assertFail(schema, 'three', ['Must be one of ["one", "two"].']);
+    await assertFail(schema, 'three', 'Must be one of ["one", "two"].');
   });
 
   it('should pass an array', async () => {
     const schema = yd.allow(['one', 'two']);
     await assertPass(schema, 'one');
     await assertPass(schema, 'two');
-    await assertFail(schema, 'three', ['Must be one of ["one", "two"].']);
+    await assertFail(schema, 'three', 'Must be one of ["one", "two"].');
   });
 
   it('should allow passing other schemas', async () => {
     const schema = yd.allow([yd.string(), yd.number()]);
     await assertPass(schema, 'a');
     await assertPass(schema, 5);
-    await assertFail(schema, true, ['Must be one of [string, number].']);
-    await assertFail(schema, null, ['Must be one of [string, number].']);
+    await assertFail(schema, true, 'Must be one of [string, number].');
+    await assertFail(schema, null, 'Must be one of [string, number].');
   });
 
   it('should be able to pass custom message', async () => {
@@ -49,7 +49,7 @@ describe('allow', () => {
           id: 'bad-id',
         },
       },
-      ['Must be a valid ObjectId.']
+      'Must be a valid ObjectId.'
     );
   });
 
@@ -160,7 +160,7 @@ describe('allow', () => {
     await assertPass(schema, []);
     await assertPass(schema, ['foo']);
     await assertPass(schema, ['foo', 'bar']);
-    await assertFail(schema, [1], ['Must be a string.']);
+    await assertFail(schema, [1], 'Must be a string.');
   });
 
   it('should allow an array of strings or a string', async () => {
@@ -169,7 +169,7 @@ describe('allow', () => {
     await assertPass(schema, []);
     await assertPass(schema, ['foo']);
     await assertPass(schema, ['foo', 'bar']);
-    await assertFail(schema, [1], ['Must be a string.']);
+    await assertFail(schema, [1], 'Must be a string.');
   });
 
   it('should allow an array of strings or an array of numbers', async () => {

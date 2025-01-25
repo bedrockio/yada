@@ -8,9 +8,9 @@ describe('object', () => {
     });
     await assertPass(schema, undefined);
     await assertPass(schema, { name: 'a' });
-    await assertFail(schema, { name: 1 }, ['Must be a string.']);
-    await assertFail(schema, 1, ['Must be an object.']);
-    await assertFail(schema, null, ['Must be an object.']);
+    await assertFail(schema, { name: 1 }, 'Must be a string.');
+    await assertFail(schema, 1, 'Must be an object.');
+    await assertFail(schema, null, 'Must be an object.');
   });
 
   it('should validate an object with a required field', async () => {
@@ -19,10 +19,10 @@ describe('object', () => {
     });
     await assertPass(schema, undefined);
     await assertPass(schema, { name: 'a' });
-    await assertFail(schema, {}, ['Value is required.']);
-    await assertFail(schema, { name: 1 }, ['Must be a string.']);
-    await assertFail(schema, 1, ['Must be an object.']);
-    await assertFail(schema, null, ['Must be an object.']);
+    await assertFail(schema, {}, 'Value is required.');
+    await assertFail(schema, { name: 1 }, 'Must be a string.');
+    await assertFail(schema, 1, 'Must be an object.');
+    await assertFail(schema, null, 'Must be an object.');
   });
 
   it('should validate a required object', async () => {
@@ -32,9 +32,9 @@ describe('object', () => {
       })
       .required();
     await assertPass(schema, { name: 'a' });
-    await assertFail(schema, undefined, ['Value is required.']);
-    await assertFail(schema, { name: 1 }, ['Must be a string.']);
-    await assertFail(schema, 1, ['Must be an object.']);
+    await assertFail(schema, undefined, 'Value is required.');
+    await assertFail(schema, { name: 1 }, 'Must be a string.');
+    await assertFail(schema, 1, 'Must be an object.');
   });
 
   it('should validate all fields', async () => {
@@ -66,13 +66,13 @@ describe('object', () => {
       })
       .required();
     await assertPass(schema, { name: 'abcd' });
-    await assertFail(schema, { name: 12 }, ['Must be a string.']);
-    await assertFail(schema, { name: 'ABCD' }, [
-      'Must start with lower case letter.',
-    ]);
-    await assertFail(schema, { name: 'abc' }, [
-      'Must be at least 4 characters.',
-    ]);
+    await assertFail(schema, { name: 12 }, 'Must be a string.');
+    await assertFail(
+      schema,
+      { name: 'ABCD' },
+      'Must start with lower case letter.'
+    );
+    await assertFail(schema, { name: 'abc' }, 'Must be at least 4 characters.');
     await assertFail(schema, { name: 'Abc' }, [
       'Must start with lower case letter.',
       'Must be at least 4 characters.',
@@ -110,10 +110,12 @@ describe('object', () => {
       });
     await assertPass(schema, { a: 'a' });
     await assertPass(schema, { b: 'b' });
-    await assertFail(schema, {}, ['Either "a" or "b" must be passed.']);
-    await assertFail(schema, { a: 'a', b: 'b' }, [
-      'Either "a" or "b" must be passed.',
-    ]);
+    await assertFail(schema, {}, 'Either "a" or "b" must be passed.');
+    await assertFail(
+      schema,
+      { a: 'a', b: 'b' },
+      'Either "a" or "b" must be passed.'
+    );
   });
 
   it('should fail on unknown keys by default', async () => {
@@ -132,7 +134,7 @@ describe('object', () => {
         b: 'b',
         c: 'c',
       },
-      ['Unknown field "c".']
+      'Unknown field "c".'
     );
   });
 
@@ -166,7 +168,7 @@ describe('object', () => {
 
   it('should not allow unknown fields for empty objects', async () => {
     const schema = yd.object({});
-    await assertFail(schema, { foo: 'bar' }, ['Unknown field "foo".']);
+    await assertFail(schema, { foo: 'bar' }, 'Unknown field "foo".');
   });
 
   describe('append', () => {
@@ -179,8 +181,8 @@ describe('object', () => {
       });
       const schema = schema1.append(schema2);
       await assertPass(schema, { foo: 'foo', bar: 'bar' });
-      await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
-      await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
+      await assertFail(schema, { foo: 'foo' }, 'Value is required.');
+      await assertFail(schema, { bar: 'bar' }, 'Value is required.');
     });
 
     it('should allow appending a plain object', async () => {
@@ -192,8 +194,8 @@ describe('object', () => {
       };
       const schema = schema1.append(schema2);
       await assertPass(schema, { foo: 'foo', bar: 'bar' });
-      await assertFail(schema, { foo: 'foo' }, ['Value is required.']);
-      await assertFail(schema, { bar: 'bar' }, ['Value is required.']);
+      await assertFail(schema, { foo: 'foo' }, 'Value is required.');
+      await assertFail(schema, { bar: 'bar' }, 'Value is required.');
     });
 
     it('should keep options when appending', async () => {
@@ -246,11 +248,13 @@ describe('object', () => {
           firstName: 'Foo',
           lastName: 'Bar',
         },
-        ['Unknown field "lastName".']
+        'Unknown field "lastName".'
       );
-      await assertFail(schema, { lastName: 'Bar' }, [
-        'Unknown field "lastName".',
-      ]);
+      await assertFail(
+        schema,
+        { lastName: 'Bar' },
+        'Unknown field "lastName".'
+      );
     });
 
     it('should be able to pick fields with array', async () => {
@@ -270,7 +274,7 @@ describe('object', () => {
         {
           age: 25,
         },
-        ['Unknown field "age".']
+        'Unknown field "age".'
       );
       await assertFail(
         schema,
@@ -279,7 +283,7 @@ describe('object', () => {
           lastName: 'Bar',
           age: 25,
         },
-        ['Unknown field "age".']
+        'Unknown field "age".'
       );
     });
   });
@@ -299,11 +303,13 @@ describe('object', () => {
           firstName: 'Foo',
           lastName: 'Bar',
         },
-        ['Unknown field "firstName".']
+        'Unknown field "firstName".'
       );
-      await assertFail(schema, { firstName: 'Bar' }, [
-        'Unknown field "firstName".',
-      ]);
+      await assertFail(
+        schema,
+        { firstName: 'Bar' },
+        'Unknown field "firstName".'
+      );
     });
 
     it('should be able to omit fields with array', async () => {
@@ -323,7 +329,7 @@ describe('object', () => {
           age: 25,
           firstName: 'Foo',
         },
-        ['Unknown field "firstName".']
+        'Unknown field "firstName".'
       );
       await assertFail(
         schema,
@@ -332,7 +338,7 @@ describe('object', () => {
           firstName: 'Foo',
           lastName: 'Bar',
         },
-        ['Unknown field "firstName".']
+        'Unknown field "firstName".'
       );
     });
   });
@@ -356,9 +362,11 @@ describe('object', () => {
     });
     await assertPass(schema, {});
     await assertPass(schema, { type: 'phone', phone: 'phone' });
-    await assertFail(schema, { phone: 'phone' }, [
-      'Phone cannot be passed when "type" is "email".',
-    ]);
+    await assertFail(
+      schema,
+      { phone: 'phone' },
+      'Phone cannot be passed when "type" is "email".'
+    );
   });
 
   describe('strip', () => {
