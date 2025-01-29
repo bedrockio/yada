@@ -388,4 +388,20 @@ describe('getFullMessage', () => {
     }
     expect(error.getFullMessage()).toBe('Value is required.');
   });
+
+  it('should have field names on empty strings', async () => {
+    const schema = yd.object({
+      name: yd.string().required(),
+    });
+
+    let error;
+    try {
+      await schema.validate({
+        name: '',
+      });
+    } catch (err) {
+      error = err;
+    }
+    expect(error.getFullMessage()).toBe('"name" is required.');
+  });
 });

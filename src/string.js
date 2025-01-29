@@ -37,7 +37,7 @@ class StringSchema extends TypeSchema {
     this.assert('empty', (val, options) => {
       const { required, allowEmpty } = options;
       if (val === '' && (required || allowEmpty === false)) {
-        throw new LocalizedError('String may not be empty.');
+        throw new LocalizedError('Value is required.');
       }
       return val;
     });

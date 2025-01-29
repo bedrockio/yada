@@ -14,7 +14,7 @@ describe('string', () => {
   it('should validate a required string', async () => {
     const schema = yd.string().required();
     await assertPass(schema, 'a');
-    await assertFail(schema, '', 'String may not be empty.');
+    await assertFail(schema, '', 'Value is required.');
     await assertFail(schema, undefined, 'Value is required.');
     await assertFail(schema, 1, 'Must be a string.');
   });
@@ -315,7 +315,7 @@ describe('string', () => {
         firstName: 'Foo',
         lastName: '',
       },
-      'String may not be empty.'
+      'Value is required.'
     );
   });
 
@@ -353,7 +353,7 @@ describe('string', () => {
         firstName: 'Foo',
         lastName: '',
       },
-      'String may not be empty.'
+      'Value is required.'
     );
   });
 
@@ -366,7 +366,7 @@ describe('string', () => {
     const schema = yd.string().phone().options({
       allowEmpty: false,
     });
-    await assertFail(schema, '', 'String may not be empty.');
+    await assertFail(schema, '', 'Value is required.');
   });
 
   it('should not allow empty in multi-type schema', async () => {
@@ -380,9 +380,6 @@ describe('string', () => {
       .options({
         allowEmpty: false,
       });
-    await assertFail(schema, '', [
-      'String may not be empty.',
-      'Must be an object.',
-    ]);
+    await assertFail(schema, '', ['Value is required.', 'Must be an object.']);
   });
 });

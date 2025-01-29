@@ -1,3 +1,7 @@
+## 1.2.9
+
+- Fixed field missing on empty strings.
+
 ## 1.2.8
 
 - Added "missing" which runs a custom validator on undefined.

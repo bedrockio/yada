@@ -22,7 +22,7 @@ describe('nullable', () => {
 
   it('should allow null for a required string', async () => {
     const schema = yd.string().required().nullable();
-    await assertFail(schema, '', 'String may not be empty.');
+    await assertFail(schema, '', 'Value is required.');
     await assertPass(schema, null);
   });
 
