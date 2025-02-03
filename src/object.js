@@ -133,6 +133,34 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
+   * Gets the schema for the given field. Accepts either a string
+   * separated by "." or an array of path names.
+   * @param {string|Array<string>} [path] The path of the field.
+   */
+  get(path) {
+    const { fields } = this.meta;
+    if (!fields) {
+      throw new Error('Cannot select field on an open object schema.');
+    }
+
+    path = Array.isArray(path) ? path : path.split('.');
+
+    const [name, ...rest] = path;
+    const schema = fields[name];
+
+    if (!schema) {
+      throw new Error(`Cannot find field "${name}".`);
+    }
+
+    if (rest.length) {
+      return schema.get(rest);
+    } else {
+      return schema;
+    }
+  }
+
+  /**
+   * Returns a new schema that only validates the selected fields.
    * @param {...string} [names] Names to include.
    */
   pick(...names) {
@@ -147,6 +175,7 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
+   * Returns a new schema that omits fields.
    * @param {...string} [names] Names to exclude.
    */
   omit(...names) {

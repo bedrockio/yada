@@ -233,8 +233,120 @@ describe('object', () => {
     });
   });
 
+  describe('get', () => {
+    it('should get a field', async () => {
+      const schema = yd.object({
+        firstName: yd.string(),
+        lastName: yd.string().required(),
+      });
+
+      const firstName = schema.get('firstName');
+      await assertPass(firstName, 'Foo');
+      await assertPass(firstName, '');
+      await assertPass(firstName, undefined);
+
+      const lastName = schema.get('lastName');
+      await assertPass(lastName, 'Foo');
+      await assertFail(lastName, '', 'Value is required.');
+      await assertFail(lastName, undefined, 'Value is required.');
+    });
+
+    it('should deeply get a field by a path', async () => {
+      const schema = yd.object({
+        user: yd.object({
+          profile: yd.object({
+            firstName: yd.string(),
+            lastName: yd.string().required(),
+          }),
+        }),
+      });
+
+      const firstName = schema.get('user.profile.firstName');
+      await assertPass(firstName, 'Foo');
+      await assertPass(firstName, '');
+      await assertPass(firstName, undefined);
+
+      const lastName = schema.get('user.profile.lastName');
+      await assertPass(lastName, 'Foo');
+      await assertFail(lastName, '', 'Value is required.');
+      await assertFail(lastName, undefined, 'Value is required.');
+    });
+
+    it('should deeply get a field by an array path', async () => {
+      const schema = yd.object({
+        user: yd.object({
+          profile: yd.object({
+            firstName: yd.string(),
+            lastName: yd.string().required(),
+          }),
+        }),
+      });
+
+      const firstName = schema.get(['user', 'profile', 'firstName']);
+      await assertPass(firstName, 'Foo');
+      await assertPass(firstName, '');
+      await assertPass(firstName, undefined);
+
+      const lastName = schema.get(['user', 'profile', 'lastName']);
+      await assertPass(lastName, 'Foo');
+      await assertFail(lastName, '', 'Value is required.');
+      await assertFail(lastName, undefined, 'Value is required.');
+    });
+
+    it('should get an intermediary object schema', async () => {
+      const schema = yd.object({
+        user: yd.object({
+          profile: yd.object({
+            firstName: yd.string(),
+            lastName: yd.string().required(),
+          }),
+        }),
+      });
+
+      const profile = schema.get('user.profile');
+      await assertPass(profile, {
+        firstName: 'Foo',
+        lastName: 'Bar',
+      });
+      await assertFail(
+        profile,
+        {
+          firstName: 'Foo',
+        },
+        'Value is required.'
+      );
+    });
+
+    it('should error if field is not found', async () => {
+      const schema = yd.object({});
+
+      expect(() => {
+        schema.get('bad');
+      }).toThrow('Cannot find field "bad".');
+    });
+
+    it('should error if no fields defined', async () => {
+      const schema = yd.object();
+
+      expect(() => {
+        schema.get('bad');
+      }).toThrow('Cannot select field on an open object schema.');
+    });
+
+    it('should error if path is too deep', async () => {
+      const schema = yd.object({
+        firstName: yd.string(),
+        lastName: yd.string().required(),
+      });
+
+      expect(() => {
+        schema.get('firstName.foo');
+      }).toThrow('"get" not implemented by StringSchema.');
+    });
+  });
+
   describe('pick', () => {
-    it('should be able to pick fields with arguments', async () => {
+    it('should pick fields with arguments', async () => {
       const schema = yd
         .object({
           firstName: yd.string(),
@@ -257,7 +369,7 @@ describe('object', () => {
       );
     });
 
-    it('should be able to pick fields with array', async () => {
+    it('should pick fields with array', async () => {
       const schema = yd
         .object({
           age: yd.number().required(),
@@ -289,7 +401,7 @@ describe('object', () => {
   });
 
   describe('omit', () => {
-    it('should be able to omit fields with arguments', async () => {
+    it('should omit fields with arguments', async () => {
       const schema = yd
         .object({
           firstName: yd.string(),
@@ -312,7 +424,7 @@ describe('object', () => {
       );
     });
 
-    it('should be able to omit fields with array', async () => {
+    it('should omit fields with array', async () => {
       const schema = yd
         .object({
           age: yd.number().required(),

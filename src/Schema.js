@@ -257,6 +257,11 @@ export default class Schema {
     return JSON.stringify(this.toOpenApi(), null, 2);
   }
 
+  get() {
+    const { name } = this.constructor;
+    throw new Error(`"get" not implemented by ${name}.`);
+  }
+
   // Private
 
   /**

@@ -1,3 +1,7 @@
+## 1.3.0
+
+- Added object schema "get".
+
 ## 1.2.9
 
 - Fixed field missing on empty strings.
