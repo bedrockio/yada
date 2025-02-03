@@ -45,6 +45,23 @@ describe('string', () => {
     await assertFail(schema, 'foo@bar', 'Must be an email address.');
   });
 
+  it('should validate a gTLD email', async () => {
+    const schema = yd.string().url();
+    await assertPass(schema, 'foo@bar.network');
+    await assertPass(schema, 'foo@bar.online');
+    await assertPass(schema, 'foo@bar.site');
+    await assertPass(schema, 'foo@bar.top');
+    await assertPass(schema, 'foo@bar.app');
+  });
+
+  it('should validate an sTLD email', async () => {
+    const schema = yd.string().url();
+    await assertPass(schema, 'foo@bar.gov');
+    await assertPass(schema, 'foo@bar.edu');
+    await assertPass(schema, 'foo@bar.mil');
+    await assertPass(schema, 'http://foo.aero');
+  });
+
   it('should validate any E.164 phone number by default', async () => {
     const schema = yd.string().phone();
     await assertPass(schema, undefined);
@@ -253,6 +270,23 @@ describe('string', () => {
     const schema = yd.string().url();
     await assertPass(schema, 'http://foo.com');
     await assertFail(schema, 'http://foo', 'Must be a valid URL.');
+  });
+
+  it('should validate a gTLD', async () => {
+    const schema = yd.string().url();
+    await assertPass(schema, 'http://foo.network');
+    await assertPass(schema, 'http://foo.online');
+    await assertPass(schema, 'http://foo.site');
+    await assertPass(schema, 'http://foo.top');
+    await assertPass(schema, 'http://foo.app');
+  });
+
+  it('should validate an sTLD', async () => {
+    const schema = yd.string().url();
+    await assertPass(schema, 'http://foo.gov');
+    await assertPass(schema, 'http://foo.edu');
+    await assertPass(schema, 'http://foo.mil');
+    await assertPass(schema, 'http://foo.aero');
   });
 
   it('should validate a UUID v4', async () => {
