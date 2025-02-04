@@ -380,7 +380,7 @@ const schema = yd.object({
       last4: yd.string().length(4),
       expMonth: yd.number(),
       expYear: yd.number(),
-    })
+    }),
   ),
 });
 
@@ -812,7 +812,7 @@ The delimiter can be customized with the `delimiter` option:
 console.info(
   error.getFullMessage({
     delimiter: '\n',
-  })
+  }),
 );
 // "email" is required
 // "lastName" is required
@@ -825,7 +825,7 @@ labels:
 console.info(
   error.getFullMessage({
     natural: true,
-  })
+  }),
 );
 // "Email" is required
 // "Last Name" is required

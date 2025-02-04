@@ -38,7 +38,7 @@ describe('allow', () => {
         null,
         yd.object({
           id: yd.string().mongo(),
-        })
+        }),
       ),
     });
 
@@ -49,7 +49,7 @@ describe('allow', () => {
           id: 'bad-id',
         },
       },
-      'Must be a valid ObjectId.'
+      'Must be a valid ObjectId.',
     );
   });
 
@@ -61,7 +61,7 @@ describe('allow', () => {
           .object({
             id: yd.string().mongo(),
           })
-          .message('Custom message')
+          .message('Custom message'),
       ),
     });
 
@@ -212,7 +212,7 @@ describe('allow', () => {
         field: 'field',
         order: 'bad',
       },
-      ['Must be one of ["desc", "asc"].', 'Must be an array.']
+      ['Must be one of ["desc", "asc"].', 'Must be an array.'],
     );
     await assertFail(
       schema,
@@ -226,7 +226,7 @@ describe('allow', () => {
           order: 'bad',
         },
       ],
-      ['Unknown field "0".', 'Must be one of ["desc", "asc"].']
+      ['Unknown field "0".', 'Must be one of ["desc", "asc"].'],
     );
   });
 });

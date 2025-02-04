@@ -186,7 +186,7 @@ describe('getFullMessage', () => {
       error = err;
     }
     expect(error.getFullMessage()).toBe(
-      '"a" must be a string. "b" must be a number.'
+      '"a" must be a string. "b" must be a number.',
     );
   });
 
@@ -208,7 +208,7 @@ describe('getFullMessage', () => {
     expect(
       error.getFullMessage({
         delimiter: '\n',
-      })
+      }),
     ).toBe('"a" must be a string.\n"b" must be a number.');
   });
 
@@ -241,7 +241,7 @@ describe('getFullMessage', () => {
       error = err;
     }
     expect(error.getFullMessage()).toBe(
-      '"password" must be at least 12 characters. "password" must contain at least 1 number.'
+      '"password" must be at least 12 characters. "password" must contain at least 1 number.',
     );
   });
 
@@ -261,9 +261,9 @@ describe('getFullMessage', () => {
     expect(
       error.getFullMessage({
         natural: true,
-      })
+      }),
     ).toBe(
-      'Auth code is required. Pass code is required. My token is required.'
+      'Auth code is required. Pass code is required. My token is required.',
     );
   });
 
@@ -349,7 +349,7 @@ describe('getFullMessage', () => {
       error = err;
     }
     expect(error.getFullMessage()).toBe(
-      '"profile.name" must start with an uppercase letter.'
+      '"profile.name" must start with an uppercase letter.',
     );
   });
 

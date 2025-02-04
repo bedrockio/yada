@@ -150,20 +150,20 @@ describe('string', () => {
     await assertFail(
       yd.string().md5(),
       'aaaa',
-      'Must be a hash in md5 format.'
+      'Must be a hash in md5 format.',
     );
   });
 
   it('should validate a SHA1 hash', async () => {
     await assertPass(
       yd.string().sha1(),
-      'c9b09f7f254eb6aaeeff30abeb0b92bea732855a'
+      'c9b09f7f254eb6aaeeff30abeb0b92bea732855a',
     );
 
     await assertFail(
       yd.string().sha1(),
       'bed1e4d90fb9261a80ae92d339949559',
-      'Must be a hash in sha1 format.'
+      'Must be a hash in sha1 format.',
     );
   });
 
@@ -185,7 +185,7 @@ describe('string', () => {
     await assertFail(
       schema,
       '5111111111111111',
-      'Must be a valid credit card number.'
+      'Must be a valid credit card number.',
     );
     await assertFail(schema, 'foo', 'Must be a valid credit card number.');
   });
@@ -222,7 +222,7 @@ describe('string', () => {
     await assertFail(
       schema,
       '41.7708727',
-      'Must be a valid lat,lng coordinate.'
+      'Must be a valid lat,lng coordinate.',
     );
   });
 
@@ -349,7 +349,7 @@ describe('string', () => {
         firstName: 'Foo',
         lastName: '',
       },
-      'Value is required.'
+      'Value is required.',
     );
   });
 
@@ -387,7 +387,7 @@ describe('string', () => {
         firstName: 'Foo',
         lastName: '',
       },
-      'Value is required.'
+      'Value is required.',
     );
   });
 
@@ -409,7 +409,7 @@ describe('string', () => {
         yd.string().mongo(),
         yd.object({
           id: yd.string().mongo(),
-        })
+        }),
       )
       .options({
         allowEmpty: false,

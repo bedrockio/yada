@@ -30,7 +30,7 @@ describe('missing', () => {
     await assertFail(
       schema,
       { email: 'foo@bar.com' },
-      '"phone" is required when "email" is passed.'
+      '"phone" is required when "email" is passed.',
     );
   });
 
@@ -49,12 +49,12 @@ describe('missing', () => {
     await assertFail(
       schema,
       {},
-      'Email must be passed when "type" is "email".'
+      'Email must be passed when "type" is "email".',
     );
     await assertFail(
       schema,
       { type: 'email' },
-      'Email must be passed when "type" is "email".'
+      'Email must be passed when "type" is "email".',
     );
     await assertPass(schema, { type: 'phone' });
   });

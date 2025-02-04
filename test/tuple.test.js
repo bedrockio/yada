@@ -12,17 +12,17 @@ describe('tuple', () => {
     await assertFail(
       schema,
       ['1', '1'],
-      ['Must be a number.', 'Must be a number.']
+      ['Must be a number.', 'Must be a number.'],
     );
     await assertFail(
       schema,
       [null, null],
-      ['Must be a number.', 'Must be a number.']
+      ['Must be a number.', 'Must be a number.'],
     );
     await assertFail(
       schema,
       [undefined, undefined],
-      ['Must be a number.', 'Must be a number.']
+      ['Must be a number.', 'Must be a number.'],
     );
   });
 
@@ -33,7 +33,7 @@ describe('tuple', () => {
     await assertFail(
       schema,
       [1, 'str'],
-      ['Must be a string.', 'Must be a number.']
+      ['Must be a string.', 'Must be a number.'],
     );
   });
 
@@ -48,7 +48,7 @@ describe('tuple', () => {
         type: 'Point',
         coordinates: ['35', 140],
       },
-      'Must be a number.'
+      'Must be a number.',
     );
   });
 
@@ -62,7 +62,7 @@ describe('tuple', () => {
     await assertFail(
       schema,
       ['1', '1'],
-      ['Must be a number.', 'Must be a number.']
+      ['Must be a number.', 'Must be a number.'],
     );
   });
 });

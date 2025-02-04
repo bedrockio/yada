@@ -31,7 +31,7 @@ describe('array', () => {
     await assertFail(
       yd.array(yd.string()),
       [1, 2],
-      ['Must be a string.', 'Must be a string.']
+      ['Must be a string.', 'Must be a string.'],
     );
   });
 
@@ -100,7 +100,7 @@ describe('array', () => {
     const schema = yd.array(
       yd.object({
         foo: yd.string().required(),
-      })
+      }),
     );
     await assertPass(schema, [{ foo: 'hi' }]);
     await assertFail(schema, [{ bar: 'hi' }], 'Unknown field "bar".');
@@ -126,7 +126,7 @@ describe('array', () => {
     await assertFail(
       schema,
       ['one', 'two'],
-      'Cannot contain more than 1 element.'
+      'Cannot contain more than 1 element.',
     );
   });
 

@@ -38,22 +38,22 @@ export function validateLength(expected) {
 
 export const validateLowercase = validateRegex(
   LOWER_REG,
-  'Must contain at least {length} lowercase character{s}.'
+  'Must contain at least {length} lowercase character{s}.',
 );
 
 export const validateUppercase = validateRegex(
   UPPER_REG,
-  'Must contain at least {length} uppercase character{s}.'
+  'Must contain at least {length} uppercase character{s}.',
 );
 
 export const validateNumbers = validateRegex(
   NUMBER_REG,
-  'Must contain at least {length} number{s}.'
+  'Must contain at least {length} number{s}.',
 );
 
 export const validateSymbols = validateRegex(
   SYMBOL_REG,
-  'Must contain at least {length} symbol{s}.'
+  'Must contain at least {length} symbol{s}.',
 );
 
 function validateRegex(reg, message) {

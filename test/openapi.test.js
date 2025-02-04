@@ -75,7 +75,7 @@ describe('toOpenApi', () => {
         .object({
           any: yd.any(),
         })
-        .toOpenApi()
+        .toOpenApi(),
     ).toEqual({
       type: 'object',
       properties: {
@@ -276,7 +276,7 @@ describe('toOpenApi', () => {
       schema.toOpenApi({
         'x-schema': 'my-schema',
         description: 'My Schema!',
-      })
+      }),
     ).toEqual({
       type: 'string',
       'x-schema': 'my-schema',
@@ -345,7 +345,7 @@ describe('toOpenApi', () => {
         .default(() => {
           return new Date();
         })
-        .toOpenApi()
+        .toOpenApi(),
     ).toEqual({
       type: 'string',
       format: 'date-time',

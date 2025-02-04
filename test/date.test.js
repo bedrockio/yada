@@ -47,7 +47,7 @@ describe('date', () => {
     await assertFail(
       schema,
       '01 Jan 1970 00:00:00 GMT',
-      'Must be in ISO 8601 format.'
+      'Must be in ISO 8601 format.',
     );
   });
 
@@ -64,7 +64,7 @@ describe('date', () => {
     await assertFail(
       schema,
       '2019-01-01',
-      'Must be after 2020-01-01T00:00:00.000Z.'
+      'Must be after 2020-01-01T00:00:00.000Z.',
     );
   });
 
@@ -75,7 +75,7 @@ describe('date', () => {
     await assertFail(
       schema,
       '2020-12-02',
-      'Must be before 2020-01-01T00:00:00.000Z.'
+      'Must be before 2020-01-01T00:00:00.000Z.',
     );
   });
 
@@ -100,7 +100,7 @@ describe('date', () => {
     await assertFail(
       schema,
       '2020-01-01',
-      'Must be before 2020-01-01T00:00:00.000Z.'
+      'Must be before 2020-01-01T00:00:00.000Z.',
     );
   });
 
@@ -111,7 +111,7 @@ describe('date', () => {
     await assertFail(
       schema,
       '2020-01-01',
-      'Must be after 2020-01-01T00:00:00.000Z.'
+      'Must be after 2020-01-01T00:00:00.000Z.',
     );
   });
 
@@ -121,7 +121,7 @@ describe('date', () => {
     await assertFail(
       schema,
       '2019-01-01',
-      'Must be a timestamp in milliseconds.'
+      'Must be a timestamp in milliseconds.',
     );
     const now = new Date();
     const val = await schema.validate(now.getTime());

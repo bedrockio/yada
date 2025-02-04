@@ -70,7 +70,7 @@ describe('object', () => {
     await assertFail(
       schema,
       { name: 'ABCD' },
-      'Must start with lower case letter.'
+      'Must start with lower case letter.',
     );
     await assertFail(schema, { name: 'abc' }, 'Must be at least 4 characters.');
     await assertFail(schema, { name: 'Abc' }, [
@@ -114,7 +114,7 @@ describe('object', () => {
     await assertFail(
       schema,
       { a: 'a', b: 'b' },
-      'Either "a" or "b" must be passed.'
+      'Either "a" or "b" must be passed.',
     );
   });
 
@@ -134,7 +134,7 @@ describe('object', () => {
         b: 'b',
         c: 'c',
       },
-      'Unknown field "c".'
+      'Unknown field "c".',
     );
   });
 
@@ -161,7 +161,7 @@ describe('object', () => {
       { a: 'b' },
       {
         foo: 'bar',
-      }
+      },
     );
     expect(foo).toBe('bar');
   });
@@ -246,7 +246,7 @@ describe('object', () => {
       await assertFail(
         schema,
         { foo: 'foo', bar: 'bar', baz: 'baz' },
-        'Unknown field "baz".'
+        'Unknown field "baz".',
       );
     });
 
@@ -288,17 +288,17 @@ describe('object', () => {
       await assertFail(
         schema,
         { firstName: 'Foo' },
-        'Unknown field "firstName".'
+        'Unknown field "firstName".',
       );
       await assertFail(
         schema,
         { lastName: 'Bar' },
-        'Unknown field "lastName".'
+        'Unknown field "lastName".',
       );
       await assertFail(
         schema,
         { profile: { firstName: 3 } },
-        'Must be a string.'
+        'Must be a string.',
       );
     });
 
@@ -328,14 +328,14 @@ describe('object', () => {
       await assertFail(
         schema,
         { firstName: 'Foo' },
-        'Unknown field "firstName".'
+        'Unknown field "firstName".',
       );
       await assertFail(
         schema,
         {
           lastName: 'Bar',
         },
-        'Unknown field "lastName".'
+        'Unknown field "lastName".',
       );
       await assertFail(
         schema,
@@ -344,7 +344,7 @@ describe('object', () => {
             firstName: 3,
           },
         },
-        'Must be a string.'
+        'Must be a string.',
       );
     });
 
@@ -362,7 +362,7 @@ describe('object', () => {
               .default({
                 b: 'c',
               }),
-          })
+          }),
         );
       await assertPass(schema, { a: 'a' });
     });
@@ -467,7 +467,7 @@ describe('object', () => {
         {
           firstName: 'Foo',
         },
-        'Value is required.'
+        'Value is required.',
       );
     });
 
@@ -505,7 +505,7 @@ describe('object', () => {
         profiles: yd.array(
           yd.object({
             name: yd.string().required(),
-          })
+          }),
         ),
       });
 
@@ -583,7 +583,7 @@ describe('object', () => {
       await assertFail(
         schema,
         { profile: { lastName: 'Bar' } },
-        'Value is required.'
+        'Value is required.',
       );
       await assertFail(schema, { profile: {} }, 'Value is required.');
     });
@@ -616,7 +616,7 @@ describe('object', () => {
             },
           },
         },
-        'Value is required.'
+        'Value is required.',
       );
     });
 
@@ -648,7 +648,7 @@ describe('object', () => {
         {
           user: {},
         },
-        'Value is required.'
+        'Value is required.',
       );
     });
 
@@ -695,12 +695,12 @@ describe('object', () => {
           firstName: 'Foo',
           lastName: 'Bar',
         },
-        'Unknown field "lastName".'
+        'Unknown field "lastName".',
       );
       await assertFail(
         schema,
         { lastName: 'Bar' },
-        'Unknown field "lastName".'
+        'Unknown field "lastName".',
       );
     });
 
@@ -721,7 +721,7 @@ describe('object', () => {
         {
           age: 25,
         },
-        'Unknown field "age".'
+        'Unknown field "age".',
       );
       await assertFail(
         schema,
@@ -730,7 +730,7 @@ describe('object', () => {
           lastName: 'Bar',
           age: 25,
         },
-        'Unknown field "age".'
+        'Unknown field "age".',
       );
     });
   });
@@ -750,12 +750,12 @@ describe('object', () => {
           firstName: 'Foo',
           lastName: 'Bar',
         },
-        'Unknown field "firstName".'
+        'Unknown field "firstName".',
       );
       await assertFail(
         schema,
         { firstName: 'Bar' },
-        'Unknown field "firstName".'
+        'Unknown field "firstName".',
       );
     });
 
@@ -776,7 +776,7 @@ describe('object', () => {
           age: 25,
           firstName: 'Foo',
         },
-        'Unknown field "firstName".'
+        'Unknown field "firstName".',
       );
       await assertFail(
         schema,
@@ -785,7 +785,7 @@ describe('object', () => {
           firstName: 'Foo',
           lastName: 'Bar',
         },
-        'Unknown field "firstName".'
+        'Unknown field "firstName".',
       );
     });
   });
@@ -812,7 +812,7 @@ describe('object', () => {
     await assertFail(
       schema,
       { phone: 'phone' },
-      'Phone cannot be passed when "type" is "email".'
+      'Phone cannot be passed when "type" is "email".',
     );
   });
 
@@ -831,7 +831,7 @@ describe('object', () => {
         },
         {
           isPrivate: true,
-        }
+        },
       );
       expect(result).toEqual({
         name: 'Brett',
@@ -853,7 +853,7 @@ describe('object', () => {
         await schema.validate({
           firstName: 'Foo',
           lastName: '',
-        })
+        }),
       ).toEqual({
         firstName: 'Foo',
       });
@@ -862,7 +862,7 @@ describe('object', () => {
         await schema.validate({
           firstName: '',
           lastName: 'Bar',
-        })
+        }),
       ).toEqual({
         lastName: 'Bar',
       });
@@ -871,7 +871,7 @@ describe('object', () => {
         await schema.validate({
           firstName: '',
           lastName: '',
-        })
+        }),
       ).toEqual({});
     });
   });
