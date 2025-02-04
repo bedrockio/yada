@@ -1,3 +1,7 @@
+## 1.4.1
+
+- Removed lodash-es in favor of lodash.
+
 ## 1.4.0
 
 - Added object schema "require".

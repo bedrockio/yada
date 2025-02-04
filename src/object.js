@@ -1,4 +1,4 @@
-import { set, pick, omit } from 'lodash-es';
+import { set, pick, omit } from 'lodash';
 
 import TypeSchema from './TypeSchema';
 import { FieldError, LocalizedError } from './errors';

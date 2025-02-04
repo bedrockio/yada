@@ -1,4 +1,4 @@
-import { omit } from 'lodash-es';
+import { omit } from 'lodash';
 
 import Schema from './Schema';
 import TypeSchema from './TypeSchema';
