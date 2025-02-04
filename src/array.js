@@ -1,7 +1,8 @@
+import { omit } from 'lodash-es';
+
 import Schema from './Schema';
 import TypeSchema from './TypeSchema';
 import { ArrayError, ElementError, LocalizedError } from './errors';
-import { omit } from './utils';
 
 class ArraySchema extends TypeSchema {
   constructor(schemas) {
@@ -82,7 +83,7 @@ class ArraySchema extends TypeSchema {
           {
             length,
             s,
-          }
+          },
         );
       }
     });

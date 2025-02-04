@@ -7,9 +7,11 @@ import array from './array';
 import tuple from './tuple';
 
 import Schema from './Schema';
-import { isSchema, isSchemaError } from './utils';
 import { useLocalizer, getLocalizedMessages } from './localization';
 import { LocalizedError } from './errors';
+
+import { isSchema } from './Schema';
+import { isSchemaError } from './errors';
 
 /**
  * Accepts anything.

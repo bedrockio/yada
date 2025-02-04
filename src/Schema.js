@@ -1,3 +1,5 @@
+import { omit } from 'lodash-es';
+
 import {
   TypeError,
   FormatError,
@@ -6,7 +8,6 @@ import {
   LocalizedError,
   ValidationError,
 } from './errors';
-import { omit } from './utils';
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
 const REQUIRED_TYPES = ['default', 'required', 'missing'];

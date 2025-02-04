@@ -17,6 +17,7 @@
   "author": "Andrew Plummer <plummer.andrew@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "lodash-es": "^4.17.21",
     "validator": "^13.9.0"
   },
   "devDependencies": {

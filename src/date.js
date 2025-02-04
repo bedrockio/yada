@@ -1,7 +1,7 @@
 import validator from 'validator';
-import { LocalizedError } from './errors';
 
 import Schema from './Schema';
+import { LocalizedError } from './errors';
 
 class DateSchema extends Schema {
   constructor() {
@@ -114,7 +114,7 @@ class DateSchema extends Schema {
         if (typeof original !== 'number' && !options.default) {
           throw new LocalizedError('Must be a timestamp in milliseconds.');
         }
-      }
+      },
     );
   }
 
@@ -130,7 +130,7 @@ class DateSchema extends Schema {
         } else {
           return new Date(original * 1000);
         }
-      }
+      },
     );
   }
 

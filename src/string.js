@@ -1,4 +1,5 @@
 import validator from 'validator';
+
 import TypeSchema from './TypeSchema';
 import { LocalizedError } from './errors';
 import {
@@ -412,7 +413,7 @@ class StringSchema extends TypeSchema {
           return;
         }
         fn(val, options);
-      }
+      },
     );
   }
 

@@ -1,6 +1,6 @@
 import yd from '../src';
 import { assertPass, assertFail, assertErrorMessage } from './utils';
-import { isSchema, isSchemaError } from '../src/utils';
+import { isSchema, isSchemaError } from '../src';
 
 describe('default', () => {
   it('should set a default value', async () => {
@@ -39,7 +39,7 @@ describe('default', () => {
     expect(await schema.validate()).toBeInstanceOf(Date);
     expect(await schema.validate(undefined)).toBeInstanceOf(Date);
     expect(await schema.validate('2020-01-01T00:00:00.000Z')).toEqual(
-      new Date('2020-01-01T00:00:00.000Z')
+      new Date('2020-01-01T00:00:00.000Z'),
     );
   });
 });
@@ -88,12 +88,12 @@ describe('append', () => {
     await assertFail(
       schema.default('fop').append(custom),
       undefined,
-      'You misspelled foo!'
+      'You misspelled foo!',
     );
     await assertFail(
       schema.append(custom).default('fop'),
       undefined,
-      'You misspelled foo!'
+      'You misspelled foo!',
     );
   });
 });
@@ -143,7 +143,7 @@ describe('options', () => {
         schema,
         { a: 'a', b: 'b', c: 'c' },
         { a: 'a', b: 'b' },
-        options
+        options,
       );
     });
 
@@ -179,7 +179,7 @@ describe('options', () => {
           b: 'b',
           c: 'c',
         },
-        options
+        options,
       );
       await assertFail(schema, {}, 'Object must not be empty.');
     });
@@ -216,7 +216,7 @@ describe('options', () => {
           b: 'b',
           c: 'c',
         },
-        options
+        options,
       );
       await assertFail(schema, {}, 'Object must not be empty.');
     });
@@ -341,7 +341,7 @@ describe('options', () => {
         },
         {
           cast: true,
-        }
+        },
       );
       expect(result).toEqual({
         include: ['foo', 'bar'],
@@ -371,7 +371,7 @@ describe('options', () => {
         {
           a: [1, 2, 3],
           b: 4,
-        }
+        },
       );
 
       await assertFail(
@@ -379,7 +379,7 @@ describe('options', () => {
         {
           b: 'b',
         },
-        'Must be a number.'
+        'Must be a number.',
       );
     });
   });
@@ -406,7 +406,7 @@ describe('options', () => {
             name: 'foo',
           },
         },
-        options
+        options,
       );
     });
   });
@@ -430,9 +430,9 @@ describe('errors', () => {
           images: yd.array(
             yd.object({
               name: yd.string(),
-            })
+            }),
           ),
-        })
+        }),
       ),
     });
     try {
@@ -447,7 +447,7 @@ describe('errors', () => {
       });
     } catch (error) {
       expect(error.getFullMessage()).toBe(
-        '"fields.0.images" must be an array.'
+        '"fields.0.images" must be an array.',
       );
       expect(error.toJSON()).toEqual({
         type: 'validation',
@@ -593,7 +593,7 @@ describe('misc', () => {
         })
         .custom((obj) => {
           return obj.id;
-        })
+        }),
     );
     const result = await schema.validate({
       id: 'fake id',
