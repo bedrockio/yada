@@ -40,7 +40,7 @@ describe('localization', () => {
       error = err;
     }
     expect(error.details[0].details[0].message).toBe(
-      '6文字以上入力して下さい。'
+      '6文字以上入力して下さい。',
     );
   });
 
@@ -69,7 +69,7 @@ describe('localization', () => {
       error = err;
     }
     expect(error.details[0].details[0].message).toBe(
-      'Deve contenere almeno 6 caratteri.'
+      'Deve contenere almeno 6 caratteri.',
     );
   });
 
@@ -88,7 +88,7 @@ describe('localization', () => {
       await schema.validate({
         password: 'a',
       });
-    } catch (err) {
+    } catch {
       const localized = getLocalizedMessages();
       expect(localized).toEqual({
         'Must be at least {length} character{s}.':
@@ -115,7 +115,7 @@ describe('localization', () => {
       });
     } catch (err) {
       expect(err.getFullMessage()).toBe(
-        '"name": 文字列を入力してください。 "age": 数字を入力してください。'
+        '"name": 文字列を入力してください。 "age": 数字を入力してください。',
       );
       expect(getLocalizedMessages()).toMatchObject({
         '{field} must be a number.': '{field}: 数字を入力してください。',
