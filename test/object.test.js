@@ -213,6 +213,141 @@ describe('object', () => {
       await assertPass(schema, { foo: 'foo', bar: 'bar', baz: 'baz' });
     });
 
+    it('should append with required', async () => {
+      const schema1 = yd.object({
+        name: yd.string(),
+      });
+      const schema2 = yd
+        .object({
+          name: yd.string(),
+        })
+        .required();
+      const schema = schema1.append(schema2);
+      await assertPass(schema, { name: 'Foo' });
+      await assertFail(schema, undefined, 'Value is required.');
+    });
+
+    it('should override options with incoming', async () => {
+      const schema1 = yd
+        .object({
+          foo: yd.string().required(),
+        })
+        .options({
+          stripUnknown: true,
+        });
+      const schema2 = yd
+        .object({
+          bar: yd.string().required(),
+        })
+        .options({
+          stripUnknown: false,
+        });
+      const schema = schema1.append(schema2);
+      await assertFail(
+        schema,
+        { foo: 'foo', bar: 'bar', baz: 'baz' },
+        'Unknown field "baz".'
+      );
+    });
+
+    it('should override fields already set', async () => {
+      const schema1 = yd.object({
+        foo: yd.string(),
+      });
+      const schema2 = yd.object({
+        foo: yd.number(),
+      });
+      const schema = schema1.append(schema2);
+      await assertPass(schema, { foo: 3 });
+      await assertFail(schema, { foo: 'foo' }, 'Must be a number.');
+    });
+
+    it('should append deeply', async () => {
+      const schema1 = yd.object({
+        profile: yd.object({
+          firstName: yd.string(),
+        }),
+      });
+      const schema2 = yd.object({
+        profile: yd.object({
+          lastName: yd.string(),
+        }),
+      });
+      const schema = schema1.append(schema2);
+      await assertPass(schema, {
+        profile: {
+          firstName: 'Foo',
+          lastName: 'Bar',
+        },
+      });
+      await assertPass(schema, { profile: { firstName: 'Foo' } });
+      await assertPass(schema, { profile: { lastName: 'Bar' } });
+      await assertPass(schema, { profile: {} });
+      await assertPass(schema, {});
+
+      await assertFail(
+        schema,
+        { firstName: 'Foo' },
+        'Unknown field "firstName".'
+      );
+      await assertFail(
+        schema,
+        { lastName: 'Bar' },
+        'Unknown field "lastName".'
+      );
+      await assertFail(
+        schema,
+        { profile: { firstName: 3 } },
+        'Must be a string.'
+      );
+    });
+
+    it('should append a deep plain object', async () => {
+      const schema1 = yd.object({
+        profile: yd.object({
+          firstName: yd.string(),
+        }),
+      });
+      const schema2 = {
+        profile: {
+          lastName: yd.string(),
+        },
+      };
+      const schema = schema1.append(schema2);
+      await assertPass(schema, {
+        profile: {
+          firstName: 'Foo',
+          lastName: 'Bar',
+        },
+      });
+      await assertPass(schema, { profile: { firstName: 'Foo' } });
+      await assertPass(schema, { profile: { lastName: 'Bar' } });
+      await assertPass(schema, { profile: {} });
+      await assertPass(schema, {});
+
+      await assertFail(
+        schema,
+        { firstName: 'Foo' },
+        'Unknown field "firstName".'
+      );
+      await assertFail(
+        schema,
+        {
+          lastName: 'Bar',
+        },
+        'Unknown field "lastName".'
+      );
+      await assertFail(
+        schema,
+        {
+          profile: {
+            firstName: 3,
+          },
+        },
+        'Must be a string.'
+      );
+    });
+
     it('should not merge default values', async () => {
       const schema = yd
         .object({
@@ -337,6 +472,187 @@ describe('object', () => {
       const schema = yd.object({
         firstName: yd.string(),
         lastName: yd.string().required(),
+      });
+
+      expect(() => {
+        schema.get('firstName.foo');
+      }).toThrow('"get" not implemented by StringSchema.');
+    });
+  });
+
+  describe('unwind', () => {
+    it('should unwind an array schema', async () => {
+      const schema = yd.object({
+        profiles: yd.array(
+          yd.object({
+            name: yd.string().required(),
+          })
+        ),
+      });
+
+      const profile = schema.unwind('profiles');
+      await assertPass(profile, { name: 'Foo' });
+      await assertPass(profile, undefined);
+
+      await assertFail(profile, { bad: 'Foo' }, 'Unknown field "bad".');
+      await assertFail(profile, {}, 'Value is required.');
+    });
+
+    it('should error if field is not an array', async () => {
+      const schema = yd.object({
+        profiles: yd.string(),
+      });
+
+      expect(() => {
+        schema.unwind('profiles');
+      }).toThrow('Field "profiles" is not an array schema.');
+    });
+
+    it('should error if multiple schemas found in array', async () => {
+      const schema = yd.object({
+        profiles: yd.array(yd.string(), yd.number()),
+      });
+
+      expect(() => {
+        schema.unwind('profiles');
+      }).toThrow('Field "profiles" should contain only one schema.');
+    });
+
+    it('should error if no schemas found in array', async () => {
+      const schema = yd.object({
+        profiles: yd.array(),
+      });
+
+      expect(() => {
+        schema.unwind('profiles');
+      }).toThrow('Field "profiles" should contain only one schema.');
+    });
+  });
+
+  describe('require', () => {
+    it('should require specific fields', async () => {
+      const schema = yd
+        .object({
+          firstName: yd.string(),
+          lastName: yd.string(),
+        })
+        .require('firstName');
+
+      await assertPass(schema, { firstName: 'Foo' });
+      await assertPass(schema, { firstName: 'Foo', lastName: 'Bar' });
+      await assertFail(schema, { lastName: 'Bar' }, 'Value is required.');
+      await assertFail(schema, {}, 'Value is required.');
+    });
+
+    it('should require specific deep fields', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            firstName: yd.string(),
+            lastName: yd.string(),
+          }),
+        })
+        .require('profile.firstName');
+
+      await assertPass(schema, { profile: { firstName: 'Foo' } });
+      await assertPass(schema, {
+        profile: { firstName: 'Foo', lastName: 'Bar' },
+      });
+      // Note profile object is not required here.
+      await assertPass(schema, {});
+
+      await assertFail(
+        schema,
+        { profile: { lastName: 'Bar' } },
+        'Value is required.'
+      );
+      await assertFail(schema, { profile: {} }, 'Value is required.');
+    });
+
+    it('should deeply require a field by an array path', async () => {
+      const schema = yd
+        .object({
+          user: yd.object({
+            profile: yd.object({
+              firstName: yd.string(),
+              lastName: yd.string(),
+            }),
+          }),
+        })
+        .require(['user.profile.firstName']);
+
+      await assertPass(schema, {
+        user: {
+          profile: {
+            firstName: 'Foo',
+          },
+        },
+      });
+      await assertFail(
+        schema,
+        {
+          user: {
+            profile: {
+              lastName: 'Bar',
+            },
+          },
+        },
+        'Value is required.'
+      );
+    });
+
+    it('should require an intermediary object schema', async () => {
+      const schema = yd
+        .object({
+          user: yd.object({
+            profile: yd.object({
+              name: yd.string(),
+            }),
+          }),
+        })
+        .require('user.profile');
+
+      await assertPass(schema, {
+        user: {
+          profile: {
+            name: 'Foo',
+          },
+        },
+      });
+      await assertPass(schema, {
+        user: {
+          profile: {},
+        },
+      });
+      await assertFail(
+        schema,
+        {
+          user: {},
+        },
+        'Value is required.'
+      );
+    });
+
+    it('should error if field does not exist', async () => {
+      const schema = yd.object({});
+
+      expect(() => {
+        schema.require('bad');
+      }).toThrow('Cannot find field "bad".');
+    });
+
+    it('should error if no fields defined', async () => {
+      const schema = yd.object();
+
+      expect(() => {
+        schema.require('bad');
+      }).toThrow('Cannot select field on an open object schema.');
+    });
+
+    it('should error if path is too deep', async () => {
+      const schema = yd.object({
+        firstName: yd.string(),
+        lastName: yd.string(),
       });
 
       expect(() => {

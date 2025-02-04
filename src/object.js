@@ -1,17 +1,19 @@
+import { set } from 'lodash';
+
 import TypeSchema from './TypeSchema';
 import { FieldError, LocalizedError } from './errors';
 import { pick, omit } from './utils';
 import Schema, { isSchema } from './Schema';
 
-const BASE_ASSERTIONS = ['type', 'transform', 'field'];
+const APPEND_ASSERTION_TYPES = ['required', 'type', 'custom'];
 
 /**
  * @typedef {{ [key: string]: Schema } | {}} SchemaMap
  */
 
 class ObjectSchema extends TypeSchema {
-  constructor(fields, meta) {
-    super(Object, { ...meta, fields });
+  constructor(meta) {
+    super(Object, meta);
     this.setup();
   }
 
@@ -48,11 +50,11 @@ class ObjectSchema extends TypeSchema {
     });
     for (let [key, schema] of Object.entries(this.getFields())) {
       if (!isSchema(schema)) {
-        throw new Error(`Key "${key}" must be a schema`);
+        throw new Error(`Key "${key}" must be a schema.`);
       }
       this.assert('field', async (obj, options) => {
         if (obj) {
-          const { path = [] } = options;
+          const { path = [], original } = options;
           const { strip, required } = schema.meta;
           const val = obj[key];
 
@@ -72,9 +74,13 @@ class ObjectSchema extends TypeSchema {
             options = omit(options, 'message');
             const result = await schema.validate(val, {
               ...options,
-              // Re-pass the object as root here as its fields
-              // may have been transformed by defaults.
+              // The root object may have been transformed here
+              // by defaults or values returned by custom functions
+              // so re-pass it here.
               root: obj,
+              // The original root represents the root object
+              // before it was transformed.
+              originalRoot: original,
             });
             if (result !== undefined) {
               return {
@@ -91,50 +97,15 @@ class ObjectSchema extends TypeSchema {
     }
   }
 
+  // TODO: make me export!
   getFields() {
     return this.meta.fields || {};
   }
 
   /**
-   * @param {SchemaMap|Schema} arg Object or schema to append.
-   */
-  // @ts-ignore
-  append(arg) {
-    let schema;
-    if (arg instanceof ObjectSchema) {
-      schema = arg;
-    } else if (arg instanceof Schema) {
-      // If the schema is of a different type then
-      // simply append it and don't merge fields.
-      return super.append(arg);
-    } else {
-      schema = new ObjectSchema(arg);
-    }
-
-    const fields = {
-      ...this.meta.fields,
-      ...schema.meta.fields,
-    };
-
-    const merged = new ObjectSchema(fields, {
-      ...this.meta,
-      ...schema.meta,
-    });
-
-    const assertions = [...this.assertions, ...schema.assertions];
-    for (let assertion of assertions) {
-      const { type } = assertion;
-      if (!BASE_ASSERTIONS.includes(type)) {
-        merged.pushAssertion(assertion);
-      }
-    }
-
-    return merged;
-  }
-
-  /**
-   * Gets the schema for the given field. Accepts either a string
-   * separated by "." or an array of path names.
+   * Gets the schema for the given field. Deep fields accept
+   * either a string using dot syntax or an array representing
+   * the path.
    * @param {string|Array<string>} [path] The path of the field.
    */
   get(path) {
@@ -160,6 +131,24 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
+   * Returns the inner schema of an array field. This only makes
+   * sense if the array field holds a single schema, so all other
+   * scenarios will throw an error.
+   * @param {string|Array<string>} [path] The path of the field.
+   */
+  unwind(path) {
+    path = Array.isArray(path) ? path.join('.') : path;
+    const field = this.get(path);
+    const { schemas } = field.meta;
+    if (!schemas) {
+      throw new Error(`Field "${path}" is not an array schema.`);
+    } else if (schemas.length !== 1) {
+      throw new Error(`Field "${path}" should contain only one schema.`);
+    }
+    return schemas[0];
+  }
+
+  /**
    * Returns a new schema that only validates the selected fields.
    * @param {...string} [names] Names to include.
    */
@@ -167,10 +156,8 @@ class ObjectSchema extends TypeSchema {
     if (Array.isArray(names[0])) {
       names = names[0];
     }
-    const fields = pick(this.meta.fields, names);
-
-    return new ObjectSchema(fields, {
-      ...this.meta,
+    return new ObjectSchema({
+      fields: pick(this.meta.fields, names),
     });
   }
 
@@ -182,11 +169,73 @@ class ObjectSchema extends TypeSchema {
     if (Array.isArray(names[0])) {
       names = names[0];
     }
-    const fields = omit(this.meta.fields, names);
-
-    return new ObjectSchema(fields, {
-      ...this.meta,
+    return new ObjectSchema({
+      fields: omit(this.meta.fields, names),
     });
+  }
+
+  /**
+   * Augments the object schema to make fields required.
+   * Field names may be passed as an array or arguments.
+   * Field names may be deep using dot syntax.
+   *
+   * @param {...string} fields
+   * @param {Array<string>} fields
+   */
+  require(...fields) {
+    if (!fields.length) {
+      throw new Error('No fields specified.');
+    }
+
+    if (Array.isArray(fields[0])) {
+      fields = fields[0];
+    }
+
+    const update = {};
+    for (let field of fields) {
+      set(update, field, this.get(field).required());
+    }
+
+    return this.append(update);
+  }
+
+  /**
+   * Appends another schema and returns a new one. Appended
+   * schemas may be deep. Note that custom and required
+   * assertions on the schemas are preserved. This means that
+   * if either object schema is required then the resulting
+   * merged schema will also be required.
+   * @param {SchemaMap|Schema} arg Object or schema to append.
+   */
+  append(arg) {
+    let meta;
+    let assertions = [...this.assertions];
+
+    if (arg instanceof Schema) {
+      meta = arg.meta;
+      assertions = [...assertions, ...arg.assertions];
+    } else {
+      meta = {
+        fields: arg,
+      };
+    }
+
+    const fields = mergeFields(this.meta.fields, meta?.fields);
+
+    const schema = new ObjectSchema({
+      ...this.meta,
+      ...meta,
+      fields,
+    });
+
+    for (let assertion of assertions) {
+      const { type } = assertion;
+      if (APPEND_ASSERTION_TYPES.includes(type)) {
+        schema.pushAssertion(assertion);
+      }
+    }
+
+    return schema;
   }
 
   toOpenApi(extra) {
@@ -225,6 +274,24 @@ function expandDotProperties(obj) {
   return result;
 }
 
+function mergeFields(aFields, bFields) {
+  if (!aFields || !bFields) {
+    return aFields || bFields;
+  }
+  const result = { ...aFields };
+  for (let key of Object.keys(bFields)) {
+    const aSchema = aFields[key];
+    const bSchema = bFields[key];
+
+    if (aSchema instanceof ObjectSchema) {
+      result[key] = aSchema.append(bSchema);
+    } else {
+      result[key] = bSchema;
+    }
+  }
+  return result;
+}
+
 /**
  * Creates an [object schema](https://github.com/bedrockio/yada#object).
  *
@@ -233,5 +300,7 @@ function expandDotProperties(obj) {
  * empty object is passed then no keys will be allowed.
  */
 export default function (map) {
-  return new ObjectSchema(map);
+  return new ObjectSchema({
+    fields: map,
+  });
 }

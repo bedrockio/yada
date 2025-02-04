@@ -8,7 +8,7 @@ export async function assertPass(schema, obj, expected, options) {
     }
   } catch (error) {
     // eslint-disable-next-line
-    console.error(error);
+    console.error(JSON.stringify(error, null, 2));
     throw error;
   }
 }

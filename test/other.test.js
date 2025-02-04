@@ -500,6 +500,28 @@ describe('misc', () => {
     await assertFail(schema, { a: [1, 2, 3], b: 4 }, '"a" must include "b"');
   });
 
+  it('should have access to original root object', async () => {
+    const schema = yd
+      .object({
+        profile: yd.object({
+          name: yd.string().custom((val, { originalRoot }) => {
+            if (originalRoot.id !== 'id') {
+              throw new Error('Original root not passed.');
+            }
+          }),
+        }),
+      })
+      .options({
+        stripUnknown: true,
+      });
+    await assertPass(schema, {
+      profile: {
+        id: 'id',
+        name: 'foo',
+      },
+    });
+  });
+
   it('should have access to current path', async () => {
     const schema = yd.object({
       a: yd.object({

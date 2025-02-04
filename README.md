@@ -331,7 +331,7 @@ const schema = yd
   .required();
 ```
 
-### Choosing Fields
+### Selecting Fields
 
 Object schemas also have a `pick` and `omit` method that allows custom field
 selection. These methods accept an array of field names or enumerated arguments:
@@ -349,6 +349,72 @@ schema.pick(['firstName', 'lastName']);
 // Excludes "firstName" and "lastName" but keeps "dob".
 schema.omit('firstName', 'lastName');
 ```
+
+To get a single field use the `get` method:
+
+```js
+const schema = yd.object({
+  profile: yd.object({
+    firstName: yd.string().required(),
+    lastName: yd.string().required(),
+  }),
+});
+
+// Gets the inner "profile" schema.
+schema.get('profile');
+
+// Gets just the "firstName" schema.
+schema.get('profile.firstName');
+
+// May also pass an array of path segments.
+schema.get(['profile', 'firstName']);
+```
+
+To get a nested array field use the `unwind` method:
+
+```js
+const schema = yd.object({
+  paymentMethods: yd.array(
+    yd.object({
+      brand: yd.string().allow('visa', 'mastercard'),
+      last4: yd.string().length(4),
+      expMonth: yd.number(),
+      expYear: yd.number(),
+    })
+  ),
+});
+
+// Gets the inner "paymentMethods" object schema.
+// Will accept a single paymentMethod.
+schema.unwind('paymentMethods');
+```
+
+Compare `unwind` to `get` which would validate against an array instead of an
+object. Note that `unwind` only makes sense when there is exactly one inner
+schema and will error otherwise.
+
+### Augmenting Fields
+
+The `require` method allows augmentation of the schema to enforce specific
+fields:
+
+```js
+const schema = yd.object({
+  email: yd.string().email().required(),
+  phone: yd.string().phone(),
+  dob: yd.date(),
+});
+
+// For example a schema for a signup flow that
+// requires more fields for normal users than admins.
+const signupSchema = schema.require('phone', 'dob');
+
+// Also accepts an array.
+schema.require(['phone', 'dob']);
+```
+
+Note that there is no way to "unrequire" a field. The idea is to start with the
+minimal schema as a base and lock down more from there.
 
 ## Date
 

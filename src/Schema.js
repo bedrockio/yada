@@ -143,7 +143,6 @@ export default class Schema {
     let details = [];
 
     options = {
-      root: value,
       ...options,
       ...this.meta,
       original: value,
@@ -194,7 +193,7 @@ export default class Schema {
 
   /**
    * Appends another schema. [Link](https://github.com/bedrockio/yada#append)
-   * @returns {this}
+   * @returns {Schema}
    */
   append(schema) {
     const merged = this.clone(schema.meta);

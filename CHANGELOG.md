@@ -1,3 +1,9 @@
+## 1.4.0
+
+- Added object schema "require".
+- Added object schema "unwind" to get an inner array schema.
+- "append" now handles handle deep fields.
+
 ## 1.3.0
 
 - Added object schema "get".

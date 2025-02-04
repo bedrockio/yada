@@ -24,7 +24,6 @@ class DateSchema extends Schema {
     return this.clone().assert('min', (date) => {
       if (date < min) {
         throw new LocalizedError('Must be after {date}.', {
-          // @ts-ignore
           date: min.toISOString(),
         });
       }
@@ -39,7 +38,6 @@ class DateSchema extends Schema {
     return this.clone().assert('max', (date) => {
       if (date > max) {
         throw new LocalizedError('Must be before {date}.', {
-          // @ts-ignore
           date: max.toISOString(),
         });
       }
@@ -54,7 +52,6 @@ class DateSchema extends Schema {
     return this.clone().assert('before', (date) => {
       if (date >= max) {
         throw new LocalizedError('Must be before {date}.', {
-          // @ts-ignore
           date: max.toISOString(),
         });
       }
@@ -69,7 +66,6 @@ class DateSchema extends Schema {
     return this.clone().assert('after', (date) => {
       if (date <= min) {
         throw new LocalizedError('Must be after {date}.', {
-          // @ts-ignore
           date: min.toISOString(),
         });
       }
