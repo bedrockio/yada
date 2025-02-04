@@ -2,6 +2,7 @@
 
 - Added object schema "require".
 - Added object schema "unwind" to get an inner array schema.
+- Added object schema "export" to allow object spreading.
 - "append" now handles handle deep fields.
 
 ## 1.3.0

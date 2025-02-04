@@ -416,6 +416,21 @@ schema.require(['phone', 'dob']);
 Note that there is no way to "unrequire" a field. The idea is to start with the
 minimal schema as a base and lock down more from there.
 
+### Merging Fields
+
+The [append](#append) method merges object schemas together, however it
+preserves custom and required assertions on the object itself which is not
+always desired. It also lacks the elegance of the spread operator. For this the
+`export` method is provided which will simply export the schema's fields as an
+object:
+
+```js
+const newSchema = yd.object({
+  ...schema1.export(),
+  ...schema2.export(),
+});
+```
+
 ## Date
 
 Dates are similar to the basic types with the exception that in addition to date
@@ -513,6 +528,10 @@ const schema2 = yd.object({
 });
 const schema = schema1.append(schema2);
 ```
+
+Note however that this preserves custom and required assertions on the object
+itself. To simply merge fields as an object use the [export](#merging-fields)
+method instead.
 
 ### Custom
 

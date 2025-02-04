@@ -368,6 +368,25 @@ describe('object', () => {
     });
   });
 
+  describe('export', () => {
+    it('should allow a schema to be exported to its fields', async () => {
+      const schema = yd
+        .object({
+          firstName: yd.string(),
+          lastName: yd.string(),
+        })
+        .options({
+          stripUnknown: true,
+        });
+
+      const newSchema = yd.object({
+        ...schema.export(),
+      });
+      await assertPass(newSchema, { firstName: 'Foo', lastName: 'Bar' });
+      await assertFail(newSchema, { foo: 'foo' }, 'Unknown field "foo".');
+    });
+  });
+
   describe('get', () => {
     it('should get a field', async () => {
       const schema = yd.object({

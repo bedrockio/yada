@@ -48,7 +48,7 @@ class ObjectSchema extends TypeSchema {
         return result;
       }
     });
-    for (let [key, schema] of Object.entries(this.getFields())) {
+    for (let [key, schema] of Object.entries(this.export())) {
       if (!isSchema(schema)) {
         throw new Error(`Key "${key}" must be a schema.`);
       }
@@ -97,15 +97,11 @@ class ObjectSchema extends TypeSchema {
     }
   }
 
-  // TODO: make me export!
-  getFields() {
-    return this.meta.fields || {};
-  }
-
   /**
    * Gets the schema for the given field. Deep fields accept
    * either a string using dot syntax or an array representing
    * the path.
+   *
    * @param {string|Array<string>} [path] The path of the field.
    */
   get(path) {
@@ -134,6 +130,7 @@ class ObjectSchema extends TypeSchema {
    * Returns the inner schema of an array field. This only makes
    * sense if the array field holds a single schema, so all other
    * scenarios will throw an error.
+   *
    * @param {string|Array<string>} [path] The path of the field.
    */
   unwind(path) {
@@ -150,6 +147,7 @@ class ObjectSchema extends TypeSchema {
 
   /**
    * Returns a new schema that only validates the selected fields.
+   *
    * @param {...string} [names] Names to include.
    */
   pick(...names) {
@@ -163,6 +161,7 @@ class ObjectSchema extends TypeSchema {
 
   /**
    * Returns a new schema that omits fields.
+   *
    * @param {...string} [names] Names to exclude.
    */
   omit(...names) {
@@ -200,11 +199,24 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
+   * Returns the schema's fields as an object allowing them
+   * to be "spread" to create new schemas. Note that doing
+   * this will mean that custom and required assertions will
+   * not be preserved. Compare to {@link append} which
+   * preserves all assertions on the base schema.
+   */
+  export() {
+    return this.meta.fields || {};
+  }
+
+  /**
    * Appends another schema and returns a new one. Appended
-   * schemas may be deep. Note that custom and required
-   * assertions on the schemas are preserved. This means that
-   * if either object schema is required then the resulting
-   * merged schema will also be required.
+   * schemas may have nested fields. Note that custom and
+   * required assertions on the schemas are preserved. This
+   * means that if either object schema is required then the
+   * resulting merged schema will also be required. Compare
+   * to {@link export} which exports the fields as an object.
+   *
    * @param {SchemaMap|Schema} arg Object or schema to append.
    */
   append(arg) {
@@ -240,7 +252,7 @@ class ObjectSchema extends TypeSchema {
 
   toOpenApi(extra) {
     const properties = {};
-    for (let [key, schema] of Object.entries(this.getFields())) {
+    for (let [key, schema] of Object.entries(this.export())) {
       properties[key] = schema.toOpenApi(extra);
     }
     return {
