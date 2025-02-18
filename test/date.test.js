@@ -34,6 +34,7 @@ describe('date', () => {
     await assertPass(schema, '2022-01-15T08:27:36.114');
     await assertPass(schema, '2022-01-15T08:27:36');
     await assertPass(schema, '2022-01-15T08:27');
+
     await assertPass(schema, '2022-01-15');
     await assertPass(schema, '2022-01');
 
@@ -49,6 +50,9 @@ describe('date', () => {
       '01 Jan 1970 00:00:00 GMT',
       'Must be in ISO 8601 format.',
     );
+
+    // Hours only is NOT valid under ISO-8601
+    await assertFail(schema, '2022-01-15T08', 'Must be a valid date input.');
   });
 
   it('should convert string to date', async () => {
