@@ -104,6 +104,8 @@ class ArraySchema extends TypeSchema {
     });
   }
 
+  // Private
+
   toString() {
     return 'array';
   }

@@ -60,10 +60,6 @@ export class TypeError extends ValidationError {
     this.kind = kind;
   }
 
-  isPrimitiveKind() {
-    return this.kind !== 'array' && this.kind !== 'object';
-  }
-
   toJSON() {
     return {
       ...super.toJSON(),

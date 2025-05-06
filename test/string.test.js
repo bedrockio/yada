@@ -414,6 +414,6 @@ describe('string', () => {
       .options({
         allowEmpty: false,
       });
-    await assertFail(schema, '', ['Value is required.', 'Must be an object.']);
+    await assertFail(schema, '', ['Value is required.']);
   });
 });

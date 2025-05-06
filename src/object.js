@@ -249,6 +249,8 @@ class ObjectSchema extends TypeSchema {
     return schema;
   }
 
+  // Private
+
   toOpenApi(extra) {
     const properties = {};
     for (let [key, schema] of Object.entries(this.export())) {

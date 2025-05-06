@@ -1,3 +1,7 @@
+## 1.4.2
+
+- Improved enum type assertion errors.
+
 ## 1.4.1
 
 - Removed lodash-es in favor of lodash.

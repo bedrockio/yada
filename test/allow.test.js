@@ -75,6 +75,7 @@ describe('allow', () => {
     } catch (err) {
       error = err;
     }
+
     expect(error.toJSON()).toEqual({
       type: 'validation',
       details: [
@@ -83,24 +84,13 @@ describe('allow', () => {
           field: 'shop',
           details: [
             {
-              type: 'allowed',
+              type: 'field',
+              field: 'id',
               details: [
                 {
-                  type: 'validation',
-                  message: 'Custom message',
-                  details: [
-                    {
-                      type: 'field',
-                      field: 'id',
-                      details: [
-                        {
-                          type: 'format',
-                          format: 'mongo-object-id',
-                          message: 'Must be a valid ObjectId.',
-                        },
-                      ],
-                    },
-                  ],
+                  type: 'format',
+                  format: 'mongo-object-id',
+                  message: 'Must be a valid ObjectId.',
                 },
               ],
             },
@@ -134,19 +124,9 @@ describe('allow', () => {
           message: 'Must be an ObjectId or null.',
           details: [
             {
-              type: 'allowed',
-              details: [
-                {
-                  type: 'validation',
-                  details: [
-                    {
-                      type: 'format',
-                      format: 'mongo-object-id',
-                      message: 'Must be a valid ObjectId.',
-                    },
-                  ],
-                },
-              ],
+              type: 'format',
+              format: 'mongo-object-id',
+              message: 'Must be a valid ObjectId.',
             },
           ],
         },
@@ -174,8 +154,8 @@ describe('allow', () => {
 
   it('should allow an array of strings or an array of numbers', async () => {
     const schema = yd.allow(yd.array(yd.string()), yd.array(yd.number()));
-    await assertFail(schema, 'foo', ['Must be an array.', 'Must be an array.']);
-    await assertFail(schema, 1, ['Must be an array.', 'Must be an array.']);
+    await assertFail(schema, 'foo', ['Must be an array.']);
+    await assertFail(schema, 1, ['Must be an array.']);
     await assertPass(schema, []);
     await assertPass(schema, ['foo']);
     await assertPass(schema, ['foo', 'bar']);
@@ -212,7 +192,7 @@ describe('allow', () => {
         field: 'field',
         order: 'bad',
       },
-      ['Must be one of ["desc", "asc"].', 'Must be an array.'],
+      ['Must be one of ["desc", "asc"].'],
     );
     await assertFail(
       schema,
@@ -227,6 +207,18 @@ describe('allow', () => {
         },
       ],
       ['Unknown field "0".', 'Must be one of ["desc", "asc"].'],
+    );
+  });
+
+  it('should report all possible typs in an enum', async () => {
+    const base = yd.string();
+    const schema = yd.allow(base, yd.array(base));
+    await assertFail(
+      schema,
+      {
+        id: 'fake-id',
+      },
+      ['Must be one of [string, array].'],
     );
   });
 });

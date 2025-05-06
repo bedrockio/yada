@@ -69,6 +69,8 @@ class NumberSchema extends TypeSchema {
     });
   }
 
+  // Private
+
   toOpenApi(extra) {
     const { min, max, multiple } = this.meta;
     return {

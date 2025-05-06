@@ -417,6 +417,8 @@ class StringSchema extends TypeSchema {
     );
   }
 
+  // Private
+
   toOpenApi(extra) {
     const { min, max } = this.meta;
     return {

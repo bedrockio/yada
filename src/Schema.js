@@ -1,4 +1,4 @@
-import { omit } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 
 import {
   TypeError,
@@ -11,6 +11,10 @@ import {
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
 const REQUIRED_TYPES = ['default', 'required', 'missing'];
+
+export function isSchema(arg) {
+  return arg instanceof Schema;
+}
 
 export default class Schema {
   constructor(meta = {}) {
@@ -271,16 +275,10 @@ export default class Schema {
     if (set.length === 1 && Array.isArray(set[0])) {
       set = set[0];
     }
-    const types = set.map((el) => {
-      if (!isSchema(el)) {
-        el = JSON.stringify(el);
-      }
-      return el;
-    });
-    const message = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
       if (val !== undefined) {
-        const captured = [];
+        let captured = [];
+
         for (let el of set) {
           if (isSchema(el)) {
             try {
@@ -290,28 +288,36 @@ export default class Schema {
               options = omit(options, 'cast');
               return await el.validate(val, options);
             } catch (err) {
-              const [first] = err.details;
-              if (first instanceof TypeError && first.isPrimitiveKind()) {
-                // If the error is a simple primitive type error then
-                // continue to show more meaningful messages for simple enums.
-                continue;
-              } else {
-                // Otherwise capture the error to surface messages on
-                // more complex schemas.
-                captured.push(err);
-              }
+              captured.push(err.details[0]);
             }
           } else if ((el === val) === allow) {
             return;
           }
         }
-        if (captured.length) {
-          throw new AllowedError(this.meta.message, captured);
-        } else {
-          throw new LocalizedError(message, {
-            types: types.join(', '),
+
+        captured = uniqBy(captured, 'message');
+
+        const isTypeErrors = captured.every((error) => {
+          return error instanceof TypeError;
+        });
+
+        if (captured.length === 1) {
+          throw captured[0];
+        }
+
+        if (captured.length === 0 || isTypeErrors) {
+          assertTypes({
+            set,
+            allow,
           });
         }
+
+        throw new AllowedError(
+          this.meta.message,
+          captured.filter((error) => {
+            return error instanceof TypeError ? false : true;
+          }),
+        );
       }
     });
   }
@@ -418,6 +424,16 @@ export default class Schema {
   }
 }
 
-export function isSchema(arg) {
-  return arg instanceof Schema;
+function assertTypes(options) {
+  const { set, allow } = options;
+  const types = set.map((el) => {
+    if (!isSchema(el)) {
+      el = JSON.stringify(el);
+    }
+    return el;
+  });
+  const message = `${allow ? 'Must' : 'Must not'} be one of [{types}].`;
+  throw new LocalizedError(message, {
+    types: types.join(', '),
+  });
 }
