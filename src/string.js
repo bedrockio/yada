@@ -14,6 +14,7 @@ import {
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PHONE_REG = /^\+\d{1,3}\d{3,14}$/;
 const NANP_REG = /^\+1[2-9]\d{2}[2-9]\d{6}$/;
+const DATE_REG = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[01])$/;
 
 const E164_DESCRIPTION =
   'A phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format.';
@@ -400,6 +401,26 @@ class StringSchema extends TypeSchema {
     return this.format('mongo-object-id', (str) => {
       if (!validator.isMongoId(str)) {
         throw new LocalizedError('Must be a valid ObjectId.');
+      }
+    });
+  }
+
+  /**
+   * Validates a calendar date in extended ISO-8601 format:
+   *
+   * 1. Must exactly match `YYYY-MM-DD`.
+   * 2. Year may not be negative.
+   * 3. Month must be 1-12.
+   * 4. Date must be 1-31.
+   *
+   * Note that only individual components are validated so impossible
+   * dates like "2020-02-30" are still considered valid.
+   *
+   */
+  calendar() {
+    return this.format('date', (str) => {
+      if (!DATE_REG.test(str)) {
+        throw new LocalizedError('Must be an ISO-8601 calendar date.');
       }
     });
   }

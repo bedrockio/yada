@@ -145,12 +145,6 @@ describe('toOpenApi', () => {
       format: 'date-time',
     });
 
-    schema = yd.date().iso('date');
-    expect(schema.toOpenApi()).toEqual({
-      type: 'string',
-      format: 'date',
-    });
-
     schema = yd.date().timestamp();
     expect(schema.toOpenApi()).toEqual({
       type: 'number',

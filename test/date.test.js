@@ -55,53 +55,6 @@ describe('date', () => {
     await assertFail(schema, '2022-01-15T08', 'Must be a valid date input.');
   });
 
-  it('should validate an iso date without time', async () => {
-    const schema = yd.date().iso('date').required();
-    await assertFail(
-      schema,
-      '2022-01-15T08:27:36.114Z',
-      'Must be an ISO-8601 calendar date.',
-    );
-    await assertFail(
-      schema,
-      '2022-01-15T08:27:36.114',
-      'Must be an ISO-8601 calendar date.',
-    );
-    await assertFail(
-      schema,
-      '2022-01-15T08:27:36',
-      'Must be an ISO-8601 calendar date.',
-    );
-    await assertFail(
-      schema,
-      '2022-01-15T08:27',
-      'Must be an ISO-8601 calendar date.',
-    );
-
-    await assertPass(schema, '2022-01-15');
-    await assertFail(schema, '2022-01', 'Must be an ISO-8601 calendar date.');
-
-    await assertFail(schema, new Date(), 'Must be a string.');
-    await assertFail(schema, 1642232606911, 'Must be a string.');
-    await assertFail(schema, undefined, 'Value is required.');
-    await assertFail(schema, null, 'Must be a valid date input.');
-    await assertFail(schema, false, 'Must be a valid date input.');
-    await assertFail(schema, NaN, 'Must be a valid date input.');
-    await assertFail(schema, 'invalid', 'Must be a valid date input.');
-
-    await assertFail(
-      schema,
-      '01 Jan 1970 00:00:00 GMT',
-      'Must be an ISO-8601 calendar date.',
-    );
-  });
-
-  it('should throw an error on unknown format', async () => {
-    expect(() => {
-      yd.date().iso('bad');
-    }).toThrow('Invalid format "bad".');
-  });
-
   it('should convert string to date', async () => {
     const schema = yd.date();
     const date = await schema.validate('2020-01-01');

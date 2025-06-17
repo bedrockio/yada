@@ -1,3 +1,8 @@
+## 1.5.0
+
+- Calendar date validator moved to string as it cannot work when coerced to a
+  date object.
+
 ## 1.4.3
 
 - Fixed date not allowing calendar date format without time.

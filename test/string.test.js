@@ -416,4 +416,65 @@ describe('string', () => {
       });
     await assertFail(schema, '', ['Value is required.']);
   });
+
+  it('should validate a calendar date', async () => {
+    const schema = yd.string().calendar().required();
+    await assertFail(
+      schema,
+      '2022-01-15T08:27:36.114Z',
+      'Must be an ISO-8601 calendar date.',
+    );
+
+    await assertPass(schema, '2022-01-15');
+    await assertPass(schema, '2022-02-30');
+    await assertFail(
+      schema,
+      '2022-00-30',
+      'Must be an ISO-8601 calendar date.',
+    );
+    await assertFail(
+      schema,
+      '2022-14-30',
+      'Must be an ISO-8601 calendar date.',
+    );
+
+    await assertPass(schema, '2022-12-01');
+    await assertPass(schema, '2022-12-10');
+    await assertPass(schema, '2022-12-11');
+    await assertPass(schema, '2022-12-20');
+    await assertPass(schema, '2022-12-21');
+    await assertPass(schema, '2022-12-29');
+    await assertPass(schema, '2022-12-30');
+    await assertPass(schema, '2022-12-31');
+    await assertFail(
+      schema,
+      '2022-12-32',
+      'Must be an ISO-8601 calendar date.',
+    );
+    await assertFail(
+      schema,
+      '2022-12-00',
+      'Must be an ISO-8601 calendar date.',
+    );
+
+    await assertFail(schema, '2022-01', 'Must be an ISO-8601 calendar date.');
+    await assertFail(
+      schema,
+      '2025-W05-3',
+      'Must be an ISO-8601 calendar date.',
+    );
+
+    await assertFail(schema, new Date(), 'Must be a string.');
+    await assertFail(schema, 1642232606911, 'Must be a string.');
+    await assertFail(schema, undefined, 'Value is required.');
+    await assertFail(schema, null, 'Value is required.');
+    await assertFail(schema, false, 'Must be a string.');
+    await assertFail(schema, NaN, 'Must be a string.');
+
+    await assertFail(
+      schema,
+      '01 Jan 1970 00:00:00 GMT',
+      'Must be an ISO-8601 calendar date.',
+    );
+  });
 });
