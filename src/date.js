@@ -94,14 +94,19 @@ class DateSchema extends Schema {
    * @param {"date" | "date-time"} format
    */
   iso(format = 'date-time') {
+    if (format !== 'date' && format !== 'date-time') {
+      throw new Error(`Invalid format ${JSON.stringify(format)}.`);
+    }
     return this.clone({ format }).assert('format', (val, options) => {
       const { original } = options;
       if (typeof original !== 'string') {
         if (!options.default) {
           throw new LocalizedError('Must be a string.');
         }
-      } else if (!validator.isISO8601(original)) {
-        throw new LocalizedError('Must be in ISO 8601 format.');
+      } else if (format === 'date' && !validator.isDate(original)) {
+        throw new LocalizedError('Must be an ISO-8601 calendar date.');
+      } else if (format === 'date-time' && !validator.isISO8601(original)) {
+        throw new LocalizedError('Must be in ISO-8601 format.');
       }
     });
   }

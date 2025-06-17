@@ -1,3 +1,7 @@
+## 1.4.3
+
+- Fixed date not allowing calendar date format without time.
+
 ## 1.4.2
 
 - Improved enum type assertion errors.
