@@ -200,9 +200,9 @@ class ObjectSchema extends TypeSchema {
   /**
    * Returns the schema's fields as an object allowing them
    * to be "spread" to create new schemas. Note that doing
-   * this will mean that custom and required assertions will
-   * not be preserved. Compare to {@link append} which
-   * preserves all assertions on the base schema.
+   * this will mean that custom and required assertions on
+   * the object itself will not be preserved. Compare to
+   * {@link append} which preserves all assertions.
    */
   export() {
     return this.meta.fields || {};
