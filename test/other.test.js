@@ -565,9 +565,11 @@ describe('misc', () => {
     });
     const expected = `
 {
+  "required": [],
   "type": "object",
   "properties": {
     "profile": {
+      "required": [],
       "type": "object",
       "properties": {
         "firstName": {
@@ -576,9 +578,11 @@ describe('misc', () => {
         "lastName": {
           "type": "string"
         }
-      }
+      },
+      "additionalProperties": false
     }
-  }
+  },
+  "additionalProperties": false
 }
     `;
     expect(schema.inspect()).toBe(expected.trim());

@@ -252,14 +252,22 @@ class ObjectSchema extends TypeSchema {
   // Private
 
   toOpenApi(extra) {
+    const { stripUnknown = false } = this.meta;
+
+    const required = [];
     const properties = {};
     for (let [key, schema] of Object.entries(this.export())) {
       properties[key] = schema.toOpenApi(extra);
+      if (schema.meta.required) {
+        required.push(key);
+      }
     }
     return {
       ...super.toOpenApi(extra),
       ...(Object.keys(properties).length > 0 && {
         properties,
+        required,
+        additionalProperties: stripUnknown,
       }),
     };
   }

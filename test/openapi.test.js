@@ -34,6 +34,8 @@ describe('toOpenApi', () => {
           type: 'string',
         },
       },
+      required: [],
+      additionalProperties: false,
     });
   });
 
@@ -83,6 +85,8 @@ describe('toOpenApi', () => {
           type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
         },
       },
+      required: [],
+      additionalProperties: false,
     });
   });
 
@@ -223,6 +227,8 @@ describe('toOpenApi', () => {
           type: 'string',
         },
       },
+      required: [],
+      additionalProperties: false,
       'x-schema': 'my-schema',
     });
   });
@@ -246,6 +252,8 @@ describe('toOpenApi', () => {
           type: 'string',
         },
       },
+      required: [],
+      additionalProperties: false,
     });
   });
 
@@ -323,6 +331,8 @@ describe('toOpenApi', () => {
           'x-schema': 'DateTime',
         },
       },
+      required: [],
+      additionalProperties: false,
     });
   });
 
@@ -344,6 +354,74 @@ describe('toOpenApi', () => {
       type: 'string',
       format: 'date-time',
       default: 'custom',
+    });
+  });
+
+  it('should have required field on objects', async () => {
+    // https://www.learnjsonschema.com/2020-12/validation/required/
+
+    const schema = yd.object({
+      name: yd.string().required(),
+      age: yd.number(),
+    });
+
+    expect(schema.toOpenApi()).toEqual({
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          required: true,
+        },
+        age: {
+          type: 'number',
+        },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    });
+  });
+
+  describe('additionalProperties', () => {
+    // https://www.learnjsonschema.com/2020-12/applicator/additionalproperties/
+
+    it('should be false by default', async () => {
+      const schema = yd.object({
+        name: yd.string().required(),
+      });
+
+      expect(schema.toOpenApi()).toEqual({
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+        required: ['name'],
+        additionalProperties: false,
+      });
+    });
+
+    it('should be true when unknown allowed', async () => {
+      const schema = yd
+        .object({
+          name: yd.string().required(),
+        })
+        .options({
+          stripUnknown: true,
+        });
+
+      expect(schema.toOpenApi()).toEqual({
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+        required: ['name'],
+        additionalProperties: true,
+      });
     });
   });
 });

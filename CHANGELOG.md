@@ -1,3 +1,7 @@
+## 1.5.1
+
+- Require more strict adherence to JSON Schema.
+
 ## 1.5.0
 
 - Calendar date validator moved to string as it cannot work when coerced to a
