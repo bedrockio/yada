@@ -1,33 +1,32 @@
 import yd from '../src';
 
-describe('toOpenApi', () => {
+describe('toJSON', () => {
   it('should describe a string schema', async () => {
-    expect(yd.string().toOpenApi()).toEqual({
+    expect(yd.string().toJSON()).toEqual({
       type: 'string',
     });
-    expect(yd.string().required().toOpenApi()).toEqual({
+    expect(yd.string().required().toJSON()).toEqual({
       type: 'string',
-      required: true,
     });
-    expect(yd.string().default('foo').toOpenApi()).toEqual({
+    expect(yd.string().default('foo').toJSON()).toEqual({
       type: 'string',
       default: 'foo',
     });
-    expect(yd.string().allow('foo', 'bar').toOpenApi()).toEqual({
+    expect(yd.string().allow('foo', 'bar').toJSON()).toEqual({
       type: 'string',
       enum: ['foo', 'bar'],
     });
-    expect(yd.string().email().toOpenApi()).toEqual({
+    expect(yd.string().email().toJSON()).toEqual({
       type: 'string',
       format: 'email',
     });
   });
 
   it('should describe an object schema', async () => {
-    expect(yd.object().toOpenApi()).toEqual({
+    expect(yd.object().toJSON()).toEqual({
       type: 'object',
     });
-    expect(yd.object({ foo: yd.string() }).toOpenApi()).toEqual({
+    expect(yd.object({ foo: yd.string() }).toJSON()).toEqual({
       type: 'object',
       properties: {
         foo: {
@@ -40,16 +39,16 @@ describe('toOpenApi', () => {
   });
 
   it('should describe an array schema', async () => {
-    expect(yd.array().toOpenApi()).toEqual({
+    expect(yd.array().toJSON()).toEqual({
       type: 'array',
     });
-    expect(yd.array(yd.string()).toOpenApi()).toEqual({
+    expect(yd.array(yd.string()).toJSON()).toEqual({
       type: 'array',
       items: {
         type: 'string',
       },
     });
-    expect(yd.array(yd.string(), yd.number()).toOpenApi()).toEqual({
+    expect(yd.array(yd.string(), yd.number()).toJSON()).toEqual({
       type: 'array',
       oneOf: [
         {
@@ -63,10 +62,10 @@ describe('toOpenApi', () => {
   });
 
   it('should describe a mixed type schema', async () => {
-    expect(yd.any().toOpenApi()).toEqual({
+    expect(yd.any().toJSON()).toEqual({
       type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
     });
-    expect(yd.array(yd.any()).toOpenApi()).toEqual({
+    expect(yd.array(yd.any()).toJSON()).toEqual({
       type: 'array',
       items: {
         type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
@@ -77,7 +76,7 @@ describe('toOpenApi', () => {
         .object({
           any: yd.any(),
         })
-        .toOpenApi(),
+        .toJSON(),
     ).toEqual({
       type: 'object',
       properties: {
@@ -92,7 +91,7 @@ describe('toOpenApi', () => {
 
   it('should describe enum types', async () => {
     const schema = yd.allow(yd.string(), yd.array(yd.string()));
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       oneOf: [
         {
           type: 'string',
@@ -110,7 +109,7 @@ describe('toOpenApi', () => {
 
   it('should describe string enum types', async () => {
     const schema = yd.string().allow('foo', 'bar');
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'string',
       enum: ['foo', 'bar'],
     });
@@ -118,7 +117,7 @@ describe('toOpenApi', () => {
 
   it('should describe mixed enum types', async () => {
     const schema = yd.allow(1, 2, yd.string());
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       oneOf: [
         {
           type: 'number',
@@ -133,7 +132,7 @@ describe('toOpenApi', () => {
 
   it('should describe mixed enum of same type', async () => {
     const schema = yd.allow(yd.string(), '');
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       oneOf: [
         {
           type: 'string',
@@ -144,19 +143,19 @@ describe('toOpenApi', () => {
 
   it('should describe date formats', async () => {
     let schema = yd.date().iso();
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'string',
       format: 'date-time',
     });
 
     schema = yd.date().timestamp();
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'number',
       format: 'timestamp',
     });
 
     schema = yd.date().unix();
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'number',
       format: 'unix timestamp',
     });
@@ -164,7 +163,7 @@ describe('toOpenApi', () => {
 
   it('should describe a tuple schema', async () => {
     const schema = yd.tuple(yd.string(), yd.number());
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'array',
       prefixItems: [
         {
@@ -177,14 +176,14 @@ describe('toOpenApi', () => {
 
   it('should describe number min/max', async () => {
     let schema = yd.number().min(5).max(50);
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'number',
       minimum: 5,
       maximum: 50,
     });
 
     schema = yd.number().multiple(5);
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'number',
       multipleOf: 5,
     });
@@ -192,7 +191,7 @@ describe('toOpenApi', () => {
 
   it('should describe string minLength/maxLength', async () => {
     const schema = yd.string().min(5).max(50);
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'string',
       minLength: 5,
       maxLength: 50,
@@ -201,7 +200,7 @@ describe('toOpenApi', () => {
 
   it('should describe nullable', async () => {
     const schema = yd.string().nullable();
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'string',
       nullable: true,
     });
@@ -217,7 +216,7 @@ describe('toOpenApi', () => {
         'x-schema': 'my-schema',
       });
 
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'object',
       properties: {
         num: {
@@ -241,7 +240,7 @@ describe('toOpenApi', () => {
       })
       .description('My Schema!');
 
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'object',
       description: 'My Schema!',
       properties: {
@@ -265,7 +264,7 @@ describe('toOpenApi', () => {
       })
       .description('My Schema!');
 
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'string',
       'x-schema': 'my-schema',
       description: 'My Schema!',
@@ -275,7 +274,7 @@ describe('toOpenApi', () => {
   it('should be able to set metadata in the method', async () => {
     const schema = yd.string();
     expect(
-      schema.toOpenApi({
+      schema.toJSON({
         'x-schema': 'my-schema',
         description: 'My Schema!',
       }),
@@ -294,7 +293,7 @@ describe('toOpenApi', () => {
       minLowercase: 1,
       minUppercase: 0,
     });
-    expect(schema.toOpenApi()).toEqual({
+    expect(schema.toJSON()).toEqual({
       type: 'string',
       description:
         'A password of at least 12 characters containing 1 lowercase, 3 numbers, and 2 symbols.',
@@ -302,7 +301,7 @@ describe('toOpenApi', () => {
   });
 
   it('should not fail on date with no format', async () => {
-    expect(yd.date().toOpenApi()).toEqual({
+    expect(yd.date().toJSON()).toEqual({
       type: 'string',
       format: 'date-time',
     });
@@ -313,7 +312,7 @@ describe('toOpenApi', () => {
       start: yd.date().iso(),
     });
 
-    const result = schema.toOpenApi({
+    const result = schema.toJSON({
       tag: (meta) => {
         if (meta.format === 'date-time') {
           return {
@@ -337,7 +336,7 @@ describe('toOpenApi', () => {
   });
 
   it('should make a best effort to describe custom date defaults', async () => {
-    expect(yd.date().default(Date.now).toOpenApi()).toEqual({
+    expect(yd.date().default(Date.now).toJSON()).toEqual({
       type: 'string',
       format: 'date-time',
       default: 'now',
@@ -349,7 +348,7 @@ describe('toOpenApi', () => {
         .default(() => {
           return new Date();
         })
-        .toOpenApi(),
+        .toJSON(),
     ).toEqual({
       type: 'string',
       format: 'date-time',
@@ -357,12 +356,102 @@ describe('toOpenApi', () => {
     });
   });
 
-  it('should have required field on objects', async () => {
-    // https://www.learnjsonschema.com/2020-12/validation/required/
+  describe('spec', () => {
+    describe('required', () => {
+      it('should have required field on object root', async () => {
+        // https://www.learnjsonschema.com/2020-12/validation/required/
 
+        const schema = yd.object({
+          name: yd.string().required(),
+          age: yd.number(),
+        });
+
+        expect(schema.toJSON()).toEqual({
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+            age: {
+              type: 'number',
+            },
+          },
+          required: ['name'],
+          additionalProperties: false,
+        });
+      });
+    });
+
+    describe('additionalProperties', () => {
+      // https://www.learnjsonschema.com/2020-12/applicator/additionalproperties/
+
+      it('should be false by default', async () => {
+        const schema = yd.object({
+          name: yd.string().required(),
+        });
+
+        expect(schema.toJSON()).toEqual({
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+          },
+          required: ['name'],
+          additionalProperties: false,
+        });
+      });
+
+      it('should be true when unknown allowed', async () => {
+        const schema = yd
+          .object({
+            name: yd.string().required(),
+          })
+          .options({
+            stripUnknown: true,
+          });
+
+        expect(schema.toJSON()).toEqual({
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+          },
+          required: ['name'],
+          additionalProperties: true,
+        });
+      });
+    });
+  });
+
+  it('should correctly work with JSON helpers', async () => {
     const schema = yd.object({
       name: yd.string().required(),
-      age: yd.number(),
+      age: yd.number().required(),
+    });
+
+    expect(JSON.parse(JSON.stringify(schema))).toEqual({
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+        },
+        age: {
+          type: 'number',
+        },
+      },
+      required: ['name', 'age'],
+      additionalProperties: false,
+    });
+  });
+});
+
+describe('toOpenApi', () => {
+  it('should be an alias of toJSON', async () => {
+    const schema = yd.object({
+      name: yd.string().required(),
+      age: yd.number().required(),
     });
 
     expect(schema.toOpenApi()).toEqual({
@@ -370,58 +459,13 @@ describe('toOpenApi', () => {
       properties: {
         name: {
           type: 'string',
-          required: true,
         },
         age: {
           type: 'number',
         },
       },
-      required: ['name'],
+      required: ['name', 'age'],
       additionalProperties: false,
-    });
-  });
-
-  describe('additionalProperties', () => {
-    // https://www.learnjsonschema.com/2020-12/applicator/additionalproperties/
-
-    it('should be false by default', async () => {
-      const schema = yd.object({
-        name: yd.string().required(),
-      });
-
-      expect(schema.toOpenApi()).toEqual({
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            required: true,
-          },
-        },
-        required: ['name'],
-        additionalProperties: false,
-      });
-    });
-
-    it('should be true when unknown allowed', async () => {
-      const schema = yd
-        .object({
-          name: yd.string().required(),
-        })
-        .options({
-          stripUnknown: true,
-        });
-
-      expect(schema.toOpenApi()).toEqual({
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            required: true,
-          },
-        },
-        required: ['name'],
-        additionalProperties: true,
-      });
     });
   });
 });

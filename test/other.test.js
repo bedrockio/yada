@@ -565,11 +565,9 @@ describe('misc', () => {
     });
     const expected = `
 {
-  "required": [],
   "type": "object",
   "properties": {
     "profile": {
-      "required": [],
       "type": "object",
       "properties": {
         "firstName": {
@@ -579,9 +577,11 @@ describe('misc', () => {
           "type": "string"
         }
       },
+      "required": [],
       "additionalProperties": false
     }
   },
+  "required": [],
   "additionalProperties": false
 }
     `;

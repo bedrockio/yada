@@ -1,3 +1,8 @@
+## 1.5.2
+
+- Removed boolean requried fields for further schema adherence.
+- Added `toJSON` as main serialization method and moved `toOpenApi` to an alias.
+
 ## 1.5.1
 
 - Require more strict adherence to JSON Schema.

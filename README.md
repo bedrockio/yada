@@ -888,26 +888,38 @@ const schema = yd.custom((val) => {
 });
 ```
 
-## OpenApi
+## JSON Schema
 
-One of the benefits of Yada is built-in OpenApi integration. Any schema can
-describe itself in OpenApi format including complex nested schemas.
+One of the benefits of Yada is built-in [JSON Schema](https://json-schema.org/)
+integration. Any schema can describe itself in JSON Schema format including
+complex nested schemas.
 
 ```js
-yd.string().allow('foo', 'bar').toOpenApi();
+yd.string().allow('foo', 'bar').toJSON();
 // {
 //   type: 'string',
 //   enum: ['foo', 'bar'],
 // }
 ```
 
-The `tag` method allows tagging custom OpenApi fields:
+This also means schemas work with JSON helpers:
+
+```js
+const schema = yd.string().allow('foo', 'bar');
+JSON.stringify(schema, null, 2);
+// {
+//   type: 'string',
+//   enum: ['foo', 'bar'],
+// }
+```
+
+The `tag` method allows tagging custom fields:
 
 ```js
 yd.string().tag({
   description: 'my description!',
   x-field: 'my custom field!',
-}).toOpenApi();
+}).toJSON();
 // {
 //   type: 'string',
 //   description: 'my description!',
@@ -918,10 +930,19 @@ yd.string().tag({
 The `description` method is a shortcut:
 
 ```js
-yd.string().description('my description!').toOpenApi();
+yd.string().description('my description!').toJSON();
 // {
 //   type: 'string',
 //   description: 'my description!',
+// }
+```
+
+The method `toOpenApi` is provided as an alias:
+
+```js
+yd.string().toOpenApi();
+// {
+//   type: 'string',
 // }
 ```
 

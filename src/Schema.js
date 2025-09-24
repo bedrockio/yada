@@ -206,18 +206,31 @@ export default class Schema {
     return merged;
   }
 
-  toOpenApi(extra) {
-    const { required, format, tags } = this.meta;
+  /**
+   * Exports the schema in [JSON Schema](https://json-schema.org/) format.
+   * Note that this may not represent the schema in its enitrety. Specifically,
+   * custom (code-based) assertions will not be output.
+   * @param {Object} [extra]
+   */
+  toJSON(extra) {
+    const { format, tags } = this.meta;
     return {
-      required,
       format,
       ...tags,
       ...this.getAnyType(),
       ...this.getDefault(),
       ...this.getNullable(),
-      ...this.enumToOpenApi(),
+      ...this.getEnum(),
       ...this.expandExtra(extra),
     };
+  }
+
+  /**
+   * Exports the schema in [JSON Schema](https://json-schema.org/) format.
+   * @alias toJSON.
+   */
+  toOpenApi(...extra) {
+    return this.toJSON(extra);
   }
 
   getAnyType() {
@@ -249,6 +262,46 @@ export default class Schema {
     }
   }
 
+  getEnum() {
+    const { enum: allowed } = this.meta;
+    if (allowed?.length) {
+      const type = typeof allowed[0];
+      const allowEnum = allowed.every((entry) => {
+        const entryType = typeof entry;
+        return entryType !== 'object' && entryType === type;
+      });
+      if (allowEnum) {
+        return {
+          type,
+          enum: allowed,
+        };
+      } else {
+        const oneOf = [];
+        for (let entry of allowed) {
+          if (isSchema(entry)) {
+            oneOf.push(entry.toJSON());
+          } else {
+            const type = typeof entry;
+            let forType = oneOf.find((el) => {
+              return el.type === type;
+            });
+            if (!forType) {
+              forType = {
+                type,
+                enum: [],
+              };
+              oneOf.push(forType);
+            }
+            if (forType.enum) {
+              forType.enum.push(entry);
+            }
+          }
+        }
+        return { oneOf };
+      }
+    }
+  }
+
   expandExtra(extra = {}) {
     const { tag, ...rest } = extra;
     if (typeof extra?.tag === 'function') {
@@ -258,7 +311,7 @@ export default class Schema {
   }
 
   inspect() {
-    return JSON.stringify(this.toOpenApi(), null, 2);
+    return JSON.stringify(this.toJSON(), null, 2);
   }
 
   get() {
@@ -381,46 +434,6 @@ export default class Schema {
       return result;
     }
     return value;
-  }
-
-  enumToOpenApi() {
-    const { enum: allowed } = this.meta;
-    if (allowed?.length) {
-      const type = typeof allowed[0];
-      const allowEnum = allowed.every((entry) => {
-        const entryType = typeof entry;
-        return entryType !== 'object' && entryType === type;
-      });
-      if (allowEnum) {
-        return {
-          type,
-          enum: allowed,
-        };
-      } else {
-        const oneOf = [];
-        for (let entry of allowed) {
-          if (isSchema(entry)) {
-            oneOf.push(entry.toOpenApi());
-          } else {
-            const type = typeof entry;
-            let forType = oneOf.find((el) => {
-              return el.type === type;
-            });
-            if (!forType) {
-              forType = {
-                type,
-                enum: [],
-              };
-              oneOf.push(forType);
-            }
-            if (forType.enum) {
-              forType.enum.push(entry);
-            }
-          }
-        }
-        return { oneOf };
-      }
-    }
   }
 }
 

@@ -14,9 +14,9 @@ export default class TypeSchema extends Schema {
     return this.meta.type;
   }
 
-  toOpenApi(extra) {
+  toJSON(extra) {
     return {
-      ...super.toOpenApi(extra),
+      ...super.toJSON(extra),
       type: this.meta.type,
     };
   }

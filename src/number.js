@@ -71,10 +71,10 @@ class NumberSchema extends TypeSchema {
 
   // Private
 
-  toOpenApi(extra) {
+  toJSON(extra) {
     const { min, max, multiple } = this.meta;
     return {
-      ...super.toOpenApi(extra),
+      ...super.toJSON(extra),
       ...(min != null && {
         minimum: min,
       }),

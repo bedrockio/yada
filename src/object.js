@@ -190,6 +190,7 @@ class ObjectSchema extends TypeSchema {
     }
 
     const update = {};
+
     for (let field of fields) {
       set(update, field, this.get(field).required());
     }
@@ -251,19 +252,19 @@ class ObjectSchema extends TypeSchema {
 
   // Private
 
-  toOpenApi(extra) {
+  toJSON(extra) {
     const { stripUnknown = false } = this.meta;
 
     const required = [];
     const properties = {};
     for (let [key, schema] of Object.entries(this.export())) {
-      properties[key] = schema.toOpenApi(extra);
+      properties[key] = schema.toJSON(extra);
       if (schema.meta.required) {
         required.push(key);
       }
     }
     return {
-      ...super.toOpenApi(extra),
+      ...super.toJSON(extra),
       ...(Object.keys(properties).length > 0 && {
         properties,
         required,

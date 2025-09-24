@@ -1,6 +1,6 @@
 import yd from '../src';
 
-describe('serialization', () => {
+describe('errors', () => {
   it('should correctly serialize object error', async () => {
     const schema = yd.object({
       a: yd.string().required(),
