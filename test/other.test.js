@@ -383,33 +383,6 @@ describe('options', () => {
       );
     });
   });
-
-  describe('expandDotSyntax', () => {
-    it('should expand dot syntax', async () => {
-      const schema = yd.object({
-        profile: yd.object({
-          name: yd.string(),
-        }),
-      });
-
-      const options = {
-        expandDotSyntax: true,
-      };
-
-      await assertPass(
-        schema,
-        {
-          'profile.name': 'foo',
-        },
-        {
-          profile: {
-            name: 'foo',
-          },
-        },
-        options,
-      );
-    });
-  });
 });
 
 describe('errors', () => {

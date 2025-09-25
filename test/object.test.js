@@ -849,6 +849,7 @@ describe('object', () => {
         .options({
           stripEmpty: true,
         });
+
       expect(
         await schema.validate({
           firstName: 'Foo',
@@ -873,6 +874,72 @@ describe('object', () => {
           lastName: '',
         }),
       ).toEqual({});
+    });
+  });
+
+  describe('preserveKeys', () => {
+    it('should expand dot syntax by default', async () => {
+      const schema = yd.object({
+        foo: yd.string(),
+        profile: yd.object({
+          name: yd.string(),
+        }),
+      });
+
+      expect(
+        await schema.validate({
+          foo: 'bar',
+          'profile.name': 'foo',
+        }),
+      ).toEqual({
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+
+      expect(
+        await schema.validate({
+          foo: 'bar',
+          profile: {
+            name: 'foo',
+          },
+        }),
+      ).toEqual({
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+    });
+
+    it('should disable expansion by option', async () => {
+      const schema = yd
+        .object({
+          foo: yd.string(),
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .options({
+          preserveKeys: true,
+        });
+
+      await assertFail(
+        schema,
+        {
+          foo: 'bar',
+          'profile.name': 'foo',
+        },
+        'Unknown field "profile.name".',
+      );
+
+      await assertPass(schema, {
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
     });
   });
 });

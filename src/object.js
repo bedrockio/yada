@@ -23,11 +23,11 @@ class ObjectSchema extends TypeSchema {
       }
     });
     this.transform((obj, options) => {
-      const { fields, stripUnknown, stripEmpty, expandDotSyntax } = options;
+      const { fields, stripUnknown, stripEmpty, preserveKeys } = options;
       if (obj) {
         const result = {};
-        if (expandDotSyntax) {
-          obj = expandDotProperties(obj);
+        if (!preserveKeys) {
+          obj = expandKeys(obj);
         }
         for (let key of Object.keys(obj)) {
           const value = obj[key];
@@ -250,6 +250,20 @@ class ObjectSchema extends TypeSchema {
     return schema;
   }
 
+  /**
+   * `stripEmpty` - Removes properties that are empty strings.
+   * `stripUnknown` - Removes properties not in the schema.
+   * `preserveKeys` - Prevents expansion of "flat" keys using dot syntax.
+   *
+   * @param {Object} [options]
+   * @param {boolean} [options.stripEmpty]
+   * @param {boolean} [options.stripUnknown]
+   * @param {boolean} [options.preserveKeys]
+   */
+  options(options) {
+    return super.options(options);
+  }
+
   // Private
 
   toJSON(extra) {
@@ -274,23 +288,12 @@ class ObjectSchema extends TypeSchema {
   }
 }
 
-function expandDotProperties(obj) {
-  const result = {};
-  for (let [key, val] of Object.entries(obj || {})) {
-    const split = key.split('.');
-    if (split.length > 1) {
-      let node = result;
-      for (let i = 0; i < split.length; i++) {
-        const token = split[i];
-        if (i === split.length - 1) {
-          node[token] = val;
-        } else {
-          node[token] = {};
-        }
-        node = node[token];
-      }
-    } else {
-      result[key] = val;
+function expandKeys(obj) {
+  const result = { ...obj };
+  for (let [key, value] of Object.entries(result)) {
+    if (key.includes('.')) {
+      delete result[key];
+      set(result, key, value);
     }
   }
   return result;

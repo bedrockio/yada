@@ -1,3 +1,8 @@
+## 1.6.0
+
+- Make `expandDotSyntax` option default and rename inverse option to
+  `preserveKeys`.
+
 ## 1.5.2
 
 - Removed boolean requried fields for further schema adherence.
