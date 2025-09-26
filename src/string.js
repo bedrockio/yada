@@ -1,6 +1,7 @@
 import validator from 'validator';
 
 import TypeSchema from './TypeSchema';
+import { canAllowEmptyString } from './utils';
 import { LocalizedError } from './errors';
 import {
   validateLength,
@@ -37,8 +38,7 @@ class StringSchema extends TypeSchema {
       return val;
     });
     this.assert('empty', (val, options) => {
-      const { required, allowEmpty } = options;
-      if (val === '' && (required || allowEmpty === false)) {
+      if (val === '' && !canAllowEmptyString(options)) {
         throw new LocalizedError('Value is required.');
       }
       return val;
@@ -429,8 +429,7 @@ class StringSchema extends TypeSchema {
     return this.clone({ format: name }).assert(
       'format',
       function (val, options) {
-        const { allowEmpty } = options;
-        if (val === '' && allowEmpty !== false) {
+        if (val === '' && canAllowEmptyString(options)) {
           return;
         }
         fn(val, options);

@@ -1,5 +1,7 @@
 import { omit, uniqBy } from 'lodash';
 
+import { canAllowEmptyString } from './utils';
+
 import {
   TypeError,
   FormatError,
@@ -329,6 +331,9 @@ export default class Schema {
       set = set[0];
     }
     return this.clone({ enum: set }).assert('enum', async (val, options) => {
+      if (val === '' && canAllowEmptyString(options)) {
+        return;
+      }
       if (val !== undefined) {
         let captured = [];
 

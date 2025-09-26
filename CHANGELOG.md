@@ -1,3 +1,7 @@
+## 1.6.1
+
+- Fixed empty string not allowed when enum provided.
+
 ## 1.6.0
 
 - Make `expandDotSyntax` option default and rename inverse option to

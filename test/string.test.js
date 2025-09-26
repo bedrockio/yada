@@ -403,6 +403,24 @@ describe('string', () => {
     await assertFail(schema, '', 'Value is required.');
   });
 
+  it('should allow empty for a string enum', async () => {
+    const schema = yd.string().allow('foo', 'bar');
+    await assertPass(schema, 'foo');
+    await assertPass(schema, 'bar');
+    await assertPass(schema, '');
+    await assertFail(schema, 'baz', ['Must be one of ["foo", "bar"].']);
+  });
+
+  it('should not allow empty for a string enum when flag is false', async () => {
+    const schema = yd.string().allow('foo', 'bar').options({
+      allowEmpty: false,
+    });
+    await assertPass(schema, 'foo');
+    await assertPass(schema, 'bar');
+    await assertFail(schema, '', ['Value is required.']);
+    await assertFail(schema, 'baz', ['Must be one of ["foo", "bar"].']);
+  });
+
   it('should not allow empty in multi-type schema', async () => {
     const schema = yd
       .allow(
