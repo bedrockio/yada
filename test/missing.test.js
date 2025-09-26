@@ -1,5 +1,5 @@
 import yd from '../src';
-import { assertPass, assertFail } from './utils';
+import { assertFail, assertPass } from './utils';
 
 describe('missing', () => {
   it('should not bail on previous validator', async () => {

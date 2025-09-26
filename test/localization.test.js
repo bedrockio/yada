@@ -1,6 +1,6 @@
 import yd from '../src';
 import { LocalizedError } from '../src/errors';
-import { useLocalizer, getLocalizedMessages } from '../src/localization';
+import { getLocalizedMessages, useLocalizer } from '../src/localization';
 
 describe('localization', () => {
   it('should be able to pass an object to useLocalizer', async () => {

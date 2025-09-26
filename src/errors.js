@@ -1,5 +1,5 @@
-import { getFullMessage } from './messages';
 import { localize } from './localization';
+import { getFullMessage } from './messages';
 
 export class LocalizedError extends Error {
   constructor(message, values = {}) {

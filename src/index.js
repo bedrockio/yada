@@ -1,17 +1,15 @@
-import string from './string';
-import number from './number';
+import Schema from './Schema';
+import { isSchema } from './Schema';
+import array from './array';
 import boolean from './boolean';
 import date from './date';
-import object from './object';
-import array from './array';
-import tuple from './tuple';
-
-import Schema from './Schema';
-import { useLocalizer, getLocalizedMessages } from './localization';
 import { LocalizedError } from './errors';
-
-import { isSchema } from './Schema';
 import { isSchemaError } from './errors';
+import { getLocalizedMessages, useLocalizer } from './localization';
+import number from './number';
+import object from './object';
+import string from './string';
+import tuple from './tuple';
 
 /**
  * Accepts anything.
@@ -43,22 +41,22 @@ function custom(fn) {
 }
 
 export {
+  LocalizedError,
+  allow,
+  any,
   array,
   boolean,
-  date,
-  number,
-  object,
-  string,
-  tuple,
-  any,
-  allow,
-  reject,
   custom,
+  date,
+  getLocalizedMessages,
   isSchema,
   isSchemaError,
+  number,
+  object,
+  reject,
+  string,
+  tuple,
   useLocalizer,
-  getLocalizedMessages,
-  LocalizedError,
 };
 
 export default {

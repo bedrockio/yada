@@ -1,16 +1,18 @@
 import validator from 'validator';
 
 import TypeSchema from './TypeSchema';
-import { canAllowEmptyString } from './utils';
 import { LocalizedError } from './errors';
+
 import {
+  getPasswordOptions,
   validateLength,
   validateLowercase,
-  validateUppercase,
   validateNumbers,
   validateSymbols,
-  getPasswordOptions,
+  validateUppercase,
 } from './password';
+
+import { canAllowEmptyString } from './utils';
 
 const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PHONE_REG = /^\+\d{1,3}\d{3,14}$/;

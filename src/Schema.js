@@ -1,15 +1,15 @@
 import { omit, uniqBy } from 'lodash';
 
-import { canAllowEmptyString } from './utils';
-
 import {
-  TypeError,
-  FormatError,
   AllowedError,
   AssertionError,
+  FormatError,
   LocalizedError,
+  TypeError,
   ValidationError,
 } from './errors';
+
+import { canAllowEmptyString } from './utils';
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
 const REQUIRED_TYPES = ['default', 'required', 'missing'];

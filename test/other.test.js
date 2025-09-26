@@ -1,5 +1,5 @@
+import { assertErrorMessage, assertFail, assertPass } from './utils';
 import yd from '../src';
-import { assertPass, assertFail, assertErrorMessage } from './utils';
 import { isSchema, isSchemaError } from '../src';
 
 describe('default', () => {

@@ -1,6 +1,7 @@
 ## 1.6.1
 
 - Fixed empty string not allowed when enum provided.
+- Some development version bumps.
 
 ## 1.6.0
 

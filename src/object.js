@@ -1,8 +1,8 @@
-import { set, pick, omit } from 'lodash';
+import { omit, pick, set } from 'lodash';
 
+import Schema, { isSchema } from './Schema';
 import TypeSchema from './TypeSchema';
 import { FieldError, LocalizedError } from './errors';
-import Schema, { isSchema } from './Schema';
 
 const APPEND_ASSERTION_TYPES = ['required', 'type', 'custom'];
 
