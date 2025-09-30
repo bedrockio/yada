@@ -6,6 +6,8 @@ import { FieldError, LocalizedError } from './errors';
 
 const APPEND_ASSERTION_TYPES = ['required', 'type', 'custom'];
 
+const INTEGER_REG = /^\d+$/;
+
 /**
  * @typedef {{ [key: string]: Schema } | {}} SchemaMap
  */
@@ -23,15 +25,15 @@ class ObjectSchema extends TypeSchema {
       }
     });
     this.transform((obj, options) => {
-      const { fields, stripUnknown, stripEmpty, preserveKeys } = options;
+      const { stripUnknown, stripEmpty } = options;
       if (obj) {
         const result = {};
-        if (!preserveKeys) {
-          obj = expandKeys(obj);
-        }
+
+        obj = expandFlatSyntax(obj, options);
+
         for (let key of Object.keys(obj)) {
           const value = obj[key];
-          const isUnknown = !!fields && !(key in fields);
+          const isUnknown = !isKnownKey(key, this, options);
 
           if ((value === '' && stripEmpty) || (isUnknown && stripUnknown)) {
             continue;
@@ -253,12 +255,14 @@ class ObjectSchema extends TypeSchema {
   /**
    * `stripEmpty` - Removes properties that are empty strings.
    * `stripUnknown` - Removes properties not in the schema.
-   * `preserveKeys` - Prevents expansion of "flat" keys using dot syntax.
+   * `allowFlatKeys` - Allows "flat" keys like `profile.name`.
+   * `expendFlatKeys` - Expands "flat" keys into nested objects.
    *
    * @param {Object} [options]
    * @param {boolean} [options.stripEmpty]
    * @param {boolean} [options.stripUnknown]
-   * @param {boolean} [options.preserveKeys]
+   * @param {boolean} [options.allowFlatKeys]
+   * @param {boolean} [options.expandFlatKeys]
    */
   options(options) {
     return super.options(options);
@@ -288,7 +292,11 @@ class ObjectSchema extends TypeSchema {
   }
 }
 
-function expandKeys(obj) {
+function expandFlatSyntax(obj, options) {
+  if (!options.expandFlatKeys) {
+    return obj;
+  }
+
   const result = { ...obj };
   for (let [key, value] of Object.entries(result)) {
     if (key.includes('.')) {
@@ -297,6 +305,65 @@ function expandKeys(obj) {
     }
   }
   return result;
+}
+
+function isKnownKey(key, schema, options) {
+  const { fields } = schema.meta;
+  const { allowFlatKeys } = options;
+  if (!fields) {
+    // No fields defined -> all keys are "known".
+    return true;
+  } else if (key in fields) {
+    // Exact match -> key is known.
+    return true;
+  } else if (allowFlatKeys && key.includes('.')) {
+    // Flat syntax "foo.bar".
+    const [base, ...rest] = key.split('.');
+    let subschema = fields[base];
+
+    if (!subschema) {
+      return false;
+    }
+
+    const { type, schemas } = subschema.meta;
+
+    let subkey;
+
+    if (type === 'array') {
+      // If the subschema is an array then take the first of
+      // its defined schemas as we can safely assume that an
+      // array of objects will be defined as a single element
+      // or multiple schemas will only set the base property.
+      // Test that the element key is valid and take any
+      // further properties as the subkey. Examples:
+      // - profiles.0.name (array of objects)
+      // - profiles.0 (array of stringsmk)
+      const [index, ...other] = rest;
+      if (!INTEGER_REG.test(index)) {
+        return false;
+      }
+      subschema = schemas[0];
+      subkey = other.join('.');
+    } else if (type === 'object') {
+      // If the subschema is an object then simply take any
+      // further properties as the subkey. Example:
+      // - profile.name
+      subkey = rest.join('.');
+    } else {
+      // If the subschema is anything else then disallow it
+      // further properties as the subkey. Example:
+      // - profile.name
+      return false;
+    }
+
+    if (subschema.meta.type === 'object') {
+      return isKnownKey(subkey, subschema, options);
+    } else {
+      return !subkey;
+    }
+  } else {
+    return false;
+  }
 }
 
 function mergeFields(aFields, bFields) {

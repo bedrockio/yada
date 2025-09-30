@@ -230,6 +230,10 @@ const schema = yd.string().options({
 });
 ```
 
+### String Schema Options
+
+- `allowEmpty` - Allows empty strings.
+
 ### Number
 
 Numbers have a handful of useful valiadtions:
@@ -430,6 +434,13 @@ const newSchema = yd.object({
   ...schema2.export(),
 });
 ```
+
+### Object Schema Options
+
+- `stripEmpty` - Removes properties that are empty strings.
+- `stripUnknown` - Removes properties not in the schema.
+- `allowFlatKeys` - Allows "flat" keys like `profile.name`.
+- `expendFlatKeys` - Expands "flat" keys into nested objects.
 
 ## Date
 
@@ -777,12 +788,11 @@ await schema
 
 #### Options:
 
-- `stripUnknown` - Strips unknown fields on object schemas which otherwise would
-  throw an error.
 - `cast` - Casts input to its associated type. For strings and numbers this
   performs a simple type coercion. For booleans `"true"` or `"1"` will be
   considered `true` and `"false"` or `"0"` will be considered `false`. This
   option is useful to convert query strings.
+- [Object Schema Options](#object-schema-options)
 
 ## Error Messages
 

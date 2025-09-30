@@ -877,53 +877,14 @@ describe('object', () => {
     });
   });
 
-  describe('preserveKeys', () => {
-    it('should expand dot syntax by default', async () => {
+  describe('allowFlatKeys', () => {
+    it('should not allow flat syntax by default', async () => {
       const schema = yd.object({
         foo: yd.string(),
         profile: yd.object({
           name: yd.string(),
         }),
       });
-
-      expect(
-        await schema.validate({
-          foo: 'bar',
-          'profile.name': 'foo',
-        }),
-      ).toEqual({
-        foo: 'bar',
-        profile: {
-          name: 'foo',
-        },
-      });
-
-      expect(
-        await schema.validate({
-          foo: 'bar',
-          profile: {
-            name: 'foo',
-          },
-        }),
-      ).toEqual({
-        foo: 'bar',
-        profile: {
-          name: 'foo',
-        },
-      });
-    });
-
-    it('should disable expansion by option', async () => {
-      const schema = yd
-        .object({
-          foo: yd.string(),
-          profile: yd.object({
-            name: yd.string(),
-          }),
-        })
-        .options({
-          preserveKeys: true,
-        });
 
       await assertFail(
         schema,
@@ -935,6 +896,244 @@ describe('object', () => {
       );
 
       await assertPass(schema, {
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+
+      const result = await schema.validate({
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+      expect(result).toEqual({
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+    });
+
+    it('should allow flat syntax by option', async () => {
+      const schema = yd
+        .object({
+          foo: yd.string(),
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .options({
+          allowFlatKeys: true,
+        });
+
+      await assertPass(schema, {
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+
+      await assertPass(schema, {
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+
+      await assertFail(
+        schema,
+        {
+          foo: 'bar',
+          'profile.baz': 'foo',
+        },
+        'Unknown field "profile.baz".',
+      );
+
+      const result = await schema.validate({
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+      expect(result).toEqual({
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+    });
+
+    it('should allow flat syntax in array schema', async () => {
+      const schema = yd
+        .object({
+          profiles: yd.array(
+            yd.object({
+              name: yd.string(),
+            }),
+          ),
+        })
+        .options({
+          allowFlatKeys: true,
+        });
+
+      await assertPass(schema, {
+        'profiles.0.name': 'foo',
+      });
+
+      await assertPass(schema, {
+        profiles: [
+          {
+            name: 'foo',
+          },
+        ],
+      });
+
+      await assertFail(
+        schema,
+        {
+          'profiles.0.baz': 'foo',
+        },
+        ['Unknown field "profiles.0.baz".'],
+      );
+
+      await assertFail(
+        schema,
+        {
+          'profiles.moo.name': 'foo',
+        },
+        ['Unknown field "profiles.moo.name".'],
+      );
+
+      await assertFail(
+        schema,
+        {
+          'profiles.1.4.name': 'foo',
+        },
+        ['Unknown field "profiles.1.4.name".'],
+      );
+
+      await assertFail(
+        schema,
+        {
+          'profiles.1a.name': 'foo',
+        },
+        ['Unknown field "profiles.1a.name".'],
+      );
+
+      await assertFail(
+        schema,
+        {
+          'profiles. 1.name': 'foo',
+        },
+        ['Unknown field "profiles. 1.name".'],
+      );
+    });
+
+    it('should not allow flat syntax in non-nested', async () => {
+      const schema = yd
+        .object({
+          profile: yd.string(),
+        })
+        .options({
+          allowFlatKeys: true,
+        });
+
+      await assertFail(
+        schema,
+        {
+          'profile.name': 'foo',
+        },
+        ['Unknown field "profile.name".'],
+      );
+    });
+
+    it('should allow flat syntax on non-object arrays', async () => {
+      const schema = yd
+        .object({
+          profiles: yd.array(yd.string()),
+        })
+        .options({
+          allowFlatKeys: true,
+        });
+
+      await assertPass(schema, {
+        'profiles.0': 'foo',
+      });
+
+      await assertFail(
+        schema,
+        {
+          'profiles.0.name': 'foo',
+        },
+        ['Unknown field "profiles.0.name".'],
+      );
+    });
+  });
+
+  describe('expandFlatKeys', () => {
+    it('should not expand flat syntax by default', async () => {
+      const schema = yd.object({
+        foo: yd.string(),
+        profile: yd.object({
+          name: yd.string(),
+        }),
+      });
+
+      await assertFail(
+        schema,
+        {
+          foo: 'bar',
+          'profile.name': 'foo',
+        },
+        'Unknown field "profile.name".',
+      );
+
+      await assertPass(schema, {
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+
+      const result = await schema.validate({
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+      expect(result).toEqual({
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+    });
+
+    it('should expand flat syntax by option', async () => {
+      const schema = yd
+        .object({
+          foo: yd.string(),
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .options({
+          expandFlatKeys: true,
+        });
+
+      await assertPass(schema, {
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+
+      await assertPass(schema, {
+        foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+
+      const result = await schema.validate({
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+      expect(result).toEqual({
         foo: 'bar',
         profile: {
           name: 'foo',

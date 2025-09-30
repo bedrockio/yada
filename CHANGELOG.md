@@ -1,3 +1,11 @@
+## 1.7.0
+
+- Partial revert of 1.6.0. Dot syntax expanding no longer default but enabled.
+- Expanding flat syntax is now `expandFlatKeys`.
+- Flat syntax can also now be allowed without being expanded with
+  `allowFlatKeys`.
+- Checks on flat key syntax (array, object presence, etc).
+
 ## 1.6.1
 
 - Fixed empty string not allowed when enum provided.
