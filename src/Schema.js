@@ -215,13 +215,13 @@ export default class Schema {
    * @param {Object} [extra]
    */
   toJSON(extra) {
-    const { format, tags } = this.meta;
+    const { tags } = this.meta;
     return {
-      format,
       ...tags,
       ...this.getAnyType(),
       ...this.getDefault(),
       ...this.getNullable(),
+      ...this.getFormat(),
       ...this.getEnum(),
       ...this.expandExtra(extra),
     };
@@ -241,6 +241,13 @@ export default class Schema {
       return {
         type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
       };
+    }
+  }
+
+  getFormat() {
+    const { format } = this.meta;
+    if (format) {
+      return { format };
     }
   }
 

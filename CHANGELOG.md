@@ -1,3 +1,7 @@
+## Next
+
+- Removed undefined `format` field.
+
 ## 1.7.0
 
 - Partial revert of 1.6.0. Dot syntax expanding no longer default but enabled.
