@@ -1,6 +1,7 @@
 ## Next
 
 - Removed undefined `format` field.
+- Changed JSON schema `oneOf` to `anyOf`.
 
 ## 1.7.0
 

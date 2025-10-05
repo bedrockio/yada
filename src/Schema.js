@@ -285,13 +285,19 @@ export default class Schema {
           enum: allowed,
         };
       } else {
-        const oneOf = [];
+        // Note that "oneOf" is subtly different to "anyOf" in that ONLY one branch
+        // can pass. Currently yada allows any successful branch to allow the schema
+        // to pass validation. In addition to being more semantically correct, "oneOf":
+        //
+        // 1. Is computationally expensive (must test multiple times).
+        // 2. Is disallowed by OpenAI: https://tinyurl.com/33cr388a
+        const anyOf = [];
         for (let entry of allowed) {
           if (isSchema(entry)) {
-            oneOf.push(entry.toJSON());
+            anyOf.push(entry.toJSON());
           } else {
             const type = typeof entry;
-            let forType = oneOf.find((el) => {
+            let forType = anyOf.find((el) => {
               return el.type === type;
             });
             if (!forType) {
@@ -299,14 +305,14 @@ export default class Schema {
                 type,
                 enum: [],
               };
-              oneOf.push(forType);
+              anyOf.push(forType);
             }
             if (forType.enum) {
               forType.enum.push(entry);
             }
           }
         }
-        return { oneOf };
+        return { anyOf };
       }
     }
   }

@@ -50,7 +50,7 @@ describe('toJSON', () => {
     });
     expect(yd.array(yd.string(), yd.number()).toJSON()).toEqual({
       type: 'array',
-      oneOf: [
+      anyOf: [
         {
           type: 'string',
         },
@@ -92,7 +92,7 @@ describe('toJSON', () => {
   it('should describe enum types', async () => {
     const schema = yd.allow(yd.string(), yd.array(yd.string()));
     expect(schema.toJSON()).toEqual({
-      oneOf: [
+      anyOf: [
         {
           type: 'string',
         },
@@ -118,7 +118,7 @@ describe('toJSON', () => {
   it('should describe mixed enum types', async () => {
     const schema = yd.allow(1, 2, yd.string());
     expect(schema.toJSON()).toEqual({
-      oneOf: [
+      anyOf: [
         {
           type: 'number',
           enum: [1, 2],
@@ -133,7 +133,7 @@ describe('toJSON', () => {
   it('should describe mixed enum of same type', async () => {
     const schema = yd.allow(yd.string(), '');
     expect(schema.toJSON()).toEqual({
-      oneOf: [
+      anyOf: [
         {
           type: 'string',
         },

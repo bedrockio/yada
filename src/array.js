@@ -115,7 +115,7 @@ class ArraySchema extends TypeSchema {
     const { schemas } = this.meta;
     if (schemas.length > 1) {
       other = {
-        oneOf: schemas.map((schema) => {
+        anyOf: schemas.map((schema) => {
           return schema.toJSON();
         }),
       };
