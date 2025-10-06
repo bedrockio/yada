@@ -1,4 +1,4 @@
-## Next
+## 1.8.0
 
 - Removed undefined `format` field.
 - Changed JSON schema `oneOf` to `anyOf`.
