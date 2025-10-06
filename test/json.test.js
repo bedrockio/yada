@@ -469,3 +469,162 @@ describe('toOpenApi', () => {
     });
   });
 });
+
+describe('requireAll', () => {
+  it('should make top level fields required', async () => {
+    const schema = yd
+      .object({
+        text: yd.string(),
+        numbers: yd.array(yd.number()),
+        next: yd.allow([
+          yd.object({
+            type: yd.string().allow('text', 'boolean'),
+          }),
+          yd.object({
+            type: yd.string().allow('range'),
+            min: yd.number(),
+            max: yd.number(),
+          }),
+        ]),
+      })
+      .requireAll();
+
+    expect(schema.toJSON()).toEqual({
+      type: 'object',
+      properties: {
+        text: {
+          type: 'string',
+        },
+        numbers: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+        next: {
+          anyOf: [
+            {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['text', 'boolean'],
+                },
+              },
+              required: [],
+              additionalProperties: false,
+            },
+            {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['range'],
+                },
+                min: {
+                  type: 'number',
+                },
+                max: {
+                  type: 'number',
+                },
+              },
+              required: [],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+      required: ['text', 'numbers', 'next'],
+      additionalProperties: false,
+    });
+  });
+});
+
+describe('requireAllWithin', () => {
+  it('should make all nested fields required', async () => {
+    const schema = yd
+      .object({
+        text: yd.string(),
+        numbers: yd.array(yd.number()),
+        next: yd.allow([
+          yd.object({
+            type: yd.string().allow('text', 'boolean'),
+          }),
+          yd.object({
+            type: yd.string().allow('range'),
+            min: yd.number(),
+            max: yd.number(),
+          }),
+        ]),
+      })
+      .requireAllWithin();
+
+    expect(schema.toJSON()).toEqual({
+      type: 'object',
+      properties: {
+        text: {
+          type: 'string',
+        },
+        numbers: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+        next: {
+          anyOf: [
+            {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['text', 'boolean'],
+                },
+              },
+              required: ['type'],
+              additionalProperties: false,
+            },
+            {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['range'],
+                },
+                min: {
+                  type: 'number',
+                },
+                max: {
+                  type: 'number',
+                },
+              },
+              required: ['type', 'min', 'max'],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+      required: ['text', 'numbers', 'next'],
+      additionalProperties: false,
+    });
+  });
+
+  it('should work on null', async () => {
+    const schema = yd
+      .object({
+        name: yd.allow(null, yd.string()),
+      })
+      .requireAllWithin();
+
+    expect(schema.toJSON()).toEqual({
+      type: 'object',
+      properties: {
+        name: {
+          anyOf: [{ type: 'null' }, { type: 'string' }],
+        },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    });
+  });
+});

@@ -680,6 +680,107 @@ describe('object', () => {
     });
   });
 
+  describe('requireAll', () => {
+    it('should require all fields', async () => {
+      const schema = yd
+        .object({
+          number: yd.number(),
+          profile: yd.object({
+            firstName: yd.string(),
+            lastName: yd.string(),
+          }),
+        })
+        .requireAll();
+
+      await assertPass(schema, {
+        number: 1,
+        profile: {},
+      });
+      await assertPass(schema, {
+        number: 1,
+        profile: {
+          firstName: 'Foo',
+          lastName: 'Bar',
+        },
+      });
+      await assertFail(
+        schema,
+        {
+          number: 1,
+        },
+        ['Value is required.'],
+      );
+      await assertFail(
+        schema,
+        {
+          profile: {},
+        },
+        ['Value is required.'],
+      );
+    });
+  });
+
+  describe('requireAllWithin', () => {
+    it('should require all fields with nested', async () => {
+      const schema = yd
+        .object({
+          name: yd.string(),
+          profile: yd.object({
+            name: yd.string(),
+          }),
+          options: yd.allow([
+            yd.object({
+              name: yd.string(),
+            }),
+            yd.object({
+              age: yd.number(),
+            }),
+          ]),
+        })
+        .requireAllWithin();
+
+      await assertPass(schema, {
+        name: 'top',
+        profile: {
+          name: 'inner',
+        },
+        options: {
+          name: 'inner',
+        },
+      });
+
+      await assertFail(schema, undefined, ['Value is required.']);
+
+      await assertFail(schema, {}, [
+        'Value is required.',
+        'Value is required.',
+        'Value is required.',
+      ]);
+
+      await assertFail(
+        schema,
+        {
+          name: 'top',
+          profile: {
+            name: 'inner',
+          },
+        },
+        'Value is required.',
+      );
+
+      await assertFail(
+        schema,
+        {
+          name: 'top',
+          options: {
+            name: 'inner',
+          },
+        },
+        'Value is required.',
+      );
+    });
+  });
+
   describe('pick', () => {
     it('should pick fields with arguments', async () => {
       const schema = yd

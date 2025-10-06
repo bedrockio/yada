@@ -69,6 +69,7 @@ class ObjectSchema extends TypeSchema {
             delete obj[key];
             return;
           }
+
           try {
             // Do not pass down message into validators
             // to allow custom messages to take precedence.
@@ -198,6 +199,35 @@ class ObjectSchema extends TypeSchema {
     }
 
     return this.append(update);
+  }
+
+  /**
+   * Augments the object schema to make all fields required.
+   */
+  requireAll() {
+    const update = {};
+
+    for (let field of Object.keys(this.meta.fields)) {
+      set(update, field, this.get(field).required());
+    }
+
+    return this.append(update);
+  }
+
+  /**
+   * Augments the object schema to make all fields required
+   * including fields in all nested schemas.
+   * @returns {this}
+   */
+  requireAllWithin() {
+    const update = {};
+
+    for (let field of Object.keys(this.meta.fields)) {
+      set(update, field, this.get(field).requireAllWithin());
+    }
+
+    // @ts-ignore
+    return this.append(update).required();
   }
 
   /**

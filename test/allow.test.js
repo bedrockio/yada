@@ -221,4 +221,9 @@ describe('allow', () => {
       ['Must be one of [string, array].'],
     );
   });
+
+  it('should validate a required enum', async () => {
+    const schema = yd.allow('one', 'two').required();
+    await assertFail(schema, undefined, ['Value is required.']);
+  });
 });

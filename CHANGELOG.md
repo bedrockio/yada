@@ -2,6 +2,7 @@
 
 - Removed undefined `format` field.
 - Changed JSON schema `oneOf` to `anyOf`.
+- Added `requireAll` and `requireAllWithin`.
 
 ## 1.7.0
 

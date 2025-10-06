@@ -295,6 +295,10 @@ export default class Schema {
         for (let entry of allowed) {
           if (isSchema(entry)) {
             anyOf.push(entry.toJSON());
+          } else if (entry === null) {
+            anyOf.push({
+              type: 'null',
+            });
           } else {
             const type = typeof entry;
             let forType = anyOf.find((el) => {
@@ -314,6 +318,27 @@ export default class Schema {
         }
         return { anyOf };
       }
+    }
+  }
+
+  /**
+   * Augments the schema to make all fields required
+   * including fields in all nested schemas.
+   * @returns {this}
+   */
+  requireAllWithin() {
+    let { enum: allowed } = this.meta;
+    if (allowed) {
+      allowed = allowed.map((el) => {
+        if (el?.requireAllWithin) {
+          return el.requireAllWithin();
+        } else {
+          return el;
+        }
+      });
+      return this.clone({ enum: allowed }).required();
+    } else {
+      return this.required();
     }
   }
 
