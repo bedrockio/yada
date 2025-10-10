@@ -1,3 +1,7 @@
+## 1.8.1
+
+- Fixed bug with tagging in `toOpenApi`.
+
 ## 1.8.0
 
 - Removed undefined `format` field.

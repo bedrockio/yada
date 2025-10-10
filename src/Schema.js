@@ -232,7 +232,7 @@ export default class Schema {
    * @alias toJSON.
    */
   toOpenApi(...extra) {
-    return this.toJSON(extra);
+    return this.toJSON(...extra);
   }
 
   getAnyType() {

@@ -468,6 +468,35 @@ describe('toOpenApi', () => {
       additionalProperties: false,
     });
   });
+
+  it('should allow conditional tagging of inner fields', async () => {
+    const schema = yd.object({
+      date: yd.date().iso(),
+    });
+
+    const json = schema.toOpenApi({
+      tag(meta) {
+        if (meta.format === 'date-time') {
+          return {
+            'x-schema': 'DateTime',
+          };
+        }
+      },
+    });
+
+    expect(json).toEqual({
+      type: 'object',
+      properties: {
+        date: {
+          type: 'string',
+          format: 'date-time',
+          'x-schema': 'DateTime',
+        },
+      },
+      required: [],
+      additionalProperties: false,
+    });
+  });
 });
 
 describe('requireAll', () => {
