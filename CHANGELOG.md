@@ -1,3 +1,7 @@
+## 1.8.2
+
+- Fixed array schemas not passing through `requireAllWithin`.
+
 ## 1.8.1
 
 - Fixed bug with tagging in `toOpenApi`.

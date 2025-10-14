@@ -567,6 +567,43 @@ describe('requireAll', () => {
       additionalProperties: false,
     });
   });
+
+  it('should work with array fields', async () => {
+    const schema = yd
+      .object({
+        profiles: yd.array(
+          yd.object({
+            id: yd.string(),
+            name: yd.string(),
+          }),
+        ),
+      })
+      .requireAll();
+
+    expect(schema.toJSON()).toEqual({
+      type: 'object',
+      properties: {
+        profiles: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+              name: {
+                type: 'string',
+              },
+            },
+            required: [],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['profiles'],
+      additionalProperties: false,
+    });
+  });
 });
 
 describe('requireAllWithin', () => {
@@ -634,6 +671,68 @@ describe('requireAllWithin', () => {
         },
       },
       required: ['text', 'numbers', 'next'],
+      additionalProperties: false,
+    });
+  });
+
+  it('should work with array fields', async () => {
+    const schema = yd
+      .object({
+        profiles: yd.array(
+          yd.object({
+            id: yd.string(),
+            name: yd.string(),
+          }),
+        ),
+      })
+      .requireAllWithin();
+
+    expect(schema.toJSON()).toEqual({
+      type: 'object',
+      properties: {
+        profiles: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+              name: {
+                type: 'string',
+              },
+            },
+            required: ['id', 'name'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['profiles'],
+      additionalProperties: false,
+    });
+  });
+
+  it('should not mask array description', async () => {
+    const schema = yd
+      .object({
+        profiles: yd.array(yd.string()).description('An array of strings.'),
+      })
+      .description('A profile container.')
+      .requireAllWithin();
+
+    expect(schema.toJSON()).toEqual({
+      type: 'object',
+      description: 'A profile container.',
+      properties: {
+        profiles: {
+          type: 'array',
+          description: 'An array of strings.',
+          items: {
+            type: 'string',
+          },
+        },
+      },
+      required: ['profiles'],
       additionalProperties: false,
     });
   });

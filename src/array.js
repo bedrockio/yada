@@ -5,8 +5,8 @@ import TypeSchema from './TypeSchema';
 import { ArrayError, ElementError, LocalizedError } from './errors';
 
 class ArraySchema extends TypeSchema {
-  constructor(schemas) {
-    super(Array, { schemas });
+  constructor(schemas, meta) {
+    super(Array, { ...meta, schemas });
     this.setup();
   }
 
@@ -102,6 +102,21 @@ class ArraySchema extends TypeSchema {
         }
       }
     });
+  }
+
+  /**
+   * Augments the array schema to make all nested fields required.
+   * @returns {this}
+   */
+  requireAllWithin() {
+    const { schemas, ...rest } = this.meta;
+
+    const newSchemas = schemas.map((schema) => {
+      return schema.requireAllWithin();
+    });
+
+    // @ts-ignore
+    return new ArraySchema(newSchemas, rest).required();
   }
 
   // Private
