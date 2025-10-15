@@ -6,7 +6,7 @@
 
 - Fixed bug with tagging in `toOpenApi`.
 
-## 1.8.1
+## 1.8.3
 
 - Fixed issue with incorrect JSON schema when nested.
 
