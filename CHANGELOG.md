@@ -6,6 +6,10 @@
 
 - Fixed bug with tagging in `toOpenApi`.
 
+## 1.8.1
+
+- Fixed issue with incorrect JSON schema when nested.
+
 ## 1.8.0
 
 - Removed undefined `format` field.

@@ -1,32 +1,32 @@
 import yd from '../src';
 
-describe('toJSON', () => {
+describe('toJsonSchema', () => {
   it('should describe a string schema', async () => {
-    expect(yd.string().toJSON()).toEqual({
+    expect(yd.string().toJsonSchema()).toEqual({
       type: 'string',
     });
-    expect(yd.string().required().toJSON()).toEqual({
+    expect(yd.string().required().toJsonSchema()).toEqual({
       type: 'string',
     });
-    expect(yd.string().default('foo').toJSON()).toEqual({
+    expect(yd.string().default('foo').toJsonSchema()).toEqual({
       type: 'string',
       default: 'foo',
     });
-    expect(yd.string().allow('foo', 'bar').toJSON()).toEqual({
+    expect(yd.string().allow('foo', 'bar').toJsonSchema()).toEqual({
       type: 'string',
       enum: ['foo', 'bar'],
     });
-    expect(yd.string().email().toJSON()).toEqual({
+    expect(yd.string().email().toJsonSchema()).toEqual({
       type: 'string',
       format: 'email',
     });
   });
 
   it('should describe an object schema', async () => {
-    expect(yd.object().toJSON()).toEqual({
+    expect(yd.object().toJsonSchema()).toEqual({
       type: 'object',
     });
-    expect(yd.object({ foo: yd.string() }).toJSON()).toEqual({
+    expect(yd.object({ foo: yd.string() }).toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         foo: {
@@ -39,16 +39,16 @@ describe('toJSON', () => {
   });
 
   it('should describe an array schema', async () => {
-    expect(yd.array().toJSON()).toEqual({
+    expect(yd.array().toJsonSchema()).toEqual({
       type: 'array',
     });
-    expect(yd.array(yd.string()).toJSON()).toEqual({
+    expect(yd.array(yd.string()).toJsonSchema()).toEqual({
       type: 'array',
       items: {
         type: 'string',
       },
     });
-    expect(yd.array(yd.string(), yd.number()).toJSON()).toEqual({
+    expect(yd.array(yd.string(), yd.number()).toJsonSchema()).toEqual({
       type: 'array',
       anyOf: [
         {
@@ -62,10 +62,10 @@ describe('toJSON', () => {
   });
 
   it('should describe a mixed type schema', async () => {
-    expect(yd.any().toJSON()).toEqual({
+    expect(yd.any().toJsonSchema()).toEqual({
       type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
     });
-    expect(yd.array(yd.any()).toJSON()).toEqual({
+    expect(yd.array(yd.any()).toJsonSchema()).toEqual({
       type: 'array',
       items: {
         type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
@@ -76,7 +76,7 @@ describe('toJSON', () => {
         .object({
           any: yd.any(),
         })
-        .toJSON(),
+        .toJsonSchema(),
     ).toEqual({
       type: 'object',
       properties: {
@@ -91,7 +91,7 @@ describe('toJSON', () => {
 
   it('should describe enum types', async () => {
     const schema = yd.allow(yd.string(), yd.array(yd.string()));
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       anyOf: [
         {
           type: 'string',
@@ -109,7 +109,7 @@ describe('toJSON', () => {
 
   it('should describe string enum types', async () => {
     const schema = yd.string().allow('foo', 'bar');
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'string',
       enum: ['foo', 'bar'],
     });
@@ -117,7 +117,7 @@ describe('toJSON', () => {
 
   it('should describe mixed enum types', async () => {
     const schema = yd.allow(1, 2, yd.string());
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       anyOf: [
         {
           type: 'number',
@@ -132,7 +132,7 @@ describe('toJSON', () => {
 
   it('should describe mixed enum of same type', async () => {
     const schema = yd.allow(yd.string(), '');
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       anyOf: [
         {
           type: 'string',
@@ -143,19 +143,19 @@ describe('toJSON', () => {
 
   it('should describe date formats', async () => {
     let schema = yd.date().iso();
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'string',
       format: 'date-time',
     });
 
     schema = yd.date().timestamp();
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'number',
       format: 'timestamp',
     });
 
     schema = yd.date().unix();
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'number',
       format: 'unix timestamp',
     });
@@ -163,7 +163,7 @@ describe('toJSON', () => {
 
   it('should describe a tuple schema', async () => {
     const schema = yd.tuple(yd.string(), yd.number());
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'array',
       prefixItems: [
         {
@@ -176,14 +176,14 @@ describe('toJSON', () => {
 
   it('should describe number min/max', async () => {
     let schema = yd.number().min(5).max(50);
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'number',
       minimum: 5,
       maximum: 50,
     });
 
     schema = yd.number().multiple(5);
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'number',
       multipleOf: 5,
     });
@@ -191,7 +191,7 @@ describe('toJSON', () => {
 
   it('should describe string minLength/maxLength', async () => {
     const schema = yd.string().min(5).max(50);
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'string',
       minLength: 5,
       maxLength: 50,
@@ -200,7 +200,7 @@ describe('toJSON', () => {
 
   it('should describe nullable', async () => {
     const schema = yd.string().nullable();
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'string',
       nullable: true,
     });
@@ -216,7 +216,7 @@ describe('toJSON', () => {
         'x-schema': 'my-schema',
       });
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         num: {
@@ -240,7 +240,7 @@ describe('toJSON', () => {
       })
       .description('My Schema!');
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       description: 'My Schema!',
       properties: {
@@ -264,7 +264,7 @@ describe('toJSON', () => {
       })
       .description('My Schema!');
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'string',
       'x-schema': 'my-schema',
       description: 'My Schema!',
@@ -274,7 +274,7 @@ describe('toJSON', () => {
   it('should be able to set metadata in the method', async () => {
     const schema = yd.string();
     expect(
-      schema.toJSON({
+      schema.toJsonSchema({
         'x-schema': 'my-schema',
         description: 'My Schema!',
       }),
@@ -293,7 +293,7 @@ describe('toJSON', () => {
       minLowercase: 1,
       minUppercase: 0,
     });
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'string',
       description:
         'A password of at least 12 characters containing 1 lowercase, 3 numbers, and 2 symbols.',
@@ -301,7 +301,7 @@ describe('toJSON', () => {
   });
 
   it('should not fail on date with no format', async () => {
-    expect(yd.date().toJSON()).toEqual({
+    expect(yd.date().toJsonSchema()).toEqual({
       type: 'string',
       format: 'date-time',
     });
@@ -312,7 +312,7 @@ describe('toJSON', () => {
       start: yd.date().iso(),
     });
 
-    const result = schema.toJSON({
+    const result = schema.toJsonSchema({
       tag: (meta) => {
         if (meta.format === 'date-time') {
           return {
@@ -336,7 +336,7 @@ describe('toJSON', () => {
   });
 
   it('should make a best effort to describe custom date defaults', async () => {
-    expect(yd.date().default(Date.now).toJSON()).toEqual({
+    expect(yd.date().default(Date.now).toJsonSchema()).toEqual({
       type: 'string',
       format: 'date-time',
       default: 'now',
@@ -348,7 +348,7 @@ describe('toJSON', () => {
         .default(() => {
           return new Date();
         })
-        .toJSON(),
+        .toJsonSchema(),
     ).toEqual({
       type: 'string',
       format: 'date-time',
@@ -366,7 +366,7 @@ describe('toJSON', () => {
           age: yd.number(),
         });
 
-        expect(schema.toJSON()).toEqual({
+        expect(schema.toJsonSchema()).toEqual({
           type: 'object',
           properties: {
             name: {
@@ -390,7 +390,7 @@ describe('toJSON', () => {
           name: yd.string().required(),
         });
 
-        expect(schema.toJSON()).toEqual({
+        expect(schema.toJsonSchema()).toEqual({
           type: 'object',
           properties: {
             name: {
@@ -411,7 +411,7 @@ describe('toJSON', () => {
             stripUnknown: true,
           });
 
-        expect(schema.toJSON()).toEqual({
+        expect(schema.toJsonSchema()).toEqual({
           type: 'object',
           properties: {
             name: {
@@ -424,31 +424,10 @@ describe('toJSON', () => {
       });
     });
   });
-
-  it('should correctly work with JSON helpers', async () => {
-    const schema = yd.object({
-      name: yd.string().required(),
-      age: yd.number().required(),
-    });
-
-    expect(JSON.parse(JSON.stringify(schema))).toEqual({
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-        },
-        age: {
-          type: 'number',
-        },
-      },
-      required: ['name', 'age'],
-      additionalProperties: false,
-    });
-  });
 });
 
 describe('toOpenApi', () => {
-  it('should be an alias of toJSON', async () => {
+  it('should be an alias for toJsonSchema', async () => {
     const schema = yd.object({
       name: yd.string().required(),
       age: yd.number().required(),
@@ -518,7 +497,7 @@ describe('requireAll', () => {
       })
       .requireAll();
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         text: {
@@ -580,7 +559,7 @@ describe('requireAll', () => {
       })
       .requireAll();
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         profiles: {
@@ -625,7 +604,7 @@ describe('requireAllWithin', () => {
       })
       .requireAllWithin();
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         text: {
@@ -687,7 +666,7 @@ describe('requireAllWithin', () => {
       })
       .requireAllWithin();
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         profiles: {
@@ -720,7 +699,7 @@ describe('requireAllWithin', () => {
       .description('A profile container.')
       .requireAllWithin();
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       description: 'A profile container.',
       properties: {
@@ -744,7 +723,7 @@ describe('requireAllWithin', () => {
       })
       .requireAllWithin();
 
-    expect(schema.toJSON()).toEqual({
+    expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         name: {
@@ -753,6 +732,61 @@ describe('requireAllWithin', () => {
       },
       required: ['name'],
       additionalProperties: false,
+    });
+  });
+});
+
+describe('toJSON', () => {
+  it('should serialized correctly', async () => {
+    const schema = yd.object({
+      name: yd.string().required(),
+      age: yd.number().required(),
+    });
+
+    expect(JSON.parse(JSON.stringify(schema))).toEqual({
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+        },
+        age: {
+          type: 'number',
+        },
+      },
+      required: ['name', 'age'],
+      additionalProperties: false,
+    });
+  });
+
+  it('should serialize correctly when nested', async () => {
+    let schema;
+    let result;
+
+    schema = yd.allow('foo');
+    result = JSON.parse(JSON.stringify({ schema }));
+    expect(result).toEqual({
+      schema: {
+        type: 'string',
+        enum: ['foo'],
+      },
+    });
+
+    schema = yd.object({
+      foo: yd.allow('bar').required(),
+    });
+    result = JSON.parse(JSON.stringify({ schema }));
+    expect(result).toEqual({
+      schema: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string',
+            enum: ['bar'],
+          },
+        },
+        required: ['foo'],
+        additionalProperties: false,
+      },
     });
   });
 });

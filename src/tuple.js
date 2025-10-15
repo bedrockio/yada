@@ -69,13 +69,13 @@ class TupleSchema extends Schema {
     return 'tuple';
   }
 
-  toJSON(extra) {
+  toJsonSchema(extra) {
     const { schemas } = this.meta;
     return {
-      ...super.toJSON(extra),
+      ...super.toJsonSchema(extra),
       type: 'array',
       prefixItems: schemas.map((schema) => {
-        return schema.toJSON();
+        return schema.toJsonSchema();
       }),
     };
   }

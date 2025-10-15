@@ -905,14 +905,14 @@ integration. Any schema can describe itself in JSON Schema format including
 complex nested schemas.
 
 ```js
-yd.string().allow('foo', 'bar').toJSON();
+yd.string().allow('foo', 'bar').toJsonSchema();
 // {
 //   type: 'string',
 //   enum: ['foo', 'bar'],
 // }
 ```
 
-This also means schemas work with JSON helpers:
+This also means schemas work with JSON serializers:
 
 ```js
 const schema = yd.string().allow('foo', 'bar');
@@ -929,7 +929,7 @@ The `tag` method allows tagging custom fields:
 yd.string().tag({
   description: 'my description!',
   x-field: 'my custom field!',
-}).toJSON();
+}).toJsonSchema();
 // {
 //   type: 'string',
 //   description: 'my description!',
@@ -940,7 +940,7 @@ yd.string().tag({
 The `description` method is a shortcut:
 
 ```js
-yd.string().description('my description!').toJSON();
+yd.string().description('my description!').toJsonSchema();
 // {
 //   type: 'string',
 //   description: 'my description!',

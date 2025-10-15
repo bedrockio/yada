@@ -71,10 +71,10 @@ class NumberSchema extends TypeSchema {
 
   // Private
 
-  toJSON(extra) {
+  toJsonSchema(extra) {
     const { min, max, multiple } = this.meta;
     return {
-      ...super.toJSON(extra),
+      ...super.toJsonSchema(extra),
       ...(min != null && {
         minimum: min,
       }),

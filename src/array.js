@@ -125,23 +125,23 @@ class ArraySchema extends TypeSchema {
     return 'array';
   }
 
-  toJSON(extra) {
+  toJsonSchema(extra) {
     let other;
     const { schemas } = this.meta;
     if (schemas.length > 1) {
       other = {
         anyOf: schemas.map((schema) => {
-          return schema.toJSON();
+          return schema.toJsonSchema();
         }),
       };
     } else if (schemas.length === 1) {
       other = {
-        items: schemas[0].toJSON(),
+        items: schemas[0].toJsonSchema(),
       };
     }
 
     return {
-      ...super.toJSON(extra),
+      ...super.toJsonSchema(extra),
       ...other,
       type: 'array',
     };

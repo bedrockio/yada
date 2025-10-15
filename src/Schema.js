@@ -214,7 +214,7 @@ export default class Schema {
    * custom (code-based) assertions will not be output.
    * @param {Object} [extra]
    */
-  toJSON(extra) {
+  toJsonSchema(extra) {
     const { tags } = this.meta;
     return {
       ...tags,
@@ -229,10 +229,17 @@ export default class Schema {
 
   /**
    * Exports the schema in [JSON Schema](https://json-schema.org/) format.
-   * @alias toJSON.
+   * @alias toJsonSchema.
    */
   toOpenApi(...extra) {
-    return this.toJSON(...extra);
+    return this.toJsonSchema(...extra);
+  }
+
+  /**
+   * Export JSON schema when invoked by JSON serializer.
+   */
+  toJSON() {
+    return this.toJsonSchema();
   }
 
   getAnyType() {
@@ -294,7 +301,7 @@ export default class Schema {
         const anyOf = [];
         for (let entry of allowed) {
           if (isSchema(entry)) {
-            anyOf.push(entry.toJSON());
+            anyOf.push(entry.toJsonSchema());
           } else if (entry === null) {
             anyOf.push({
               type: 'null',
@@ -351,7 +358,7 @@ export default class Schema {
   }
 
   inspect() {
-    return JSON.stringify(this.toJSON(), null, 2);
+    return JSON.stringify(this, null, 2);
   }
 
   get() {
