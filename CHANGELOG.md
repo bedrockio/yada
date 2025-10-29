@@ -6,6 +6,10 @@
 
 - Fixed bug with tagging in `toOpenApi`.
 
+## 1.9.0
+
+- Added ISO-8601 `time` format on a string.
+
 ## 1.8.3
 
 - Fixed issue with incorrect JSON schema when nested.

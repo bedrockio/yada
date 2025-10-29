@@ -495,4 +495,61 @@ describe('string', () => {
       'Must be an ISO-8601 calendar date.',
     );
   });
+
+  it('should validate a time', async () => {
+    const schema = yd.string().time().required();
+    await assertFail(
+      schema,
+      '2022-01-15T08:27:36.114Z',
+      'Must be an ISO-8601 time.',
+    );
+
+    // Basic
+    await assertPass(schema, '23');
+    await assertPass(schema, '23:59');
+    await assertPass(schema, '23:59:59');
+    await assertPass(schema, '23:59:59.999');
+
+    // Zero edge cases
+    await assertPass(schema, '00');
+    await assertPass(schema, '00:00');
+    await assertPass(schema, '00:00:00');
+    await assertPass(schema, '00:00:00.000');
+
+    // Extended hours
+    await assertPass(schema, '24');
+    await assertPass(schema, '25:00');
+    await assertPass(schema, '29:00');
+
+    // With zulu flag
+    await assertPass(schema, '23Z');
+    await assertPass(schema, '23:59Z');
+    await assertPass(schema, '23:59:59Z');
+    await assertPass(schema, '23:59:59.999Z');
+
+    // With negative offset
+    await assertPass(schema, '23-05:30');
+    await assertPass(schema, '23:59-05:30');
+    await assertPass(schema, '23:59:59-05:30');
+    await assertPass(schema, '23:59:59.999-05:30');
+    await assertPass(schema, '23:59:59.999-12:00');
+    await assertFail(schema, '23:59:59.999-13:30', 'Must be an ISO-8601 time.');
+
+    // With positive offset
+    await assertPass(schema, '23+05:30');
+    await assertPass(schema, '23:59+05:30');
+    await assertPass(schema, '23:59:59+05:30');
+    await assertPass(schema, '23:59:59.999+05:30');
+    await assertPass(schema, '23:59:59.999+14:00');
+    await assertFail(schema, '23:59:59.999+15:30', 'Must be an ISO-8601 time.');
+
+    await assertFail(schema, '', 'Value is required.');
+    await assertFail(schema, 'bad', 'Must be an ISO-8601 time.');
+    await assertFail(schema, '3:59', 'Must be an ISO-8601 time.');
+    await assertFail(schema, '23:60', 'Must be an ISO-8601 time.');
+    await assertFail(schema, '23:59:60', 'Must be an ISO-8601 time.');
+    await assertFail(schema, '23:59:59.1', 'Must be an ISO-8601 time.');
+    await assertFail(schema, '23 :59', 'Must be an ISO-8601 time.');
+    await assertFail(schema, ' 23:59', 'Must be an ISO-8601 time.');
+  });
 });

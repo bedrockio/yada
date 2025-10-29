@@ -18,6 +18,9 @@ const SLUG_REG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PHONE_REG = /^\+\d{1,3}\d{3,14}$/;
 const NANP_REG = /^\+1[2-9]\d{2}[2-9]\d{6}$/;
 const DATE_REG = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[01])$/;
+const LOCALE_REG = /^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$/;
+const TIME_REG =
+  /^(?:[0-2][0-9])(?::[0-5][0-9])?(?::[0-5][0-9])?(?:\.\d{3})?(?:Z|(?:[+-]0[0-9]|-1[0-2]|\+1[0-4]):[0-5][0-9])?$/;
 
 const E164_DESCRIPTION =
   'A phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format.';
@@ -238,7 +241,9 @@ class StringSchema extends TypeSchema {
 
   locale() {
     return this.format('locale', (str) => {
-      if (!validator.isLocale(str)) {
+      // Switch to simple regex while this bug is being fixed:
+      // https://github.com/validatorjs/validator.js/issues/2342
+      if (!LOCALE_REG.test(str)) {
         throw new LocalizedError('Must be a valid locale code.');
       }
     });
@@ -423,6 +428,17 @@ class StringSchema extends TypeSchema {
     return this.format('date', (str) => {
       if (!DATE_REG.test(str)) {
         throw new LocalizedError('Must be an ISO-8601 calendar date.');
+      }
+    });
+  }
+
+  /**
+   * Validates times in ISO-8601 format.
+   */
+  time() {
+    return this.format('time', (str) => {
+      if (!TIME_REG.test(str)) {
+        throw new LocalizedError('Must be an ISO-8601 time.');
       }
     });
   }
