@@ -218,16 +218,15 @@ export default class Schema {
    * @param {'openai'} [options.style] - Constrains schema output. Currently only
    *   supports OpenAI which will ensure the resulting schema works with the Structured
    *   Outputs API.
+   * @param {boolean} [options.stripExtensions] - Strips out JSON schema extensions.
    */
   toJsonSchema(options) {
-    const { tags } = this.meta;
     return {
-      ...tags,
       ...this.getAnyType(),
       ...this.getDefault(),
       ...this.getNullable(),
-      ...this.getEnum(),
-      ...this.getTag(options),
+      ...this.getEnum(options),
+      ...this.getTags(options),
       ...this.getFormat(options),
     };
   }
@@ -283,7 +282,7 @@ export default class Schema {
     }
   }
 
-  getEnum() {
+  getEnum(options) {
     const { enum: allowed } = this.meta;
     if (allowed?.length) {
       const type = typeof allowed[0];
@@ -306,7 +305,7 @@ export default class Schema {
         const anyOf = [];
         for (let entry of allowed) {
           if (isSchema(entry)) {
-            anyOf.push(entry.toJsonSchema());
+            anyOf.push(entry.toJsonSchema(options));
           } else if (entry === null) {
             anyOf.push({
               type: 'null',
@@ -333,11 +332,25 @@ export default class Schema {
     }
   }
 
-  getTag(options = {}) {
-    const { tag } = options;
+  getTags(options = {}) {
+    const { tag, stripExtensions } = options;
+    const tags = { ...this.meta.tags };
+
+    // Allows custom tags by options.
     if (typeof tag === 'function') {
-      return tag(this.meta);
+      Object.assign(tags, tag(this.meta));
     }
+
+    // Strip custom extensions by option.
+    if (stripExtensions) {
+      for (let key of Object.keys(tags)) {
+        if (key.startsWith('x-')) {
+          delete tags[key];
+        }
+      }
+    }
+
+    return tags;
   }
 
   /**

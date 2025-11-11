@@ -3,6 +3,7 @@
 - Added `style` option to `toJsonSchema` to control disallowed formats for
   OpenAI.
 - Now using `integer` as the type for integers in JSON schema.
+- Allow stripping out JSON schema extensions by option.
 
 ## 1.9.0
 

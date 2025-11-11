@@ -131,12 +131,12 @@ class ArraySchema extends TypeSchema {
     if (schemas.length > 1) {
       other = {
         anyOf: schemas.map((schema) => {
-          return schema.toJsonSchema();
+          return schema.toJsonSchema(options);
         }),
       };
     } else if (schemas.length === 1) {
       other = {
-        items: schemas[0].toJsonSchema(),
+        items: schemas[0].toJsonSchema(options),
       };
     }
 

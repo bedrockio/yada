@@ -75,7 +75,7 @@ class TupleSchema extends Schema {
       ...super.toJsonSchema(options),
       type: 'array',
       prefixItems: schemas.map((schema) => {
-        return schema.toJsonSchema();
+        return schema.toJsonSchema(options);
       }),
     };
   }
