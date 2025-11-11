@@ -107,43 +107,35 @@ class DateSchema extends Schema {
   }
 
   timestamp() {
-    return this.clone({ format: 'timestamp' }).assert(
-      'format',
-      (date, options) => {
-        const { original } = options;
-        if (typeof original !== 'number' && !options.default) {
-          throw new LocalizedError('Must be a timestamp in milliseconds.');
-        }
-      },
-    );
+    return this.clone({
+      type: 'integer',
+      format: null,
+    }).custom((arg, options) => {
+      const { original } = options;
+      if (typeof original !== 'number' && !options.default) {
+        throw new LocalizedError('Must be a timestamp in milliseconds.');
+      }
+    });
   }
 
   unix() {
-    return this.clone({ format: 'unix timestamp' }).assert(
-      'format',
-      (date, options) => {
-        const { original } = options;
-        if (typeof original !== 'number') {
-          if (!options.default) {
-            throw new LocalizedError('Must be a timestamp in seconds.');
-          }
-        } else {
-          return new Date(original * 1000);
+    return this.clone({
+      type: 'integer',
+      format: null,
+    }).custom((arg, options) => {
+      const { original } = options;
+      if (typeof original !== 'number') {
+        if (!options.default) {
+          throw new LocalizedError('Must be a timestamp in seconds.');
         }
-      },
-    );
+      } else {
+        return new Date(original * 1000);
+      }
+    });
   }
 
   toString() {
     return 'date';
-  }
-
-  toJsonSchema(options) {
-    const { format } = this.meta;
-    return {
-      ...super.toJsonSchema(options),
-      type: format.includes('timestamp') ? 'number' : 'string',
-    };
   }
 
   getDefault() {

@@ -13,11 +13,4 @@ export default class TypeSchema extends Schema {
   toString() {
     return this.meta.type;
   }
-
-  toJsonSchema(options) {
-    return {
-      ...super.toJsonSchema(options),
-      type: this.meta.type,
-    };
-  }
 }

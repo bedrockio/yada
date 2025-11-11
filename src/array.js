@@ -143,7 +143,6 @@ class ArraySchema extends TypeSchema {
     return {
       ...super.toJsonSchema(options),
       ...other,
-      type: 'array',
     };
   }
 }

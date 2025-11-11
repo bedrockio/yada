@@ -222,9 +222,8 @@ export default class Schema {
    */
   toJsonSchema(options) {
     return {
-      ...this.getAnyType(),
+      ...this.getType(),
       ...this.getDefault(),
-      ...this.getNullable(),
       ...this.getEnum(options),
       ...this.getTags(options),
       ...this.getFormat(options),
@@ -246,11 +245,15 @@ export default class Schema {
     return this.toJsonSchema();
   }
 
-  getAnyType() {
-    const { type, enum: set } = this.meta;
-    if (!type && !set) {
+  getType() {
+    const { type, nullable } = this.meta;
+    if (type && nullable) {
       return {
-        type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+        type: [type, 'null'],
+      };
+    } else if (type) {
+      return {
+        type,
       };
     }
   }
@@ -269,15 +272,6 @@ export default class Schema {
     } else if (defaultValue != null) {
       return {
         default: defaultValue,
-      };
-    }
-  }
-
-  getNullable() {
-    const { nullable } = this.meta;
-    if (nullable) {
-      return {
-        nullable: true,
       };
     }
   }

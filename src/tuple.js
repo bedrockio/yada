@@ -3,7 +3,7 @@ import { ArrayError, ElementError, LocalizedError } from './errors';
 
 class TupleSchema extends Schema {
   constructor(schemas) {
-    super({ schemas });
+    super({ schemas, type: 'array' });
     this.setup();
   }
 
@@ -73,7 +73,6 @@ class TupleSchema extends Schema {
     const { schemas } = this.meta;
     return {
       ...super.toJsonSchema(options),
-      type: 'array',
       prefixItems: schemas.map((schema) => {
         return schema.toJsonSchema(options);
       }),

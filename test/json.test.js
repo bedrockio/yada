@@ -74,14 +74,10 @@ describe('toJsonSchema', () => {
   });
 
   it('should describe a mixed type schema', async () => {
-    expect(yd.any().toJsonSchema()).toEqual({
-      type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-    });
+    expect(yd.any().toJsonSchema()).toEqual({});
     expect(yd.array(yd.any()).toJsonSchema()).toEqual({
       type: 'array',
-      items: {
-        type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-      },
+      items: {},
     });
     expect(
       yd
@@ -92,9 +88,7 @@ describe('toJsonSchema', () => {
     ).toEqual({
       type: 'object',
       properties: {
-        any: {
-          type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-        },
+        any: {},
       },
       required: [],
       additionalProperties: false,
@@ -162,14 +156,12 @@ describe('toJsonSchema', () => {
 
     schema = yd.date().timestamp();
     expect(schema.toJsonSchema()).toEqual({
-      type: 'number',
-      format: 'timestamp',
+      type: 'integer',
     });
 
     schema = yd.date().unix();
     expect(schema.toJsonSchema()).toEqual({
-      type: 'number',
-      format: 'unix timestamp',
+      type: 'integer',
     });
   });
 
@@ -209,14 +201,6 @@ describe('toJsonSchema', () => {
       type: 'string',
       minLength: 5,
       maxLength: 50,
-    });
-  });
-
-  it('should describe nullable', async () => {
-    const schema = yd.string().nullable();
-    expect(schema.toJsonSchema()).toEqual({
-      type: 'string',
-      nullable: true,
     });
   });
 
@@ -353,6 +337,50 @@ describe('toJsonSchema', () => {
       type: 'string',
       format: 'date-time',
       default: 'custom',
+    });
+  });
+
+  describe('nullable', () => {
+    it('should describe basic nullable', async () => {
+      expect(yd.string().nullable().toJsonSchema()).toEqual({
+        type: ['string', 'null'],
+      });
+      expect(yd.object().nullable().toJsonSchema()).toEqual({
+        type: ['object', 'null'],
+      });
+    });
+
+    it('should describe nullable for alternates', async () => {
+      const schema = yd.allow(yd.string().nullable(), yd.number().nullable());
+      expect(schema.toJsonSchema()).toEqual({
+        anyOf: [
+          {
+            type: ['string', 'null'],
+          },
+          {
+            type: ['number', 'null'],
+          },
+        ],
+      });
+    });
+
+    it('should describe complex nullable object', async () => {
+      const schema = yd
+        .object({
+          array: yd.array().nullable(),
+        })
+        .nullable();
+
+      expect(schema.toJsonSchema()).toEqual({
+        type: ['object', 'null'],
+        properties: {
+          array: {
+            type: ['array', 'null'],
+          },
+        },
+        required: [],
+        additionalProperties: false,
+      });
     });
   });
 
