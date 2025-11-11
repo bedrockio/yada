@@ -33,4 +33,10 @@ describe('nullable', () => {
     await assertPass(schema, '');
     await assertPass(schema, null);
   });
+
+  it('should allow an argument to flip nullable off', async () => {
+    const schema = yd.string().nullable().nullable(false);
+    await assertPass(schema, '');
+    await assertFail(schema, null, 'Must be a string.');
+  });
 });

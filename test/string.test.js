@@ -485,7 +485,7 @@ describe('string', () => {
     await assertFail(schema, new Date(), 'Must be a string.');
     await assertFail(schema, 1642232606911, 'Must be a string.');
     await assertFail(schema, undefined, 'Value is required.');
-    await assertFail(schema, null, 'Value is required.');
+    await assertFail(schema, null, 'Must be a string.');
     await assertFail(schema, false, 'Must be a string.');
     await assertFail(schema, NaN, 'Must be a string.');
 

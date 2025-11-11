@@ -51,17 +51,6 @@ class StringSchema extends TypeSchema {
   }
 
   /**
-   * @returns {this}
-   */
-  required() {
-    return this.clone({ required: true }).assert('required', (val) => {
-      if (val == null) {
-        throw new LocalizedError('Value is required.');
-      }
-    });
-  }
-
-  /**
    * @param {number} length
    */
   length(length) {

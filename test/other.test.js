@@ -577,4 +577,10 @@ describe('misc', () => {
     });
     expect(result).toBe('fake id');
   });
+
+  it('should allow an argument to flip required off', async () => {
+    const schema = yd.string().required().required(false);
+    await assertPass(schema, 'foo');
+    await assertPass(schema, undefined);
+  });
 });

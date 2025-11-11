@@ -28,11 +28,14 @@ export default class Schema {
   // Public
 
   /**
+   * @param {boolean} [allow=true]
    * @returns {this}
    */
-  required() {
-    return this.clone({ required: true }).assert('required', (val) => {
-      if (val === undefined) {
+  required(allow = true) {
+    return this.clone({
+      required: allow,
+    }).assert('required', (val, options) => {
+      if (val === undefined && options.required) {
         throw new LocalizedError('Value is required.');
       }
     });
@@ -106,10 +109,11 @@ export default class Schema {
 
   /**
    * Allow null. [Link](https://github.com/bedrockio/yada#nullable)
+   * @param {boolean} [allow=true]
    * @returns {this}
    */
-  nullable() {
-    return this.clone({ nullable: true });
+  nullable(allow = true) {
+    return this.clone({ nullable: allow });
   }
 
   /**
