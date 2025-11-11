@@ -1,4 +1,4 @@
-## Next
+## 1.10.0
 
 - Added `style` option to `toJsonSchema` to control disallowed formats for
   OpenAI.
