@@ -673,7 +673,17 @@ describe('requireAll', () => {
   });
 });
 
-describe('requireAllWithin', () => {
+describe('transform', () => {
+  it('should not include object root level', async () => {
+    const schema = yd.object().transform((s) => {
+      return s.nullable();
+    });
+
+    expect(schema.toJsonSchema()).toEqual({
+      type: 'object',
+    });
+  });
+
   it('should make all nested fields required', async () => {
     const schema = yd
       .object({
@@ -690,7 +700,9 @@ describe('requireAllWithin', () => {
           }),
         ]),
       })
-      .requireAllWithin();
+      .transform((s) => {
+        return s.required();
+      });
 
     expect(schema.toJsonSchema()).toEqual({
       type: 'object',
@@ -752,7 +764,9 @@ describe('requireAllWithin', () => {
           }),
         ),
       })
-      .requireAllWithin();
+      .transform((s) => {
+        return s.required();
+      });
 
     expect(schema.toJsonSchema()).toEqual({
       type: 'object',
@@ -785,7 +799,9 @@ describe('requireAllWithin', () => {
         profiles: yd.array(yd.string()).description('An array of strings.'),
       })
       .description('A profile container.')
-      .requireAllWithin();
+      .transform((s) => {
+        return s.required();
+      });
 
     expect(schema.toJsonSchema()).toEqual({
       type: 'object',
@@ -809,13 +825,62 @@ describe('requireAllWithin', () => {
       .object({
         name: yd.allow(null, yd.string()),
       })
-      .requireAllWithin();
+      .transform((s) => {
+        return s.required();
+      });
 
     expect(schema.toJsonSchema()).toEqual({
       type: 'object',
       properties: {
         name: {
-          anyOf: [{ type: 'null' }, { type: 'string' }],
+          anyOf: [
+            {
+              type: 'null',
+            },
+            {
+              type: 'string',
+            },
+          ],
+        },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    });
+  });
+
+  it('should work for nested arrays', async () => {
+    const schema = yd.array(yd.array()).transform((s) => {
+      return s.nullable();
+    });
+
+    expect(schema.toJsonSchema()).toEqual({
+      type: 'array',
+      items: {
+        type: ['array', 'null'],
+      },
+    });
+  });
+
+  it('should conditionally transform', async () => {
+    const schema = yd
+      .object({
+        name: yd.string(),
+        age: yd.number(),
+      })
+      .transform((s) => {
+        if (s.meta.type === 'string') {
+          return s.required().nullable();
+        }
+      });
+
+    expect(schema.toJsonSchema()).toEqual({
+      type: 'object',
+      properties: {
+        name: {
+          type: ['string', 'null'],
+        },
+        age: {
+          type: 'number',
         },
       },
       required: ['name'],

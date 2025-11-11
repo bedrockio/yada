@@ -6,6 +6,7 @@
 - Allow stripping out JSON schema extensions by option.
 - More strictly following JSON schema for nullable.
 - Allow flags to flip off required and nullable.
+- Moved `requireAllWithin` to `transform`.
 
 ## 1.9.0
 

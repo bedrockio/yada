@@ -24,7 +24,7 @@ class ObjectSchema extends TypeSchema {
         throw new LocalizedError('Must be an object.');
       }
     });
-    this.transform((obj, options) => {
+    this.transformValue((obj, options) => {
       const { stripUnknown, stripEmpty } = options;
       if (obj) {
         const result = {};
@@ -215,19 +215,27 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
-   * Augments the object schema to make all fields required
-   * including fields in all nested schemas.
+   * Recursively transforms all fields including those in
+   * nested schemas.
+   * @param {Function} fn - Transform function that accepts an instance
+   *   of the schema.
    * @returns {this}
    */
-  requireAllWithin() {
+  transform(fn, root = true) {
     const update = {};
 
-    for (let field of Object.keys(this.meta.fields)) {
-      set(update, field, this.get(field).requireAllWithin());
+    for (let field of Object.keys(this.meta.fields || {})) {
+      set(update, field, this.get(field).transform(fn, false));
     }
 
-    // @ts-ignore
-    return this.append(update).required();
+    const transformed = this.append(update);
+
+    if (root) {
+      // @ts-ignore
+      return transformed;
+    } else {
+      return super.transform.call(transformed, fn);
+    }
   }
 
   /**

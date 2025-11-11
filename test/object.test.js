@@ -720,8 +720,8 @@ describe('object', () => {
     });
   });
 
-  describe('requireAllWithin', () => {
-    it('should require all fields with nested', async () => {
+  describe('transform', () => {
+    it('should deeply transform all fields', async () => {
       const schema = yd
         .object({
           name: yd.string(),
@@ -737,7 +737,9 @@ describe('object', () => {
             }),
           ]),
         })
-        .requireAllWithin();
+        .transform((s) => {
+          return s.required().nullable();
+        });
 
       await assertPass(schema, {
         name: 'top',
@@ -748,8 +750,6 @@ describe('object', () => {
           name: 'inner',
         },
       });
-
-      await assertFail(schema, undefined, ['Value is required.']);
 
       await assertFail(schema, {}, [
         'Value is required.',

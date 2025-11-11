@@ -105,18 +105,26 @@ class ArraySchema extends TypeSchema {
   }
 
   /**
-   * Augments the array schema to make all nested fields required.
+   * Recursively transforms all fields in the array schema.
+   * @param {Function} fn - Transform function that accepts an instance
+   *   of the schema.
    * @returns {this}
    */
-  requireAllWithin() {
+  transform(fn, root = true) {
     const { schemas, ...rest } = this.meta;
 
     const newSchemas = schemas.map((schema) => {
-      return schema.requireAllWithin();
+      return schema.transform(fn, false);
     });
 
-    // @ts-ignore
-    return new ArraySchema(newSchemas, rest).required();
+    const transformed = new ArraySchema(newSchemas, rest);
+
+    if (root) {
+      // @ts-ignore
+      return transformed;
+    } else {
+      return super.transform.call(transformed, fn);
+    }
   }
 
   // Private

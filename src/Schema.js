@@ -352,23 +352,24 @@ export default class Schema {
   }
 
   /**
-   * Augments the schema to make all fields required
-   * including fields in all nested schemas.
+   * Transforms any nested schemas.
+   * @param {Function} fn - Transform function that accepts an instance
+   *   of the schema.
    * @returns {this}
    */
-  requireAllWithin() {
+  transform(fn, root) {
     let { enum: allowed } = this.meta;
     if (allowed) {
       allowed = allowed.map((el) => {
-        if (el?.requireAllWithin) {
-          return el.requireAllWithin();
+        if (el?.transform) {
+          return el.transform(fn, root);
         } else {
           return el;
         }
       });
-      return this.clone({ enum: allowed }).required();
+      return fn(this.clone({ enum: allowed }));
     } else {
-      return this.required();
+      return fn(this) || this;
     }
   }
 
@@ -473,7 +474,7 @@ export default class Schema {
   /**
    * @returns {this}
    */
-  transform(fn) {
+  transformValue(fn) {
     this.assert('transform', (val, options) => {
       if (val !== undefined) {
         return fn(val, options);

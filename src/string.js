@@ -90,7 +90,7 @@ class StringSchema extends TypeSchema {
   }
 
   trim() {
-    return this.clone().transform((str) => {
+    return this.clone().transformValue((str) => {
       return str.trim();
     });
   }
@@ -99,7 +99,7 @@ class StringSchema extends TypeSchema {
    * @param {boolean} [assert] Throws an error if not lowercase. Default: `false`.
    */
   lowercase(assert = false) {
-    return this.clone().transform((str) => {
+    return this.clone().transformValue((str) => {
       const lower = str.toLowerCase();
       if (lower !== str) {
         if (assert) {
@@ -114,7 +114,7 @@ class StringSchema extends TypeSchema {
    * @param {boolean} [assert] Throws an error if not uppercase. Default: `false`.
    */
   uppercase(assert = false) {
-    return this.clone().transform((str) => {
+    return this.clone().transformValue((str) => {
       const upper = str.toUpperCase();
       if (upper !== str) {
         if (assert) {
