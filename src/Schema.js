@@ -9,6 +9,7 @@ import {
   ValidationError,
 } from './errors';
 
+import { isAllowedFormat } from './formats';
 import { canAllowEmptyString } from './utils';
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
@@ -210,20 +211,24 @@ export default class Schema {
 
   /**
    * Exports the schema in [JSON Schema](https://json-schema.org/) format.
-   * Note that this may not represent the schema in its enitrety. Specifically,
+   * Note that this may not represent the schema in its entirety. Specifically,
    * custom (code-based) assertions will not be output.
-   * @param {Object} [extra]
+   * @param {Object} [options]
+   * @param {Function} [options.tag] - Allows adding additional custom tags.
+   * @param {'openai'} [options.style] - Constrains schema output. Currently only
+   *   supports OpenAI which will ensure the resulting schema works with the Structured
+   *   Outputs API.
    */
-  toJsonSchema(extra) {
+  toJsonSchema(options) {
     const { tags } = this.meta;
     return {
       ...tags,
       ...this.getAnyType(),
       ...this.getDefault(),
       ...this.getNullable(),
-      ...this.getFormat(),
       ...this.getEnum(),
-      ...this.expandExtra(extra),
+      ...this.getTag(options),
+      ...this.getFormat(options),
     };
   }
 
@@ -231,8 +236,8 @@ export default class Schema {
    * Exports the schema in [JSON Schema](https://json-schema.org/) format.
    * @alias toJsonSchema.
    */
-  toOpenApi(...extra) {
-    return this.toJsonSchema(...extra);
+  toOpenApi(options) {
+    return this.toJsonSchema(options);
   }
 
   /**
@@ -251,9 +256,9 @@ export default class Schema {
     }
   }
 
-  getFormat() {
+  getFormat(options) {
     const { format } = this.meta;
-    if (format) {
+    if (isAllowedFormat(format, options)) {
       return { format };
     }
   }
@@ -328,6 +333,13 @@ export default class Schema {
     }
   }
 
+  getTag(options = {}) {
+    const { tag } = options;
+    if (typeof tag === 'function') {
+      return tag(this.meta);
+    }
+  }
+
   /**
    * Augments the schema to make all fields required
    * including fields in all nested schemas.
@@ -347,14 +359,6 @@ export default class Schema {
     } else {
       return this.required();
     }
-  }
-
-  expandExtra(extra = {}) {
-    const { tag, ...rest } = extra;
-    if (typeof extra?.tag === 'function') {
-      Object.assign(rest, extra.tag(this.meta));
-    }
-    return rest;
   }
 
   inspect() {

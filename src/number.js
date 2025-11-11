@@ -52,7 +52,7 @@ class NumberSchema extends TypeSchema {
   }
 
   integer() {
-    return this.clone().assert('integer', (num) => {
+    return this.clone({ type: 'integer' }).assert('integer', (num) => {
       if (!Number.isInteger(num)) {
         throw new LocalizedError('Must be an integer.');
       }
@@ -71,10 +71,10 @@ class NumberSchema extends TypeSchema {
 
   // Private
 
-  toJsonSchema(extra) {
+  toJsonSchema(options) {
     const { min, max, multiple } = this.meta;
     return {
-      ...super.toJsonSchema(extra),
+      ...super.toJsonSchema(options),
       ...(min != null && {
         minimum: min,
       }),

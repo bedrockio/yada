@@ -457,10 +457,10 @@ class StringSchema extends TypeSchema {
 
   // Private
 
-  toJsonSchema(extra) {
+  toJsonSchema(options) {
     const { min, max } = this.meta;
     return {
-      ...super.toJsonSchema(extra),
+      ...super.toJsonSchema(options),
       ...(min && {
         minLength: min,
       }),

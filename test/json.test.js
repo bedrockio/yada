@@ -22,6 +22,18 @@ describe('toJsonSchema', () => {
     });
   });
 
+  it('should describe a number schema', async () => {
+    expect(yd.number().toJsonSchema()).toEqual({
+      type: 'number',
+    });
+  });
+
+  it('should describe an integer type', async () => {
+    expect(yd.number().integer().toJsonSchema()).toEqual({
+      type: 'integer',
+    });
+  });
+
   it('should describe an object schema', async () => {
     expect(yd.object().toJsonSchema()).toEqual({
       type: 'object',
@@ -271,20 +283,6 @@ describe('toJsonSchema', () => {
     });
   });
 
-  it('should be able to set metadata in the method', async () => {
-    const schema = yd.string();
-    expect(
-      schema.toJsonSchema({
-        'x-schema': 'my-schema',
-        description: 'My Schema!',
-      }),
-    ).toEqual({
-      type: 'string',
-      'x-schema': 'my-schema',
-      description: 'My Schema!',
-    });
-  });
-
   it('should output a description for passwords', async () => {
     const schema = yd.string().password({
       minLength: 12,
@@ -422,6 +420,25 @@ describe('toJsonSchema', () => {
           additionalProperties: true,
         });
       });
+    });
+  });
+
+  it('should strip off OpenAI invalid formats', async () => {
+    const schema = yd.object({
+      id: yd.string().mongo(),
+    });
+    const result = schema.toJsonSchema({
+      style: 'openai',
+    });
+    expect(result).toEqual({
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+        },
+      },
+      required: [],
+      additionalProperties: false,
     });
   });
 });

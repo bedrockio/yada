@@ -125,7 +125,7 @@ class ArraySchema extends TypeSchema {
     return 'array';
   }
 
-  toJsonSchema(extra) {
+  toJsonSchema(options) {
     let other;
     const { schemas } = this.meta;
     if (schemas.length > 1) {
@@ -141,7 +141,7 @@ class ArraySchema extends TypeSchema {
     }
 
     return {
-      ...super.toJsonSchema(extra),
+      ...super.toJsonSchema(options),
       ...other,
       type: 'array',
     };

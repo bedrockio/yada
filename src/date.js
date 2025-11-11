@@ -138,10 +138,10 @@ class DateSchema extends Schema {
     return 'date';
   }
 
-  toJsonSchema(extra) {
+  toJsonSchema(options) {
     const { format } = this.meta;
     return {
-      ...super.toJsonSchema(extra),
+      ...super.toJsonSchema(options),
       type: format.includes('timestamp') ? 'number' : 'string',
     };
   }

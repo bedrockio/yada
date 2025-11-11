@@ -300,19 +300,19 @@ class ObjectSchema extends TypeSchema {
 
   // Private
 
-  toJsonSchema(extra) {
+  toJsonSchema(options) {
     const { stripUnknown = false } = this.meta;
 
     const required = [];
     const properties = {};
     for (let [key, schema] of Object.entries(this.export())) {
-      properties[key] = schema.toJsonSchema(extra);
+      properties[key] = schema.toJsonSchema(options);
       if (schema.meta.required) {
         required.push(key);
       }
     }
     return {
-      ...super.toJsonSchema(extra),
+      ...super.toJsonSchema(options),
       ...(Object.keys(properties).length > 0 && {
         properties,
         required,

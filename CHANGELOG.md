@@ -1,10 +1,8 @@
-## 1.8.2
+## Next
 
-- Fixed array schemas not passing through `requireAllWithin`.
-
-## 1.8.1
-
-- Fixed bug with tagging in `toOpenApi`.
+- Added `style` option to `toJsonSchema` to control disallowed formats for
+  OpenAI.
+- Now using `integer` as the type for integers in JSON schema.
 
 ## 1.9.0
 
@@ -13,6 +11,14 @@
 ## 1.8.3
 
 - Fixed issue with incorrect JSON schema when nested.
+
+## 1.8.2
+
+- Fixed array schemas not passing through `requireAllWithin`.
+
+## 1.8.1
+
+- Fixed bug with tagging in `toOpenApi`.
 
 ## 1.8.0
 
