@@ -1399,4 +1399,60 @@ describe('object', () => {
       });
     });
   });
+
+  describe('other', () => {
+    it('should append options', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .options({
+          stripEmpty: true,
+        })
+        .options({
+          stripUnknown: true,
+        })
+        .options({
+          expandFlatKeys: true,
+        });
+
+      const result = await schema.validate({
+        bar: '',
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+
+      expect(result).toEqual({
+        profile: {
+          name: 'foo',
+        },
+      });
+    });
+
+    it('should append options by shortcut', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .stripEmpty()
+        .stripUnknown()
+        .expandFlatKeys();
+
+      const result = await schema.validate({
+        bar: '',
+        foo: 'bar',
+        'profile.name': 'foo',
+      });
+
+      expect(result).toEqual({
+        profile: {
+          name: 'foo',
+        },
+      });
+    });
+  });
 });
