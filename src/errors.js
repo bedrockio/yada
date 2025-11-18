@@ -46,6 +46,13 @@ export class ValidationError extends Error {
   }
 }
 
+export class AggregateError extends Error {
+  constructor(message, errors) {
+    super(message);
+    this.errors = errors;
+  }
+}
+
 export class AssertionError extends ValidationError {
   constructor(message, type = 'assertion') {
     super(message);

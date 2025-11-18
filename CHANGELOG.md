@@ -1,3 +1,8 @@
+## Next
+
+- Refactored object field validation.
+- Fixed issue with base object failing on flat keys.
+
 ## 1.10.0
 
 - Added `style` option to `toJsonSchema` to control disallowed formats for

@@ -1,6 +1,7 @@
 import { omit, uniqBy } from 'lodash';
 
 import {
+  AggregateError,
   AllowedError,
   AssertionError,
   FormatError,
@@ -177,6 +178,8 @@ export default class Schema {
           details.push(new FormatError(message, this.meta.format));
         } else if (error instanceof LocalizedError) {
           details.push(new AssertionError(message, type));
+        } else if (error instanceof AggregateError) {
+          details = [...details, ...error.errors];
         } else {
           details.push(error);
         }

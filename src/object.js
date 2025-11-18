@@ -2,7 +2,7 @@ import { omit, pick, set } from 'lodash';
 
 import Schema, { isSchema } from './Schema';
 import TypeSchema from './TypeSchema';
-import { FieldError, LocalizedError } from './errors';
+import { AggregateError, FieldError, LocalizedError } from './errors';
 
 const APPEND_ASSERTION_TYPES = ['required', 'type', 'custom'];
 
@@ -15,7 +15,17 @@ const INTEGER_REG = /^\d+$/;
 class ObjectSchema extends TypeSchema {
   constructor(meta) {
     super(Object, meta);
+    this.validateInput();
     this.setup();
+  }
+
+  validateInput() {
+    const { fields } = this.meta;
+    for (let [key, value] of Object.entries(fields || {})) {
+      if (!isSchema(value)) {
+        throw new Error(`Key "${key}" must be a schema.`);
+      }
+    }
   }
 
   setup() {
@@ -24,79 +34,105 @@ class ObjectSchema extends TypeSchema {
         throw new LocalizedError('Must be an object.');
       }
     });
-    this.transformValue((obj, options) => {
-      const { stripUnknown, stripEmpty } = options;
-      if (obj) {
-        const result = {};
 
-        obj = expandFlatSyntax(obj, options);
+    this.assert('fields', async (obj, options) => {
+      const {
+        path = [],
+        original,
+        stripEmpty,
+        stripUnknown,
+        allowFlatKeys,
+        expandFlatKeys,
+      } = options;
 
-        for (let key of Object.keys(obj)) {
-          const value = obj[key];
-          const isUnknown = !isKnownKey(key, this, options);
+      const { fields } = this.meta;
 
-          if ((value === '' && stripEmpty) || (isUnknown && stripUnknown)) {
-            continue;
-          } else if (isUnknown) {
-            throw new LocalizedError('Unknown field "{key}".', {
-              key,
-              type: 'field',
-            });
-          } else {
-            result[key] = obj[key];
-          }
+      if (!fields) {
+        return;
+      }
+
+      let passed = obj;
+
+      if (expandFlatKeys) {
+        passed = expandFlatSyntax(passed);
+      }
+
+      const keys = new Set([
+        ...Object.keys(fields || {}),
+        ...Object.keys(passed),
+      ]);
+
+      let errors = [];
+      const result = {};
+
+      for (let key of keys) {
+        const value = passed[key];
+
+        if (value === '' && stripEmpty) {
+          continue;
         }
-        return result;
-      }
-    });
-    for (let [key, schema] of Object.entries(this.export())) {
-      if (!isSchema(schema)) {
-        throw new Error(`Key "${key}" must be a schema.`);
-      }
-      this.assert('field', async (obj, options) => {
-        if (obj) {
-          const { path = [], original } = options;
-          const { strip, required } = schema.meta;
-          const val = obj[key];
 
-          options = {
+        const schema = getSchema(fields, key, options);
+
+        if (!schema) {
+          if (stripUnknown) {
+            continue;
+          }
+          throw new LocalizedError('Unknown field "{key}".', {
+            type: 'field',
+            key,
+          });
+        }
+
+        if (schema.meta.strip?.(value, options)) {
+          continue;
+        }
+
+        try {
+          const validateOptions = {
             ...options,
-            required,
+
             path: [...path, key],
+            required: schema.meta.required,
+
+            // The root object may be transformed by defaults
+            // or returned values so re-pass it here.
+            root: {
+              ...obj,
+              ...result,
+            },
+
+            // The original root represents the root object
+            // before it was transformed.
+            originalRoot: original,
           };
 
-          if (strip && strip(val, options)) {
-            delete obj[key];
-            return;
-          }
+          if (allowFlatKeys && !value) {
+            // When allowing keys like "profile.name", "profile" will
+            // not be passed so expand the passed object and make sure
+            // the base validates, but do not transform the result.
+            const expanded = expandFlatSyntax(passed);
 
-          try {
-            // Do not pass down message into validators
-            // to allow custom messages to take precedence.
-            options = omit(options, 'message');
-            const result = await schema.validate(val, {
-              ...options,
-              // The root object may have been transformed here
-              // by defaults or values returned by custom functions
-              // so re-pass it here.
-              root: obj,
-              // The original root represents the root object
-              // before it was transformed.
-              originalRoot: original,
-            });
-            if (result !== undefined) {
-              return {
-                ...obj,
-                [key]: result,
-              };
+            await schema.validate(expanded[key], validateOptions);
+          } else {
+            const transformed = await schema.validate(value, validateOptions);
+            if (transformed !== undefined) {
+              result[key] = transformed;
             }
-          } catch (error) {
-            const { message } = schema.meta;
-            throw new FieldError(message, key, error.details);
           }
+        } catch (error) {
+          const { message } = schema.meta;
+          errors.push(new FieldError(message, key, error.details));
         }
-      });
-    }
+      }
+
+      if (errors.length) {
+        errors = normalizeErrors(errors, options);
+        throw new AggregateError(this.meta.message, errors);
+      }
+
+      return result;
+    });
   }
 
   /**
@@ -117,12 +153,8 @@ class ObjectSchema extends TypeSchema {
     const [name, ...rest] = path;
     const schema = fields[name];
 
-    if (!schema) {
-      throw new Error(`Cannot find field "${name}".`);
-    }
-
     if (rest.length) {
-      return schema.get(rest);
+      return schema?.get(rest);
     } else {
       return schema;
     }
@@ -195,7 +227,11 @@ class ObjectSchema extends TypeSchema {
     const update = {};
 
     for (let field of fields) {
-      set(update, field, this.get(field).required());
+      const schema = this.get(field);
+      if (!schema) {
+        throw new Error(`Cannot find field "${field}".`);
+      }
+      set(update, field, schema.required());
     }
 
     return this.append(update);
@@ -330,11 +366,7 @@ class ObjectSchema extends TypeSchema {
   }
 }
 
-function expandFlatSyntax(obj, options) {
-  if (!options.expandFlatKeys) {
-    return obj;
-  }
-
+function expandFlatSyntax(obj) {
   const result = { ...obj };
   for (let [key, value] of Object.entries(result)) {
     if (key.includes('.')) {
@@ -343,65 +375,6 @@ function expandFlatSyntax(obj, options) {
     }
   }
   return result;
-}
-
-function isKnownKey(key, schema, options) {
-  const { fields } = schema.meta;
-  const { allowFlatKeys } = options;
-  if (!fields) {
-    // No fields defined -> all keys are "known".
-    return true;
-  } else if (key in fields) {
-    // Exact match -> key is known.
-    return true;
-  } else if (allowFlatKeys && key.includes('.')) {
-    // Flat syntax "foo.bar".
-    const [base, ...rest] = key.split('.');
-    let subschema = fields[base];
-
-    if (!subschema) {
-      return false;
-    }
-
-    const { type, schemas } = subschema.meta;
-
-    let subkey;
-
-    if (type === 'array') {
-      // If the subschema is an array then take the first of
-      // its defined schemas as we can safely assume that an
-      // array of objects will be defined as a single element
-      // or multiple schemas will only set the base property.
-      // Test that the element key is valid and take any
-      // further properties as the subkey. Examples:
-      // - profiles.0.name (array of objects)
-      // - profiles.0 (array of stringsmk)
-      const [index, ...other] = rest;
-      if (!INTEGER_REG.test(index)) {
-        return false;
-      }
-      subschema = schemas[0];
-      subkey = other.join('.');
-    } else if (type === 'object') {
-      // If the subschema is an object then simply take any
-      // further properties as the subkey. Example:
-      // - profile.name
-      subkey = rest.join('.');
-    } else {
-      // If the subschema is anything else then disallow it
-      // further properties as the subkey. Example:
-      // - profile.name
-      return false;
-    }
-
-    if (subschema.meta.type === 'object') {
-      return isKnownKey(subkey, subschema, options);
-    } else {
-      return !subkey;
-    }
-  } else {
-    return false;
-  }
 }
 
 function mergeFields(aFields, bFields) {
@@ -420,6 +393,79 @@ function mergeFields(aFields, bFields) {
     }
   }
   return result;
+}
+
+// Gets the schema for a field allowing for flat
+// keys which may deeply traverse into the object.
+function getSchema(fields, key, options) {
+  const { allowFlatKeys } = options;
+
+  let schema = fields[key];
+
+  if (schema) {
+    return schema;
+  }
+
+  if (!allowFlatKeys || !key.includes('.')) {
+    return;
+  }
+
+  schema = fields;
+
+  for (let part of key.split('.')) {
+    const { schemas, fields } = schema?.meta || {};
+
+    if (schemas) {
+      // If the schema is an array schema then take the first
+      // subschema, however only allow integers in this case,
+      // for example: profiles.0.name.
+
+      if (!INTEGER_REG.test(part)) {
+        return;
+      }
+
+      schema = schemas[0];
+    } else if (fields) {
+      schema = fields[part];
+    } else {
+      schema = schema?.[part];
+    }
+  }
+
+  return schema;
+}
+
+// If flat keys are allowed then filter out errors
+// that are the nested duplicates so that they match
+// the actual fields that were passed.
+function normalizeErrors(errors, options) {
+  const { allowFlatKeys } = options;
+  if (allowFlatKeys) {
+    errors = errors.filter((error) => {
+      const { field } = error;
+      const flatField = getFlatField(error);
+
+      if (field !== flatField) {
+        return !errors.some((error) => {
+          return error.field === flatField;
+        });
+      }
+
+      return true;
+    });
+  }
+  return errors;
+}
+
+function getFlatField(error) {
+  const { field, details } = error;
+  const path = [field];
+
+  if (details.length === 1 && details[0] instanceof FieldError) {
+    path.push(getFlatField(details[0]));
+  }
+
+  return path.join('.');
 }
 
 /**

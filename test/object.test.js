@@ -210,7 +210,12 @@ describe('object', () => {
         bar: yd.string().required(),
       };
       const schema = schema1.append(schema2);
-      await assertPass(schema, { foo: 'foo', bar: 'bar', baz: 'baz' });
+
+      await assertPass(schema, {
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz',
+      });
     });
 
     it('should append with required', async () => {
@@ -471,12 +476,9 @@ describe('object', () => {
       );
     });
 
-    it('should error if field is not found', async () => {
+    it('should not error if field is not found', async () => {
       const schema = yd.object({});
-
-      expect(() => {
-        schema.get('bad');
-      }).toThrow('Cannot find field "bad".');
+      expect(schema.get('bad')).toBeUndefined();
     });
 
     it('should error if no fields defined', async () => {
@@ -891,7 +893,7 @@ describe('object', () => {
     });
   });
 
-  it('should explicitly fail keys are not schemas', async () => {
+  it('should explicitly fail on keys that are not schemas', async () => {
     expect(() => {
       yd.object({
         name: 'foo',
@@ -909,7 +911,10 @@ describe('object', () => {
       }),
     });
     await assertPass(schema, {});
-    await assertPass(schema, { type: 'phone', phone: 'phone' });
+    await assertPass(schema, {
+      type: 'phone',
+      phone: 'phone',
+    });
     await assertFail(
       schema,
       { phone: 'phone' },
@@ -917,31 +922,30 @@ describe('object', () => {
     );
   });
 
-  describe('strip', () => {
-    it('should conditionally strip out fields', async () => {
-      const schema = yd.object({
-        name: yd.string(),
-        age: yd.number().strip((val, { self }) => {
-          return !self;
+  describe('stripUnknown', () => {
+    it('should strip out unknown fields', async () => {
+      const schema = yd
+        .object({
+          foo: yd.string(),
+        })
+        .options({
+          stripUnknown: true,
+        });
+
+      expect(
+        await schema.validate({
+          foo: 'foo',
+          bar: 'bar',
+          baz: 'baz',
         }),
-      });
-      const result = await schema.validate(
-        {
-          name: 'Brett',
-          age: 25,
-        },
-        {
-          isPrivate: true,
-        },
-      );
-      expect(result).toEqual({
-        name: 'Brett',
+      ).toEqual({
+        foo: 'foo',
       });
     });
   });
 
   describe('stripEmpty', () => {
-    it('should conditionally strip out fields', async () => {
+    it('should strip out empty fields', async () => {
       const schema = yd
         .object({
           firstName: yd.string(),
@@ -975,6 +979,29 @@ describe('object', () => {
           lastName: '',
         }),
       ).toEqual({});
+    });
+  });
+
+  describe('strip', () => {
+    it('should conditionally strip out fields', async () => {
+      const schema = yd.object({
+        name: yd.string(),
+        age: yd.number().strip((val, { self }) => {
+          return !self;
+        }),
+      });
+      const result = await schema.validate(
+        {
+          name: 'Brett',
+          age: 25,
+        },
+        {
+          isPrivate: true,
+        },
+      );
+      expect(result).toEqual({
+        name: 'Brett',
+      });
     });
   });
 
@@ -1164,6 +1191,78 @@ describe('object', () => {
         },
         ['Unknown field "profiles.0.name".'],
       );
+    });
+
+    it('should fail with fields correct', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .options({
+          allowFlatKeys: true,
+        });
+
+      try {
+        await schema.validate({
+          'profile.name': 32,
+        });
+      } catch (error) {
+        expect(error.toJSON()).toEqual({
+          type: 'validation',
+          details: [
+            {
+              type: 'field',
+              field: 'profile.name',
+              details: [
+                {
+                  type: 'type',
+                  kind: 'string',
+                  message: 'Must be a string.',
+                },
+              ],
+            },
+          ],
+        });
+      }
+    });
+
+    it('should not fail on required parent object', async () => {
+      const schema = yd
+        .object({
+          terms: yd
+            .object({
+              tos: yd.allow(true).required(),
+              privacy: yd.allow(true).required(),
+            })
+            .required(),
+        })
+        .options({
+          allowFlatKeys: true,
+        });
+
+      await assertPass(schema, {
+        terms: {
+          tos: true,
+          privacy: true,
+        },
+      });
+
+      await assertPass(schema, {
+        'terms.tos': true,
+        'terms.privacy': true,
+      });
+
+      await assertFail(
+        schema,
+        {
+          'terms.tos': true,
+        },
+        'Value is required.',
+      );
+
+      await assertFail(schema, {}, 'Value is required.');
     });
   });
 
