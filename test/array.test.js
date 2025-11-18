@@ -77,17 +77,7 @@ describe('array', () => {
   });
 
   it('should validate an array of different types', async () => {
-    const schema = yd.array(yd.string(), yd.number());
-    await assertPass(schema, []);
-    await assertPass(schema, ['a']);
-    await assertPass(schema, [1]);
-    await assertPass(schema, undefined);
-    await assertFail(schema, [true], 'Must be one of [string, number].');
-    await assertFail(schema, [null], 'Must be one of [string, number].');
-  });
-
-  it('should validate an array of different types with array', async () => {
-    const schema = yd.array([yd.string(), yd.number()]);
+    const schema = yd.array(yd.allow(yd.string(), yd.number()));
     await assertPass(schema, []);
     await assertPass(schema, ['a']);
     await assertPass(schema, [1]);
@@ -139,5 +129,11 @@ describe('array', () => {
     await assertFail(schema, [35, null], 'Invalid longitude.');
     await assertFail(schema, [100, 130], 'Invalid latitude.');
     await assertFail(schema, [35, 200], 'Invalid longitude.');
+  });
+
+  it('should throw an error when more than one schema passed', async () => {
+    expect(() => {
+      yd.array(yd.string(), yd.number());
+    }).toThrow('Arrays may only have a single schema. Use "allow" instead.');
   });
 });

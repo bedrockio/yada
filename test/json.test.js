@@ -60,17 +60,21 @@ describe('toJsonSchema', () => {
         type: 'string',
       },
     });
-    expect(yd.array(yd.string(), yd.number()).toJsonSchema()).toEqual({
-      type: 'array',
-      anyOf: [
-        {
-          type: 'string',
+    expect(yd.array(yd.allow(yd.string(), yd.number())).toJsonSchema()).toEqual(
+      {
+        type: 'array',
+        items: {
+          anyOf: [
+            {
+              type: 'string',
+            },
+            {
+              type: 'number',
+            },
+          ],
         },
-        {
-          type: 'number',
-        },
-      ],
-    });
+      },
+    );
   });
 
   it('should describe a mixed type schema', async () => {

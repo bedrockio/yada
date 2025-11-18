@@ -170,13 +170,15 @@ class ObjectSchema extends TypeSchema {
   unwind(path) {
     path = Array.isArray(path) ? path.join('.') : path;
     const field = this.get(path);
-    const { schemas } = field.meta;
-    if (!schemas) {
+    const { type, schema } = field.meta;
+
+    if (type !== 'array') {
       throw new Error(`Field "${path}" is not an array schema.`);
-    } else if (schemas.length !== 1) {
-      throw new Error(`Field "${path}" should contain only one schema.`);
+    } else if (!schema) {
+      throw new Error(`Field "${path}" does not have an inner schema.`);
     }
-    return schemas[0];
+
+    return schema;
   }
 
   /**
@@ -413,9 +415,9 @@ function getSchema(fields, key, options) {
   schema = fields;
 
   for (let part of key.split('.')) {
-    const { schemas, fields } = schema?.meta || {};
+    const { type, fields } = schema?.meta || {};
 
-    if (schemas) {
+    if (type === 'array') {
       // If the schema is an array schema then take the first
       // subschema, however only allow integers in this case,
       // for example: profiles.0.name.
@@ -424,7 +426,7 @@ function getSchema(fields, key, options) {
         return;
       }
 
-      schema = schemas[0];
+      schema = schema.meta.schema;
     } else if (fields) {
       schema = fields[part];
     } else {

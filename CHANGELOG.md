@@ -1,7 +1,8 @@
-## Next
+## 1.10.1
 
 - Refactored object field validation.
 - Fixed issue with base object failing on flat keys.
+- Ensure that arrays only accept a single inner schema.
 
 ## 1.10.0
 

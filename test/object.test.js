@@ -529,24 +529,14 @@ describe('object', () => {
       }).toThrow('Field "profiles" is not an array schema.');
     });
 
-    it('should error if multiple schemas found in array', async () => {
-      const schema = yd.object({
-        profiles: yd.array(yd.string(), yd.number()),
-      });
-
-      expect(() => {
-        schema.unwind('profiles');
-      }).toThrow('Field "profiles" should contain only one schema.');
-    });
-
-    it('should error if no schemas found in array', async () => {
+    it('should error if no inner schemas on array', async () => {
       const schema = yd.object({
         profiles: yd.array(),
       });
 
       expect(() => {
         schema.unwind('profiles');
-      }).toThrow('Field "profiles" should contain only one schema.');
+      }).toThrow('Field "profiles" does not have an inner schema.');
     });
   });
 

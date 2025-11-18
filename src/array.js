@@ -1,19 +1,16 @@
 import { omit } from 'lodash';
 
-import Schema from './Schema';
 import TypeSchema from './TypeSchema';
 import { ArrayError, ElementError, LocalizedError } from './errors';
 
 class ArraySchema extends TypeSchema {
-  constructor(schemas, meta) {
-    super(Array, { ...meta, schemas });
+  constructor(meta) {
+    super(Array, meta);
     this.setup();
   }
 
   setup() {
-    const { schemas } = this.meta;
-    const schema =
-      schemas.length > 1 ? new Schema().allow(schemas) : schemas[0];
+    const { schema } = this.meta;
 
     this.assert('type', (val, options) => {
       if (typeof val === 'string' && options.cast) {
@@ -111,13 +108,14 @@ class ArraySchema extends TypeSchema {
    * @returns {this}
    */
   transform(fn, root = true) {
-    const { schemas, ...rest } = this.meta;
+    const { schema, ...rest } = this.meta;
 
-    const newSchemas = schemas.map((schema) => {
-      return schema.transform(fn, false);
+    const transformed = new ArraySchema({
+      ...rest,
+      ...(schema && {
+        schema: schema.transform(fn, false),
+      }),
     });
-
-    const transformed = new ArraySchema(newSchemas, rest);
 
     if (root) {
       // @ts-ignore
@@ -134,23 +132,12 @@ class ArraySchema extends TypeSchema {
   }
 
   toJsonSchema(options) {
-    let other;
-    const { schemas } = this.meta;
-    if (schemas.length > 1) {
-      other = {
-        anyOf: schemas.map((schema) => {
-          return schema.toJsonSchema(options);
-        }),
-      };
-    } else if (schemas.length === 1) {
-      other = {
-        items: schemas[0].toJsonSchema(options),
-      };
-    }
-
+    const { schema } = this.meta;
     return {
       ...super.toJsonSchema(options),
-      ...other,
+      ...(schema && {
+        items: schema?.toJsonSchema(options),
+      }),
     };
   }
 }
@@ -158,14 +145,16 @@ class ArraySchema extends TypeSchema {
 /**
  * Creates an [array schema](https://github.com/bedrockio/yada#array).
  *
- * @param {...Schema} [schemas] Optional schemas to validate
- * the different types of elements allowed in the array. If
- * no arguments are passed elements may be of any type. Also
- * accepts a single array argument.
+ * @param {*} [schema] - The schema to validate elements in
+ * the array. If not passed then elements may be of any type.
  */
-export default function (...schemas) {
-  if (Array.isArray(schemas[0])) {
-    schemas = schemas[0];
+export default function (schema) {
+  if (arguments.length > 1) {
+    throw new Error(
+      'Arrays may only have a single schema. Use "allow" instead.',
+    );
   }
-  return new ArraySchema(schemas);
+  return new ArraySchema({
+    schema,
+  });
 }
