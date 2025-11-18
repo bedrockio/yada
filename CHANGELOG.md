@@ -1,3 +1,7 @@
+## 1.10.3
+
+- Fix for strip empty allowing required fields.
+
 ## 1.10.2
 
 - Shortcut methods for object options.

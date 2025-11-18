@@ -68,10 +68,6 @@ class ObjectSchema extends TypeSchema {
       for (let key of keys) {
         const value = passed[key];
 
-        if (value === '' && stripEmpty) {
-          continue;
-        }
-
         const schema = getSchema(fields, key, options);
 
         if (!schema) {
@@ -116,6 +112,11 @@ class ObjectSchema extends TypeSchema {
             await schema.validate(expanded[key], validateOptions);
           } else {
             const transformed = await schema.validate(value, validateOptions);
+
+            if (transformed === '' && stripEmpty) {
+              continue;
+            }
+
             if (transformed !== undefined) {
               result[key] = transformed;
             }

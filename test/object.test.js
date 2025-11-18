@@ -1011,6 +1011,24 @@ describe('object', () => {
       ).toEqual({});
     });
 
+    it('should not allow required fields', async () => {
+      const schema = yd
+        .object({
+          name: yd.string().required(),
+        })
+        .options({
+          stripEmpty: true,
+        });
+
+      await assertFail(
+        schema,
+        {
+          name: '',
+        },
+        'Value is required.',
+      );
+    });
+
     it('should provide a shortcut method', async () => {
       const schema = yd
         .object({
