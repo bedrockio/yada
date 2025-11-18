@@ -2,6 +2,7 @@
 
 - Fix for strip empty allowing required fields.
 - Fix for flat null property being stripped.
+- Fix for defaults not being respected with flat keys.
 
 ## 1.10.2
 

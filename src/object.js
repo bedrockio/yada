@@ -66,7 +66,7 @@ class ObjectSchema extends TypeSchema {
       const result = {};
 
       for (let key of keys) {
-        const value = passed[key];
+        let value = passed[key];
 
         const schema = getSchema(fields, key, options);
 
@@ -85,7 +85,21 @@ class ObjectSchema extends TypeSchema {
         }
 
         try {
-          const validateOptions = {
+          let isBaseObject = false;
+
+          if (allowFlatKeys && value === undefined) {
+            // When allowing keys like "profile.name", "profile" must still
+            // be validated, but will not exist so expand the passed object
+            // and take the base value.
+            value = expandFlatSyntax(passed)[key];
+
+            // If the flat key did not exist but the expanded key did then
+            // we have a "base object". If both keys do not exist then the
+            // validation result needs to be set as it could be a default.
+            isBaseObject = value !== undefined;
+          }
+
+          const transformed = await schema.validate(value, {
             ...options,
 
             path: [...path, key],
@@ -101,25 +115,18 @@ class ObjectSchema extends TypeSchema {
             // The original root represents the root object
             // before it was transformed.
             originalRoot: original,
-          };
+          });
 
-          if (allowFlatKeys && value === undefined) {
-            // When allowing keys like "profile.name", "profile" will
-            // not be passed so expand the passed object and make sure
-            // the base validates, but do not transform the result.
-            const expanded = expandFlatSyntax(passed);
+          if (transformed === '' && stripEmpty) {
+            continue;
+          } else if (isBaseObject) {
+            // We do not want to return the "profile" object in the
+            // result when only flat keys are passed, so continue here.
+            continue;
+          }
 
-            await schema.validate(expanded[key], validateOptions);
-          } else {
-            const transformed = await schema.validate(value, validateOptions);
-
-            if (transformed === '' && stripEmpty) {
-              continue;
-            }
-
-            if (transformed !== undefined) {
-              result[key] = transformed;
-            }
+          if (transformed !== undefined) {
+            result[key] = transformed;
           }
         } catch (error) {
           const { message } = schema.meta;

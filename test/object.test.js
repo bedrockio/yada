@@ -1322,6 +1322,19 @@ describe('object', () => {
       });
     });
 
+    it('should not mask defaults', async () => {
+      const schema = yd
+        .object({
+          name: yd.string().default('foo'),
+        })
+        .allowFlatKeys();
+      const result = await schema.validate({});
+
+      expect(result).toEqual({
+        name: 'foo',
+      });
+    });
+
     it('should provide a shortcut method', async () => {
       const schema = yd
         .object({
