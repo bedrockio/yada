@@ -1,6 +1,7 @@
 ## 1.10.3
 
 - Fix for strip empty allowing required fields.
+- Fix for flat null property being stripped.
 
 ## 1.10.2
 

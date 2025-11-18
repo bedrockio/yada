@@ -1304,6 +1304,24 @@ describe('object', () => {
       await assertFail(schema, {}, 'Value is required.');
     });
 
+    it('should not fail on flat null', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string().nullable(),
+          }),
+        })
+        .allowFlatKeys();
+
+      const result = await schema.validate({
+        'profile.name': null,
+      });
+
+      expect(result).toEqual({
+        'profile.name': null,
+      });
+    });
+
     it('should provide a shortcut method', async () => {
       const schema = yd
         .object({

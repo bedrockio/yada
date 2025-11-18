@@ -103,7 +103,7 @@ class ObjectSchema extends TypeSchema {
             originalRoot: original,
           };
 
-          if (allowFlatKeys && !value) {
+          if (allowFlatKeys && value === undefined) {
             // When allowing keys like "profile.name", "profile" will
             // not be passed so expand the passed object and make sure
             // the base validates, but do not transform the result.
