@@ -328,6 +328,44 @@ class ObjectSchema extends TypeSchema {
     return schema;
   }
 
+  // Options
+
+  /**
+   * Remove properties that are empty strings.
+   */
+  stripEmpty() {
+    return this.options({
+      stripEmpty: true,
+    });
+  }
+
+  /**
+   * Remove properties not in the schema.
+   */
+  stripUnknown() {
+    return this.options({
+      stripUnknown: true,
+    });
+  }
+
+  /**
+   * Allow flat keys like `profile.name`.
+   */
+  allowFlatKeys() {
+    return this.options({
+      allowFlatKeys: true,
+    });
+  }
+
+  /**
+   * Expand flat keys into nested objects.
+   */
+  expandFlatKeys() {
+    return this.options({
+      expandFlatKeys: true,
+    });
+  }
+
   /**
    * `stripEmpty` - Removes properties that are empty strings.
    * `stripUnknown` - Removes properties not in the schema.

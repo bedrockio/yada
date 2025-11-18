@@ -1,3 +1,7 @@
+## 1.10.2
+
+- Shortcut methods for object options.
+
 ## 1.10.1
 
 - Refactored object field validation.

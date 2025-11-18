@@ -255,19 +255,37 @@ be a boolean, either `true` or `false`.
 
 ### Array
 
-Array schemas validate that input is an array. By default elements may be of any
-type, however however other schemas may be passed in as arguments:
+Array schemas validate that input is an array and elements are of the provided
+type:
 
 ```js
-// Allows arrays containing either strings or numbers.
-const schema = yd.array(yd.string(), yd.number());
+// Allows arrays containing strings.
+const schema = yd.array(yd.string());
 ```
 
-A single array may also be passed in place of enumerated arguments:
+These types can be object of a specific shape:
 
 ```js
-// Allows arrays containing either strings or numbers.
-const schema = yd.array([schemas]);
+// Allows arrays containing objects that follow a schema.
+const schema = yd.array(
+  yd.object({
+    name: yd.string().required(),
+  }),
+);
+```
+
+If no inner schema is provided any element type is allowed:
+
+```js
+// Allows any type of element inside the array:
+const schema = yd.array();
+```
+
+To allow mixed types inside the same array use allow:
+
+```js
+// Allows both strings and numbers in the array:
+const schema = yd.array(yd.allow(yd.string(), yd.number()));
 ```
 
 #### Methods:
@@ -285,7 +303,7 @@ well as types for a given position. Compare the following:
 
 ```js
 // Accepts any length of either strings or numbers.
-const schema1 = yd.array(yd.string(), yd.number());
+const schema1 = yd.array(yd.allow(yd.string(), yd.number()));
 // Accepts exactly 2 elements. The first MUST be a
 // string and the second MUST be a number.
 const schema2 = yd.tuple(yd.string(), yd.number());

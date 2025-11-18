@@ -912,6 +912,29 @@ describe('object', () => {
     );
   });
 
+  describe('strip', () => {
+    it('should conditionally strip out fields', async () => {
+      const schema = yd.object({
+        name: yd.string(),
+        age: yd.number().strip((val, { self }) => {
+          return !self;
+        }),
+      });
+      const result = await schema.validate(
+        {
+          name: 'Brett',
+          age: 25,
+        },
+        {
+          isPrivate: true,
+        },
+      );
+      expect(result).toEqual({
+        name: 'Brett',
+      });
+    });
+  });
+
   describe('stripUnknown', () => {
     it('should strip out unknown fields', async () => {
       const schema = yd
@@ -927,6 +950,23 @@ describe('object', () => {
           foo: 'foo',
           bar: 'bar',
           baz: 'baz',
+        }),
+      ).toEqual({
+        foo: 'foo',
+      });
+    });
+
+    it('should provide a shortcut method', async () => {
+      const schema = yd
+        .object({
+          foo: yd.string(),
+        })
+        .stripUnknown();
+
+      expect(
+        await schema.validate({
+          foo: 'foo',
+          bar: 'bar',
         }),
       ).toEqual({
         foo: 'foo',
@@ -970,28 +1010,19 @@ describe('object', () => {
         }),
       ).toEqual({});
     });
-  });
 
-  describe('strip', () => {
-    it('should conditionally strip out fields', async () => {
-      const schema = yd.object({
-        name: yd.string(),
-        age: yd.number().strip((val, { self }) => {
-          return !self;
+    it('should provide a shortcut method', async () => {
+      const schema = yd
+        .object({
+          name: yd.string(),
+        })
+        .stripEmpty();
+
+      expect(
+        await schema.validate({
+          name: '',
         }),
-      });
-      const result = await schema.validate(
-        {
-          name: 'Brett',
-          age: 25,
-        },
-        {
-          isPrivate: true,
-        },
-      );
-      expect(result).toEqual({
-        name: 'Brett',
-      });
+      ).toEqual({});
     });
   });
 
@@ -1254,6 +1285,20 @@ describe('object', () => {
 
       await assertFail(schema, {}, 'Value is required.');
     });
+
+    it('should provide a shortcut method', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .allowFlatKeys();
+
+      await assertPass(schema, {
+        'profile.name': 'foo',
+      });
+    });
   });
 
   describe('expandFlatKeys', () => {
@@ -1325,6 +1370,29 @@ describe('object', () => {
       });
       expect(result).toEqual({
         foo: 'bar',
+        profile: {
+          name: 'foo',
+        },
+      });
+    });
+
+    it('should provide a shortcut method', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .expandFlatKeys();
+
+      await assertPass(schema, {
+        'profile.name': 'foo',
+      });
+
+      const result = await schema.validate({
+        'profile.name': 'foo',
+      });
+      expect(result).toEqual({
         profile: {
           name: 'foo',
         },
