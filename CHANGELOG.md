@@ -1,3 +1,7 @@
+## 1.10.4
+
+- Fixed type errors for rest params.
+
 ## 1.10.3
 
 - Fix for strip empty allowing required fields.

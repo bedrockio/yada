@@ -192,7 +192,7 @@ class ObjectSchema extends TypeSchema {
   /**
    * Returns a new schema that only validates the selected fields.
    *
-   * @param {...string} [names] Names to include.
+   * @param {...string} names Names to include.
    */
   pick(...names) {
     if (Array.isArray(names[0])) {
@@ -206,7 +206,7 @@ class ObjectSchema extends TypeSchema {
   /**
    * Returns a new schema that omits fields.
    *
-   * @param {...string} [names] Names to exclude.
+   * @param {...string} names Names to exclude.
    */
   omit(...names) {
     if (Array.isArray(names[0])) {

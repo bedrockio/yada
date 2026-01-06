@@ -83,7 +83,7 @@ class TupleSchema extends Schema {
 /**
  * Creates a [tuple schema](https://github.com/bedrockio/yada#tuple).
  *
- * @param {...Schema} [schemas] Schemas to validate
+ * @param {...Schema} schemas Schemas to validate
  * the exact types of elements allowed in the tuple. Also
  * accepts a single array argument.
  */
