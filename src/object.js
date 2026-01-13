@@ -390,8 +390,6 @@ class ObjectSchema extends TypeSchema {
     return super.options(options);
   }
 
-  // Private
-
   toJsonSchema(options) {
     const { stripUnknown = false } = this.meta;
 
