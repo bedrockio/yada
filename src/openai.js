@@ -12,11 +12,14 @@ const OPENAI_ALLOWED_FORMATS = [
 ];
 
 export function toOpenAi(schema) {
-  const { type, required, format } = schema.meta;
+  const { type, required, format, tags } = schema.meta;
+
   if (type === 'object') {
     return schema.required();
   }
 
+  // All fields in OpenAI flavor JSON schema must be required,
+  // so make fields nullable to allow optional behvior.
   if (!required) {
     schema = schema.required().nullable();
   }
@@ -24,6 +27,12 @@ export function toOpenAi(schema) {
   if (hasInvalidFormat(format)) {
     schema = schema.clone({
       format: null,
+    });
+  }
+
+  if (tags) {
+    schema = schema.clone({
+      tags: null,
     });
   }
 

@@ -51,4 +51,23 @@ describe('toOpenAi', () => {
       additionalProperties: false,
     });
   });
+
+  it('should strip tags', async () => {
+    const schema = yd.object({
+      id: yd.string().tag({
+        'x-my-field': 'foo',
+      }),
+    });
+    const result = schema.toOpenAi().toJsonSchema();
+    expect(result).toEqual({
+      type: 'object',
+      properties: {
+        id: {
+          type: ['string', 'null'],
+        },
+      },
+      required: ['id'],
+      additionalProperties: false,
+    });
+  });
 });
