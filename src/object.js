@@ -169,6 +169,49 @@ class ObjectSchema extends TypeSchema {
   }
 
   /**
+   * Sets a path on the schema using a transform function. Deep
+   * fields accept either a string using dot syntax or an array
+   * representing the path.
+   *
+   * @param {string|Array<string>} path The path to set.
+   * @param {Function} fn - Transform function that accepts an instance
+   *   of the schema.
+   */
+  set(path, fn) {
+    if (typeof path === 'string') {
+      path = path.split('.');
+    }
+
+    const [base, ...rest] = path;
+
+    const { fields: currentFields } = this.meta;
+    const keys = Object.keys(currentFields);
+
+    if (!keys.includes(base)) {
+      throw new Error(`Unknown field "${base}".`);
+    }
+
+    const fields = {};
+
+    for (let key of keys) {
+      const schema = currentFields[key];
+      if (key === base) {
+        if (rest.length) {
+          fields[key] = schema.set(rest, fn);
+        } else {
+          fields[key] = fn(schema);
+        }
+      } else {
+        fields[key] = schema;
+      }
+    }
+
+    return new ObjectSchema({
+      fields,
+    });
+  }
+
+  /**
    * Returns the inner schema of an array field. This only makes
    * sense if the array field holds a single schema, so all other
    * scenarios will throw an error.

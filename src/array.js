@@ -125,6 +125,27 @@ class ArraySchema extends TypeSchema {
     }
   }
 
+  /**
+   * Sets a path on the schema using a transform function. Deep
+   * fields accept either a string using dot syntax or an array
+   * representing the path.
+   *
+   * @param {string|Array<string>} path The path to set.
+   * @param {Function} fn - Transform function that accepts an instance
+   *   of the schema.
+   */
+  set(path, fn) {
+    const { schema } = this.meta;
+
+    if (schema.meta.type !== 'object') {
+      throw new Error('Nested object schema required.');
+    }
+
+    return new ArraySchema({
+      schema: schema.set(path, fn),
+    });
+  }
+
   // Private
 
   toString() {

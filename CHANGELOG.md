@@ -1,6 +1,7 @@
 ## 1.11.0
 
 - Moved `openai` as `toJSONSchema` option to own method `toOpenAi`.
+- Added `set` to object and array schemas.
 
 ## 1.10.4
 

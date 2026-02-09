@@ -501,6 +501,162 @@ describe('object', () => {
     });
   });
 
+  describe('set', () => {
+    it('should set a basic field', async () => {
+      const schema = yd
+        .object({
+          name: yd.string(),
+        })
+        .set('name', () => {
+          return yd.allow('Frank', 'Dennis');
+        });
+
+      await assertPass(schema, {});
+      await assertPass(schema, { name: 'Frank' });
+      await assertPass(schema, { name: 'Dennis' });
+      await assertFail(
+        schema,
+        { name: 'Ben' },
+        'Must be one of ["Frank", "Dennis"].',
+      );
+    });
+
+    it('should pass current schema', async () => {
+      const schema = yd
+        .object({
+          name: yd.string(),
+        })
+        .set('name', (s) => {
+          return s.required();
+        });
+
+      await assertPass(schema, { name: 'Frank' });
+      await assertPass(schema, { name: 'Dennis' });
+      await assertFail(schema, {}, 'Value is required.');
+    });
+
+    it('should set a nested field', async () => {
+      const schema = yd
+        .object({
+          profile: yd.object({
+            name: yd.string(),
+          }),
+        })
+        .set('profile.name', () => {
+          return yd.allow('Frank', 'Dennis');
+        });
+
+      await assertPass(schema, {
+        profile: {
+          name: 'Frank',
+        },
+      });
+      await assertPass(schema, {
+        profile: {
+          name: 'Dennis',
+        },
+      });
+      await assertFail(
+        schema,
+        {
+          profile: {
+            name: 'Ben',
+          },
+        },
+        'Must be one of ["Frank", "Dennis"].',
+      );
+    });
+
+    it('should traverse into array', async () => {
+      let schema = yd.object({
+        user: yd.object({
+          profiles: yd.array(
+            yd.object({
+              name: yd.string(),
+            }),
+          ),
+        }),
+      });
+
+      schema = schema.set('user.profiles.name', (s) => {
+        return s.allow('Frank', 'Dennis');
+      });
+
+      await assertPass(schema, {});
+
+      await assertPass(schema, {
+        user: {
+          profiles: [
+            {
+              name: 'Frank',
+            },
+          ],
+        },
+      });
+
+      await assertPass(schema, {
+        user: {
+          profiles: [
+            {
+              name: 'Dennis',
+            },
+          ],
+        },
+      });
+
+      await assertFail(
+        schema,
+        {
+          user: {
+            profiles: [
+              {
+                name: 'Ben',
+              },
+            ],
+          },
+        },
+        'Must be one of ["Frank", "Dennis"].',
+      );
+    });
+
+    it('should not mutate schema', async () => {
+      const schema = yd.object({
+        name: yd.string(),
+      });
+
+      schema.set('name', () => {
+        return yd.allow('Frank', 'Dennis');
+      });
+
+      await assertPass(schema, {});
+      await assertPass(schema, { name: 'Frank' });
+      await assertPass(schema, { name: 'Dennis' });
+      await assertPass(schema, { name: 'Ben' });
+    });
+
+    it('should error if field is unknown', async () => {
+      const schema = yd.object({
+        name: yd.string(),
+      });
+
+      expect(() => {
+        schema.set('foo', (s) => {
+          return s.required();
+        });
+      }).toThrow('Unknown field "foo".');
+    });
+
+    it('should error if not an array of objects', async () => {
+      const schema = yd.array(yd.string());
+
+      expect(() => {
+        schema.set('foo', (s) => {
+          return s.required();
+        });
+      }).toThrow('Nested object schema required.');
+    });
+  });
+
   describe('unwind', () => {
     it('should unwind an array schema', async () => {
       const schema = yd.object({
