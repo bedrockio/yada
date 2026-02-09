@@ -10,7 +10,7 @@ import {
   ValidationError,
 } from './errors';
 
-import { isAllowedFormat } from './formats';
+import { toOpenAi } from './openai';
 import { canAllowEmptyString } from './utils';
 
 const INITIAL_TYPES = ['default', 'required', 'type', 'transform', 'empty'];
@@ -222,18 +222,15 @@ export default class Schema {
    * custom (code-based) assertions will not be output.
    * @param {Object} [options]
    * @param {Function} [options.tag] - Allows adding additional custom tags.
-   * @param {'openai'} [options.style] - Constrains schema output. Currently only
-   *   supports OpenAI which will ensure the resulting schema works with the Structured
-   *   Outputs API.
    * @param {boolean} [options.stripExtensions] - Strips out JSON schema extensions.
    */
   toJsonSchema(options) {
     return {
       ...this.getType(),
+      ...this.getFormat(),
       ...this.getDefault(),
       ...this.getEnum(options),
       ...this.getTags(options),
-      ...this.getFormat(options),
     };
   }
 
@@ -243,6 +240,16 @@ export default class Schema {
    */
   toOpenApi(options) {
     return this.toJsonSchema(options);
+  }
+
+  /**
+   * Converts the schema to OpenAI's [more strict flavor](https://platform.openai.com/docs/guides/structured-outputs#supported-schemas)
+   * for structured output.
+   */
+  toOpenAi() {
+    return this.transform((schema) => {
+      return toOpenAi(schema);
+    });
   }
 
   /**
@@ -265,9 +272,9 @@ export default class Schema {
     }
   }
 
-  getFormat(options) {
+  getFormat() {
     const { format } = this.meta;
-    if (isAllowedFormat(format, options)) {
+    if (format) {
       return { format };
     }
   }

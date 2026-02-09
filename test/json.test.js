@@ -344,6 +344,47 @@ describe('toJsonSchema', () => {
     });
   });
 
+  it('should strip custom extensions', async () => {
+    const schema = yd.object({
+      name: yd.string().tag({
+        'x-schema': 'my-schema',
+      }),
+    });
+    const result = schema.toJsonSchema({
+      stripExtensions: true,
+    });
+    expect(result).toEqual({
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+        },
+      },
+      required: [],
+      additionalProperties: false,
+    });
+  });
+
+  it('should strip custom extensions on alternates', async () => {
+    const schema = yd.allow(
+      yd.string().tag({ 'x-name': 'string' }),
+      yd.number().tag({ 'x-name': 'number' }),
+    );
+    const result = schema.toJsonSchema({
+      stripExtensions: true,
+    });
+    expect(result).toEqual({
+      anyOf: [
+        {
+          type: 'string',
+        },
+        {
+          type: 'number',
+        },
+      ],
+    });
+  });
+
   describe('nullable', () => {
     it('should describe basic nullable', async () => {
       expect(yd.string().nullable().toJsonSchema()).toEqual({
@@ -454,66 +495,6 @@ describe('toJsonSchema', () => {
           additionalProperties: true,
         });
       });
-    });
-  });
-
-  it('should strip off OpenAI invalid formats', async () => {
-    const schema = yd.object({
-      id: yd.string().mongo(),
-    });
-    const result = schema.toJsonSchema({
-      style: 'openai',
-    });
-    expect(result).toEqual({
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-        },
-      },
-      required: [],
-      additionalProperties: false,
-    });
-  });
-
-  it('should strip custom extensions', async () => {
-    const schema = yd.object({
-      name: yd.string().tag({
-        'x-schema': 'my-schema',
-      }),
-    });
-    const result = schema.toJsonSchema({
-      stripExtensions: true,
-    });
-    expect(result).toEqual({
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-        },
-      },
-      required: [],
-      additionalProperties: false,
-    });
-  });
-
-  it('should strip custom extensions on alternates', async () => {
-    const schema = yd.allow(
-      yd.string().tag({ 'x-name': 'string' }),
-      yd.number().tag({ 'x-name': 'number' }),
-    );
-    const result = schema.toJsonSchema({
-      stripExtensions: true,
-    });
-    expect(result).toEqual({
-      anyOf: [
-        {
-          type: 'string',
-        },
-        {
-          type: 'number',
-        },
-      ],
     });
   });
 });

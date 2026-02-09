@@ -1,3 +1,7 @@
+## 1.11.0
+
+- Moved `openai` as `toJSONSchema` option to own method `toOpenAi`.
+
 ## 1.10.4
 
 - Fixed type errors for rest params.
