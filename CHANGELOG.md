@@ -1,3 +1,7 @@
+## 1.11.2
+
+- Added `toArray` on array schemas.
+
 ## 1.11.1
 
 - Better handling of tuple schemas in `toOpenAi`.

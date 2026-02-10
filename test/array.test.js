@@ -131,6 +131,11 @@ describe('array', () => {
     await assertFail(schema, [35, 200], 'Invalid longitude.');
   });
 
+  it('should have toArray method for parity', async () => {
+    const schema = yd.array(yd.number());
+    expect(schema.toArray()).toBe(schema);
+  });
+
   it('should throw an error when more than one schema passed', async () => {
     expect(() => {
       yd.array(yd.string(), yd.number());
