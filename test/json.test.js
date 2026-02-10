@@ -173,6 +173,7 @@ describe('toJsonSchema', () => {
     const schema = yd.tuple(yd.string(), yd.number());
     expect(schema.toJsonSchema()).toEqual({
       type: 'array',
+      items: false,
       prefixItems: [
         {
           type: 'string',
@@ -181,6 +182,37 @@ describe('toJsonSchema', () => {
           type: 'number',
         },
       ],
+    });
+  });
+
+  it('should describe a GeoJSON point', async () => {
+    const schema = yd.object({
+      type: yd.string().allow('Point').required(),
+      coordinates: yd.tuple(yd.number(), yd.number()).required(),
+    });
+
+    expect(schema.toJsonSchema()).toEqual({
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['Point'],
+        },
+        coordinates: {
+          type: 'array',
+          items: false,
+          prefixItems: [
+            {
+              type: 'number',
+            },
+            {
+              type: 'number',
+            },
+          ],
+        },
+      },
+      required: ['type', 'coordinates'],
+      additionalProperties: false,
     });
   });
 

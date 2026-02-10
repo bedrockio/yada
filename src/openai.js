@@ -16,6 +16,13 @@ export function toOpenAi(schema) {
 
   if (type === 'object') {
     return schema.required();
+  } else if (type === 'array') {
+    const { schemas } = schema.meta;
+    if (schemas) {
+      return schema.toArray().required();
+    } else {
+      return schema.required();
+    }
   }
 
   // All fields in OpenAI flavor JSON schema must be required,

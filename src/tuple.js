@@ -1,4 +1,7 @@
+import { uniqBy } from 'lodash';
+
 import Schema from './Schema';
+import array from './array';
 import { ArrayError, ElementError, LocalizedError } from './errors';
 
 class TupleSchema extends Schema {
@@ -65,6 +68,16 @@ class TupleSchema extends Schema {
     return this.clone({ loose: true });
   }
 
+  toArray() {
+    const { schemas } = this.meta;
+    const unique = uniqBy(schemas, (s) => s.meta.type);
+    if (unique.length > 1) {
+      return array(new Schema().allow(unique));
+    } else {
+      return array(unique[0]);
+    }
+  }
+
   toString() {
     return 'tuple';
   }
@@ -73,6 +86,7 @@ class TupleSchema extends Schema {
     const { schemas } = this.meta;
     return {
       ...super.toJsonSchema(options),
+      items: false,
       prefixItems: schemas.map((schema) => {
         return schema.toJsonSchema(options);
       }),

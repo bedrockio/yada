@@ -1,3 +1,7 @@
+## 1.11.1
+
+- Better handling of tuple schemas in `toOpenAi`.
+
 ## 1.11.0
 
 - Moved `openai` as `toJSONSchema` option to own method `toOpenAi`.
