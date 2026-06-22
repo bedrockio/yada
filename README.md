@@ -31,7 +31,7 @@ Concepts
 - [Validation Options](#validation-options)
 - [Error Messages](#error-messages)
 - [Localization](#localization)
-- [OpenApi](#openapi)
+- [JSON Schema](#json-schema)
 - [Utils](#utils)
 - [Differences with Joi](#differences-with-joi)
 
@@ -179,6 +179,9 @@ that allow options will be passed through to that library.
 - `ascii` - Must be ASCII characters.
 - `base64` - Must be base64 encoded. Allows options.
 - `btc` - Must be a valid BTC address.
+- `calendar` - Must be a calendar date in ISO-8601 `YYYY-MM-DD` format. Note
+  that individual components are validated but impossible dates (e.g.
+  `2020-02-30`) are still allowed.
 - `country` - Must be a valid
   [ISO 3166-1 alpha 2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code.
 - `creditCard` - Must be a valid credit card number.
@@ -206,12 +209,19 @@ that allow options will be passed through to that library.
   - `minUppercase`
   - `minNumbers`
   - `minSymbols`
+- `phone` - Must be a valid phone number. Validates
+  [E.164](https://en.wikipedia.org/wiki/E.164) format by default. Pass `"US"` or
+  `"NANP"` for
+  [North American](https://en.wikipedia.org/wiki/North_American_Numbering_Plan)
+  format.
 - `postalCode` - Must be a valid postal code. Accepts a `locale`.
 - `sha1` - Must be a SHA1 hash.
 - `slug` - Must be a URL slug, ie. a-z, numbers, or hyphen.
 - `swift` - Must be a valid SWIFT (Bank Identification) code.
+- `time` - Must be a valid time in ISO-8601 format.
 - `url` - Must be a valid URL. Allows options.
 - `uuid` - Must be a valid UUID. Allows a `version` string.
+- `zipcode` - Must be a valid US zip code.
 
 There are also transform methods that will transform input:
 
@@ -295,6 +305,10 @@ const schema = yd.array(yd.allow(yd.string(), yd.number()));
 - `length` - Length must be exactly `n` elements.
 - `latlng` - Must be a 2 element array of numbers that represent latitude (`-90`
   to `90`) and longitude(`-180` to `180`) coordinates.
+- `set` - Transforms a field within the array's inner object schema. Accepts a
+  path and function like the object [set](#transforming-fields) method. Requires
+  an inner object schema.
+- `toArray` - Returns the schema itself. Provided for parity with tuples.
 
 ### Tuple
 
@@ -312,7 +326,12 @@ const schema2 = yd.tuple(yd.string(), yd.number());
 Tuples are appropriate for strictly structured arrays, for example an array of
 coordinates as latitude and longitude.
 
-## Object
+#### Methods:
+
+- `loose` - Also allows an empty array to pass validation.
+- `toArray` - Converts the tuple into an equivalent array schema.
+
+### Object
 
 Object schemas validate that input is an object and further validate individual
 fields:
@@ -415,6 +434,25 @@ Compare `unwind` to `get` which would validate against an array instead of an
 object. Note that `unwind` only makes sense when there is exactly one inner
 schema and will error otherwise.
 
+### Transforming Fields
+
+The `set` method transforms a field schema in place. It accepts a path (using
+dot syntax or an array of segments) and a function that receives the field
+schema and returns a new one:
+
+```js
+const schema = yd.object({
+  profile: yd.object({
+    name: yd.string(),
+  }),
+});
+
+// Make the nested "name" field required.
+const updated = schema.set('profile.name', (schema) => {
+  return schema.required();
+});
+```
+
 ### Augmenting Fields
 
 The `require` method allows augmentation of the schema to enforce specific
@@ -435,6 +473,12 @@ const signupSchema = schema.require('phone', 'dob');
 schema.require(['phone', 'dob']);
 ```
 
+To require every field at once use `requireAll`:
+
+```js
+const fullSchema = schema.requireAll();
+```
+
 Note that there is no way to "unrequire" a field. The idea is to start with the
 minimal schema as a base and lock down more from there.
 
@@ -453,14 +497,14 @@ const newSchema = yd.object({
 });
 ```
 
-### Object Schema Options
+#### Object Schema Options
 
 - `stripEmpty` - Removes properties that are empty strings.
 - `stripUnknown` - Removes properties not in the schema.
 - `allowFlatKeys` - Allows "flat" keys like `profile.name`.
-- `expendFlatKeys` - Expands "flat" keys into nested objects.
+- `expandFlatKeys` - Expands "flat" keys into nested objects.
 
-## Date
+### Date
 
 Dates are similar to the basic types with the exception that in addition to date
 objects they will also accept input that can resolve into a date. By default
@@ -698,7 +742,7 @@ schema = yd.allow(schema, null);
 ```
 
 However it has two advantages. First it will correctly describe its
-[OpenApi](#openapi) schema as `nullable`. It will also return the same type
+[JSON Schema](#json-schema) as `nullable`. It will also return the same type
 schema, allowing chaining:
 
 ```js
@@ -1029,8 +1073,8 @@ const schema = yd.object({
 });
 ```
 
-Note: yada has no "any" equivalent. schemas must either define their types or
-use "allow" for alternate types.
+Note: yada's `any` schema (`yd.any()`) accepts a value of any type. To restrict
+input to a specific set of alternate types use `allow` instead.
 
 For a few more lines of code the same schema can be defined simply as readable
 Javascript, complete with custom error messages.
